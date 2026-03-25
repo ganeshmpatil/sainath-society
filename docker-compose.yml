@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: sainath-postgres
+    environment:
+      POSTGRES_DB: sainath_society
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Go Backend API
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sainath-api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sainath_society
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_SSL_MODE=disable
+      - JWT_SECRET=your-super-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # React Frontend
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: sainath-ui
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api/v1
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

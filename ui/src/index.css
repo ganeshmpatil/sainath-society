@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-card: rgba(20, 20, 35, 0.8);
+  --border-glow: rgba(139, 92, 246, 0.3);
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899;
+  --accent-green: #10b981;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-purple) var(--bg-secondary);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent-purple), var(--accent-cyan));
+  border-radius: 3px;
+}
+
+body {
+  font-family: 'Rajdhani', system-ui, sans-serif;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f0f2a 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Galaxy Background Container */
+.galaxy-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Stars layer */
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 230px 80px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 300px 200px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 350px 150px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 420px 50px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 500px 180px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 550px 90px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 620px 220px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 700px 130px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 780px 60px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 850px 200px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 920px 140px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 1000px 80px, rgba(255,255,255,0.4), transparent);
+  background-size: 1000px 300px;
+  animation: twinkle 10s ease-in-out infinite;
+}
+
+.stars-2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 100px 150px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 200px 250px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 350px 50px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 450px 300px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 600px 100px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 750px 250px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 900px 180px, rgba(255,255,255,0.4), transparent);
+  background-size: 950px 400px;
+  animation: twinkle 12s ease-in-out infinite reverse;
+}
+
+.stars-3 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 80px 200px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 250px 100px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 400px 280px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 550px 50px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 700px 320px, rgba(255,255,255,0.5), transparent);
+  background-size: 1100px 400px;
+  animation: twinkle 14s ease-in-out infinite;
+}
+
+/* Nebula glow effects */
+.nebula {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 350px at 80% 75%, rgba(6, 182, 212, 0.06) 0%, transparent 55%);
+  animation: nebula-drift 30s ease-in-out infinite;
+}
+
+/* Shooting stars / Comets */
+.comet {
+  position: absolute;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0.8));
+  border-radius: 50%;
+  opacity: 0;
+  transform: rotate(-45deg);
+}
+
+.comet::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.comet-1 {
+  top: 10%;
+  left: -100px;
+  animation: comet-1 8s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.comet-2 {
+  top: 30%;
+  left: -100px;
+  width: 80px;
+  animation: comet-2 12s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.comet-3 {
+  top: 50%;
+  left: -100px;
+  width: 120px;
+  animation: comet-3 10s ease-in-out infinite;
+  animation-delay: 6s;
+}
+
+.comet-4 {
+  top: 70%;
+  left: -100px;
+  width: 60px;
+  animation: comet-4 15s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.comet-5 {
+  top: 20%;
+  left: -100px;
+  width: 90px;
+  animation: comet-5 9s ease-in-out infinite;
+  animation-delay: 7s;
+}
+
+@keyframes comet-1 {
+  0%, 100% { transform: rotate(-45deg) translateX(0); opacity: 0; }
+  5% { opacity: 1; }
+  25% { opacity: 1; }
+  30%, 100% { transform: rotate(-45deg) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+@keyframes comet-2 {
+  0%, 100% { transform: rotate(-35deg) translateX(0); opacity: 0; }
+  5% { opacity: 0.8; }
+  20% { opacity: 0.8; }
+  25%, 100% { transform: rotate(-35deg) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+@keyframes comet-3 {
+  0%, 100% { transform: rotate(-50deg) translateX(0); opacity: 0; }
+  3% { opacity: 1; }
+  18% { opacity: 1; }
+  22%, 100% { transform: rotate(-50deg) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+@keyframes comet-4 {
+  0%, 100% { transform: rotate(-40deg) translateX(0); opacity: 0; }
+  4% { opacity: 0.7; }
+  15% { opacity: 0.7; }
+  18%, 100% { transform: rotate(-40deg) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+@keyframes comet-5 {
+  0%, 100% { transform: rotate(-55deg) translateX(0); opacity: 0; }
+  6% { opacity: 0.9; }
+  22% { opacity: 0.9; }
+  28%, 100% { transform: rotate(-55deg) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes nebula-drift {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  33% { transform: scale(1.05) translate(20px, -10px); }
+  66% { transform: scale(0.98) translate(-15px, 15px); }
+}
+
+/* Floating particles */
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.particle-1 { top: 20%; left: 10%; animation: float-particle 20s ease-in-out infinite; }
+.particle-2 { top: 60%; left: 80%; animation: float-particle 25s ease-in-out infinite reverse; }
+.particle-3 { top: 40%; left: 50%; animation: float-particle 18s ease-in-out infinite; animation-delay: 2s; }
+.particle-4 { top: 80%; left: 30%; animation: float-particle 22s ease-in-out infinite reverse; animation-delay: 5s; }
+.particle-5 { top: 15%; left: 70%; animation: float-particle 20s ease-in-out infinite; animation-delay: 3s; }
+
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  50% { transform: translate(20px, -30px); opacity: 0.5; }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-md border border-slate-700/50 rounded-xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    @apply border-slate-600/60 bg-slate-800/50;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent;
+  }
+
+  .cyber-button {
+    @apply px-5 py-2.5 font-medium text-white rounded-lg transition-all duration-200;
+    background: linear-gradient(135deg, #7c3aed, #0891b2);
+  }
+
+  .cyber-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  .stat-card {
+    @apply bg-slate-900/40 backdrop-blur-md border border-slate-700/40 rounded-xl p-5;
+  }
+
+  .stat-card:hover {
+    @apply border-slate-600/50;
+  }
+
+  .input-cyber {
+    @apply w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 transition-all duration-200;
+  }
+
+  .input-cyber:focus {
+    @apply outline-none border-slate-500 bg-slate-800/80;
+  }
+
+  .badge-cyber {
+    @apply px-3 py-1 text-xs font-medium rounded-full bg-slate-700/50 border border-slate-600/50;
+  }
+
+  .progress-cyber {
+    @apply h-2 rounded-full overflow-hidden bg-slate-700/50;
+  }
+
+  .progress-cyber-fill {
+    @apply h-full rounded-full;
+    background: linear-gradient(90deg, #7c3aed, #0891b2);
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Title font */
+.font-display {
+  font-family: 'Orbitron', monospace;
+}
+
+/* Main content should be above galaxy background */
+#root {
+  position: relative;
+  z-index: 1;
+}

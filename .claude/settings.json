@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(docker -H unix:///var/run/docker.sock ps)",
+      "Bash(systemctl --user start docker-desktop)",
+      "Bash(sudo systemctl:*)",
+      "Bash(docker start:*)",
+      "Bash(ls -la /home/ganesh/Ganesh/workspace/poc/sainath-society/ui/src/pages/*.tsx /home/ganesh/Ganesh/workspace/poc/sainath-society/ui/src/pages/*.jsx)",
+      "Bash(ls /home/ganesh/Ganesh/workspace/poc/sainath-society/ui/src/pages/*.jsx)",
+      "Bash(ls /home/ganesh/Ganesh/workspace/poc/sainath-society/ui/src/pages/*.tsx)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
