@@ -1,210 +1,103 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Car, Bike, Plus, Tag, MapPin } from 'lucide-react'
-import { vehicles } from '../data/mockData'
+import { Car, Plus } from 'lucide-react'
+import { useApi } from '../hooks/useApi'
+import { vehiclesApi } from '../api/resources'
+import PageShell from '../components/PageShell'
+import Modal from '../components/Modal'
+
+const TYPES = ['CAR', 'BIKE', 'BICYCLE', 'COMMERCIAL', 'EV', 'OTHER']
 
 export default function Vehicles() {
   const { t } = useTranslation()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState('All')
-  const [showModal, setShowModal] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState({ registrationNo: '', vehicleType: 'CAR', make: '', model: '', color: '', parkingSlot: '' })
 
-  const filteredVehicles = vehicles.filter(v => {
-    const matchesSearch = v.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.flat.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.make.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = filterType === 'All' || v.type === filterType
-    return matchesSearch && matchesType
-  })
+  const { data, loading, error, reload } = useApi(() => vehiclesApi.list(), [])
 
-  const carCount = vehicles.filter(v => v.type === 'Car').length
-  const twoWheelerCount = vehicles.filter(v => v.type === 'Two Wheeler').length
-
-  const getFilterLabel = (filter: string) => {
-    switch (filter) {
-      case 'All': return t('vehicles.allTypes', 'All Types')
-      case 'Car': return t('vehicles.cars', 'Cars')
-      case 'Two Wheeler': return t('vehicles.twoWheelers', 'Two Wheelers')
-      default: return filter
+  const create = async () => {
+    try {
+      await vehiclesApi.create(form)
+      setModalOpen(false)
+      setForm({ registrationNo: '', vehicleType: 'CAR', make: '', model: '', color: '', parkingSlot: '' })
+      reload()
+    } catch (e) {
+      alert((e as Error).message)
     }
   }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Car className="w-6 h-6 text-cyan-400" />
-            <h1 className="font-display text-3xl font-bold gradient-text">{t('vehicles.title').toUpperCase()}</h1>
-          </div>
-          <p className="text-slate-400">{t('vehicles.description', 'Manage society vehicle records')}</p>
-        </div>
-        <button onClick={() => setShowModal(true)} className="cyber-button mt-4 sm:mt-0">
-          <span className="flex items-center gap-2">
-            <Plus size={18} />
-            {t('vehicles.registerVehicle')}
-          </span>
+    <PageShell
+      title={t('vehicles.title')}
+      icon={Car}
+      loading={loading}
+      error={error}
+      onRetry={reload}
+      actions={
+        <button onClick={() => setModalOpen(true)} className="cyber-button flex items-center gap-2 px-4 py-2">
+          <Plus size={16} /> {t('vehicles.registerVehicle')}
         </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="stat-card">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30">
-              <Car size={24} className="text-blue-400" />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white font-display">{vehicles.length}</p>
-              <p className="text-sm text-slate-400">{t('vehicles.total', 'Total')}</p>
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-              <Car size={24} className="text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white font-display">{carCount}</p>
-              <p className="text-sm text-slate-400">{t('vehicles.car')}</p>
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-orange-500/20 border border-orange-500/30">
-              <Bike size={24} className="text-orange-400" />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white font-display">{twoWheelerCount}</p>
-              <p className="text-sm text-slate-400">{t('vehicles.bike')}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="glass-card p-5 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-            <input
-              type="text"
-              placeholder={t('vehicles.searchPlaceholder', 'Search by number, flat or make...')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-cyber pl-12"
-            />
-          </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="input-cyber w-auto"
-          >
-            <option value="All">{t('vehicles.allTypes', 'All Types')}</option>
-            <option value="Car">{t('vehicles.cars', 'Cars')}</option>
-            <option value="Two Wheeler">{t('vehicles.twoWheelers', 'Two Wheelers')}</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Vehicle List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredVehicles.map((vehicle) => (
-          <div key={vehicle.id} className="glass-card-hover p-6 group">
-            <div className="flex items-start gap-4">
-              <div className={`p-4 rounded-xl ${vehicle.type === 'Car' ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-orange-500/20 border border-orange-500/30'} group-hover:scale-110 transition-transform`}>
-                {vehicle.type === 'Car' ? (
-                  <Car size={28} className="text-blue-400" />
-                ) : (
-                  <Bike size={28} className="text-orange-400" />
-                )}
+      }
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(data?.vehicles ?? []).map((v) => (
+          <div key={v.id} className="glass-card p-5">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="text-lg font-bold text-white font-mono">{v.registrationNo}</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  {v.make} {v.model} {v.color && `• ${v.color}`}
+                </p>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-white text-xl font-display">{vehicle.number}</h3>
-                <p className="text-slate-400">{vehicle.make}</p>
-              </div>
+              <span className="px-2 py-0.5 text-xs rounded border bg-purple-500/10 text-purple-400 border-purple-500/30">
+                {t(`vehicles.${v.vehicleType.toLowerCase()}`, v.vehicleType)}
+              </span>
             </div>
-
-            <div className="mt-5 space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin size={16} className="text-purple-400" />
-                <span className="text-slate-400">{t('vehicles.flat')}: <span className="text-white">{vehicle.flat}</span></span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Tag size={16} className="text-cyan-400" />
-                <span className="text-slate-400">{t('vehicles.parking', 'Parking')}: <span className="text-white">{vehicle.parkingSlot}</span></span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-slate-400">{t('vehicles.sticker')}: <span className="text-emerald-400">{vehicle.stickerNo}</span></span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex gap-3">
-              <button className="flex-1 py-2.5 text-sm font-medium text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition-all">
-                {t('common.edit')}
-              </button>
-              <button className="flex-1 py-2.5 text-sm font-medium text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition-all">
-                {t('vehicles.remove', 'Remove')}
-              </button>
+            <div className="text-xs text-slate-500 space-y-1">
+              <p>{t('vehicles.owner')}: {v.owner?.name ?? '—'}</p>
+              <p>{t('vehicles.flat')}: {v.flat?.flatNumber ?? '—'}</p>
+              {v.parkingSlot && <p>{t('vehicles.parkingSlot')}: {v.parkingSlot}</p>}
             </div>
           </div>
         ))}
+        {data?.count === 0 && <p className="col-span-full text-center text-slate-500 py-8">{t('common.noRecords')}</p>}
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-lg">
-            <div className="p-6 border-b border-purple-500/20">
-              <h2 className="text-xl font-semibold text-white font-display">{t('vehicles.registerVehicle')}</h2>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t('vehicles.registerVehicle')}>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('vehicles.registrationNo')}</label>
+            <input className="input-cyber" value={form.registrationNo} onChange={(e) => setForm({ ...form, registrationNo: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('vehicles.type')}</label>
+            <select className="input-cyber" value={form.vehicleType} onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}>
+              {TYPES.map((tp) => <option key={tp} value={tp}>{t(`vehicles.${tp.toLowerCase()}`, tp)}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('vehicles.make')}</label>
+              <input className="input-cyber" value={form.make} onChange={(e) => setForm({ ...form, make: e.target.value })} />
             </div>
-            <div className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('vehicles.vehicleType', 'Vehicle Type')}</label>
-                  <select className="input-cyber">
-                    <option>{t('vehicles.car')}</option>
-                    <option>{t('vehicles.twoWheeler', 'Two Wheeler')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('flats.flatNumber')}</label>
-                  <input type="text" className="input-cyber" placeholder="A-101" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('vehicles.vehicleNumber')}</label>
-                <input type="text" className="input-cyber" placeholder="MH-02-AB-1234" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('vehicles.makeModel', 'Make/Model')}</label>
-                <input type="text" className="input-cyber" placeholder={t('vehicles.makeModelPlaceholder', 'Honda City')} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('vehicles.parkingSlot')}</label>
-                  <input type="text" className="input-cyber" placeholder="P-01" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('vehicles.stickerNumber', 'Sticker Number')}</label>
-                  <input type="text" className="input-cyber" placeholder="STK-001" />
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-purple-500/20 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl transition-colors">
-                {t('common.cancel')}
-              </button>
-              <button onClick={() => setShowModal(false)} className="cyber-button">
-                <span>{t('vehicles.register', 'Register')}</span>
-              </button>
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('vehicles.model')}</label>
+              <input className="input-cyber" value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('vehicles.color')}</label>
+              <input className="input-cyber" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('vehicles.parkingSlot')}</label>
+              <input className="input-cyber" value={form.parkingSlot} onChange={(e) => setForm({ ...form, parkingSlot: e.target.value })} />
+            </div>
+          </div>
+          <button onClick={create} className="cyber-button w-full">{t('common.save')}</button>
         </div>
-      )}
-    </div>
+      </Modal>
+    </PageShell>
   )
 }

@@ -1,249 +1,160 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DollarSign, TrendingUp, TrendingDown, AlertCircle, Download, PieChart, Wallet } from 'lucide-react'
-import { financials } from '../data/mockData'
+import { DollarSign, Plus } from 'lucide-react'
+import { useApi } from '../hooks/useApi'
+import { billsApi, MaintenanceBill } from '../api/resources'
+import { useAuth } from '../context/AuthContext'
+import PageShell from '../components/PageShell'
+import Modal from '../components/Modal'
+
+const STATUS_COLORS: Record<string, string> = {
+  PAID: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  ISSUED: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  OVERDUE: 'bg-red-500/10 text-red-400 border-red-500/30',
+  DRAFT: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
+  WAIVED: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+}
 
 export default function Finance() {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState('overview')
+  const { isAdmin } = useAuth()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState({
+    billingPeriod: new Date().toISOString().slice(0, 7),
+    dueDate: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10),
+    maintenanceCharge: 2500,
+    sinkingFund: 500,
+    repairFund: 0,
+    waterCharge: 300,
+    otherCharges: 0,
+  })
 
-  const getTabLabel = (tab: string) => {
-    switch (tab) {
-      case 'overview': return t('finance.overview', 'Overview')
-      case 'income': return t('finance.income', 'Income')
-      case 'expenses': return t('finance.expenses')
-      case 'pending': return t('finance.pending')
-      default: return tab
+  const bills = useApi(() => billsApi.list(), [])
+  const dues = useApi(() => billsApi.pendingDues(), [])
+
+  const generate = async () => {
+    try {
+      const res = await billsApi.generate({
+        billingPeriod: form.billingPeriod,
+        dueDate: new Date(form.dueDate).toISOString(),
+        maintenanceCharge: form.maintenanceCharge,
+        sinkingFund: form.sinkingFund,
+        repairFund: form.repairFund,
+        waterCharge: form.waterCharge,
+        otherCharges: form.otherCharges,
+      })
+      alert(`${t('common.success')}: ${res.created} ${t('finance.issued')}, ${res.skipped} skipped`)
+      setModalOpen(false)
+      bills.reload()
+      dues.reload()
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
+
+  const markPaid = async (b: MaintenanceBill) => {
+    try {
+      await billsApi.markPaid(b.id, b.totalAmount - b.amountPaid)
+      bills.reload()
+      dues.reload()
+    } catch (e) {
+      alert((e as Error).message)
     }
   }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Wallet className="w-6 h-6 text-emerald-400" />
-            <h1 className="font-display text-3xl font-bold gradient-text">{t('finance.title').toUpperCase()}</h1>
-          </div>
-          <p className="text-slate-400">{t('finance.description', 'Society financial management and transparency')}</p>
+    <PageShell
+      title={t('finance.title')}
+      icon={DollarSign}
+      loading={bills.loading}
+      error={bills.error}
+      onRetry={bills.reload}
+      actions={
+        isAdmin && (
+          <button onClick={() => setModalOpen(true)} className="cyber-button flex items-center gap-2 px-4 py-2">
+            <Plus size={16} /> {t('finance.generateBills')}
+          </button>
+        )
+      }
+    >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="stat-card">
+          <p className="text-sm text-slate-400 uppercase">{t('finance.pendingDues')}</p>
+          <p className="text-2xl font-bold text-red-400 mt-2">₹{(dues.data?.pendingAmount ?? 0).toLocaleString()}</p>
         </div>
-        <button className="cyber-button mt-4 sm:mt-0">
-          <span className="flex items-center gap-2">
-            <Download size={18} />
-            {t('finance.exportReport', 'Export Report')}
-          </span>
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <div className="stat-card relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={18} className="text-emerald-400" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">{t('finance.collection', 'Collection')}</span>
-            </div>
-            <p className="text-2xl font-bold text-emerald-400 font-display">₹{(financials.summary.totalCollection / 100000).toFixed(1)}L</p>
-          </div>
+        <div className="stat-card">
+          <p className="text-sm text-slate-400 uppercase">{t('finance.pending')}</p>
+          <p className="text-2xl font-bold text-orange-400 mt-2">{dues.data?.unpaidCount ?? 0}</p>
         </div>
-        <div className="stat-card relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertCircle size={18} className="text-red-400" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">{t('finance.pending')}</span>
-            </div>
-            <p className="text-2xl font-bold text-red-400 font-display">₹{(financials.summary.pendingDues / 1000).toFixed(0)}K</p>
-          </div>
-        </div>
-        <div className="stat-card relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingDown size={18} className="text-blue-400" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">{t('finance.expenses')}</span>
-            </div>
-            <p className="text-2xl font-bold text-blue-400 font-display">₹{(financials.summary.totalExpenses / 100000).toFixed(1)}L</p>
-          </div>
-        </div>
-        <div className="stat-card relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <DollarSign size={18} className="text-cyan-400" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">{t('finance.balance')}</span>
-            </div>
-            <p className="text-2xl font-bold text-cyan-400 font-display">₹{(financials.summary.balance / 100000).toFixed(1)}L</p>
-          </div>
-        </div>
-        <div className="stat-card relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <PieChart size={18} className="text-purple-400" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">{t('finance.corpus')}</span>
-            </div>
-            <p className="text-2xl font-bold text-purple-400 font-display">₹{(financials.summary.corpusFund / 100000).toFixed(1)}L</p>
-          </div>
+        <div className="stat-card">
+          <p className="text-sm text-slate-400 uppercase">{t('common.total')} {t('finance.maintenanceBills')}</p>
+          <p className="text-2xl font-bold text-purple-400 mt-2">{bills.data?.count ?? 0}</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="glass-card mb-6 overflow-hidden">
-        <div className="flex border-b border-purple-500/20">
-          {['overview', 'income', 'expenses', 'pending'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-sm font-semibold capitalize transition-all ${
-                activeTab === tab
-                  ? 'text-cyan-400 bg-cyan-500/10 border-b-2 border-cyan-400'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-              }`}
-            >
-              {getTabLabel(tab)}
-            </button>
-          ))}
-        </div>
+      <div className="glass-card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-800/50 text-slate-400 uppercase text-xs">
+            <tr>
+              <th className="text-left px-4 py-3">{t('finance.billNo')}</th>
+              <th className="text-left px-4 py-3">{t('finance.billingPeriod')}</th>
+              <th className="text-left px-4 py-3">{t('flats.flatNumber')}</th>
+              <th className="text-left px-4 py-3">{t('finance.amount')}</th>
+              <th className="text-left px-4 py-3">{t('finance.dueDate')}</th>
+              <th className="text-left px-4 py-3">{t('finance.status')}</th>
+              {isAdmin && <th className="px-4 py-3">{t('common.actions')}</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {(bills.data?.bills ?? []).map((b) => (
+              <tr key={b.id} className="border-t border-purple-500/10 hover:bg-slate-800/30">
+                <td className="px-4 py-3 font-mono text-xs text-slate-300">{b.billNo}</td>
+                <td className="px-4 py-3 text-slate-300">{b.billingPeriod}</td>
+                <td className="px-4 py-3 text-white">{b.flat?.flatNumber ?? '—'}</td>
+                <td className="px-4 py-3 text-white font-semibold">₹{b.totalAmount.toLocaleString()}</td>
+                <td className="px-4 py-3 text-slate-300">{new Date(b.dueDate).toLocaleDateString()}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-0.5 text-xs rounded border ${STATUS_COLORS[b.status]}`}>
+                    {t(`finance.${b.status.toLowerCase()}`, b.status)}
+                  </span>
+                </td>
+                {isAdmin && (
+                  <td className="px-4 py-3">
+                    {b.status !== 'PAID' && (
+                      <button onClick={() => markPaid(b)} className="text-xs text-emerald-400 hover:text-emerald-300">
+                        {t('finance.markPaid')}
+                      </button>
+                    )}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {bills.data?.count === 0 && <p className="text-center text-slate-500 py-8">{t('common.noRecords')}</p>}
+      </div>
 
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Income Breakdown */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                  <TrendingUp size={18} className="text-emerald-400" />
-                  {t('finance.incomeBreakdown', 'Income Breakdown')}
-                </h3>
-                <div className="space-y-4">
-                  {financials.income.map((item) => {
-                    const percentage = Math.round((item.amount / financials.summary.totalCollection) * 100)
-                    return (
-                      <div key={item.id}>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-slate-400">{item.category}</span>
-                          <span className="font-medium text-emerald-400">₹{(item.amount / 1000).toFixed(0)}K</span>
-                        </div>
-                        <div className="progress-cyber">
-                          <div className="progress-cyber-fill" style={{ width: `${percentage}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Expense Breakdown */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-                  <TrendingDown size={18} className="text-blue-400" />
-                  {t('finance.expenseBreakdown', 'Expense Breakdown')}
-                </h3>
-                <div className="space-y-4">
-                  {financials.expenses.slice(0, 5).map((item) => {
-                    const percentage = Math.round((item.amount / financials.summary.totalExpenses) * 100)
-                    return (
-                      <div key={item.id}>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-slate-400">{item.category}</span>
-                          <span className="font-medium text-blue-400">₹{(item.amount / 1000).toFixed(0)}K</span>
-                        </div>
-                        <div className="progress-cyber">
-                          <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-500" style={{ width: `${percentage}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'income' && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-sm text-slate-500 border-b border-purple-500/20">
-                    <th className="pb-4 font-medium uppercase tracking-wider">{t('finance.category', 'Category')}</th>
-                    <th className="pb-4 font-medium uppercase tracking-wider">{t('finance.month', 'Month')}</th>
-                    <th className="pb-4 font-medium text-right uppercase tracking-wider">{t('finance.amount')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {financials.income.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                      <td className="py-4 font-medium text-white">{item.category}</td>
-                      <td className="py-4 text-slate-400">{item.month}</td>
-                      <td className="py-4 text-right font-bold text-emerald-400">₹{item.amount.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-emerald-500/10">
-                    <td colSpan={2} className="py-4 font-semibold text-white">{t('finance.totalIncome', 'Total Income')}</td>
-                    <td className="py-4 text-right font-bold text-emerald-400 text-lg">₹{financials.summary.totalCollection.toLocaleString()}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          )}
-
-          {activeTab === 'expenses' && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-sm text-slate-500 border-b border-purple-500/20">
-                    <th className="pb-4 font-medium uppercase tracking-wider">{t('finance.category', 'Category')}</th>
-                    <th className="pb-4 font-medium uppercase tracking-wider">{t('finance.month', 'Month')}</th>
-                    <th className="pb-4 font-medium text-right uppercase tracking-wider">{t('finance.amount')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {financials.expenses.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                      <td className="py-4 font-medium text-white">{item.category}</td>
-                      <td className="py-4 text-slate-400">{item.month}</td>
-                      <td className="py-4 text-right font-bold text-red-400">₹{item.amount.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-red-500/10">
-                    <td colSpan={2} className="py-4 font-semibold text-white">{t('finance.totalExpenses', 'Total Expenses')}</td>
-                    <td className="py-4 text-right font-bold text-red-400 text-lg">₹{financials.summary.totalExpenses.toLocaleString()}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          )}
-
-          {activeTab === 'pending' && (
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t('finance.generateBills')} size="lg">
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 p-5 mb-6">
-                <div className="flex items-center gap-3 text-red-400">
-                  <AlertCircle size={24} className="animate-pulse" />
-                  <span className="text-lg font-bold font-display">{t('finance.totalPending', 'Total Pending')}: ₹{financials.summary.pendingDues.toLocaleString()}</span>
-                </div>
-              </div>
-              <div className="space-y-4">
-                {financials.pendingMembers.map((member, index) => (
-                  <div key={index} className="flex items-center justify-between p-5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-red-500/30 transition-colors">
-                    <div>
-                      <p className="font-semibold text-white">{member.name}</p>
-                      <p className="text-sm text-slate-500">{t('flats.flatNumber', 'Flat')} {member.flat} • {member.months} {t('finance.monthsPending', 'month(s) pending')}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-red-400 font-display">₹{member.amount.toLocaleString()}</p>
-                      <button className="text-sm text-purple-400 hover:text-purple-300 mt-1">{t('finance.sendReminder', 'Send Reminder')}</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <label className="block text-sm text-slate-300 mb-1">{t('finance.billingPeriod')}</label>
+              <input type="month" className="input-cyber" value={form.billingPeriod} onChange={(e) => setForm({ ...form, billingPeriod: e.target.value })} />
             </div>
-          )}
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('finance.dueDate')}</label>
+              <input type="date" className="input-cyber" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+            </div>
+          </div>
+          {(['maintenanceCharge', 'sinkingFund', 'repairFund', 'waterCharge', 'otherCharges'] as const).map((k) => (
+            <div key={k}>
+              <label className="block text-sm text-slate-300 mb-1">{t(`finance.${k}`)}</label>
+              <input type="number" className="input-cyber" value={form[k]} onChange={(e) => setForm({ ...form, [k]: +e.target.value })} />
+            </div>
+          ))}
+          <button onClick={generate} className="cyber-button w-full">{t('finance.generateBills')}</button>
         </div>
-      </div>
-    </div>
+      </Modal>
+    </PageShell>
   )
 }

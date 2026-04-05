@@ -235,6 +235,38 @@ func (s *AuthService) Logout(ctx context.Context, userID uuid.UUID) error {
 	return s.userRepo.UpdateRefreshToken(ctx, userID, "", nil)
 }
 
+// ErrPasswordMismatch is returned when the current password does not match.
+var ErrPasswordMismatch = errors.New("current password is incorrect")
+
+// ChangePassword verifies the current password and updates it to the new one.
+// The refresh token is invalidated so all other sessions must re-login.
+func (s *AuthService) ChangePassword(ctx context.Context, userID uuid.UUID, currentPassword, newPassword string) error {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return ErrInvalidCredentials
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(currentPassword)); err != nil {
+		return ErrPasswordMismatch
+	}
+	newHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	user.PasswordHash = string(newHash)
+	user.PasswordChangedAt = &now
+	user.MustChangePassword = false
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+	// Force re-login on all other sessions
+	_ = s.userRepo.UpdateRefreshToken(ctx, userID, "", nil)
+	return nil
+}
+
+// avoid unused-import error if gorm is not referenced elsewhere in additions
+var _ = gorm.ErrRecordNotFound
+
 // hashToken creates SHA256 hash of token
 func hashToken(token string) string {
 	hash := sha256.Sum256([]byte(token))

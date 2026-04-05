@@ -175,6 +175,37 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// ChangePasswordRequest is the body for PUT /auth/password.
+type changePasswordReq struct {
+	CurrentPassword string `json:"currentPassword" binding:"required"`
+	NewPassword     string `json:"newPassword" binding:"required,min=8"`
+}
+
+// ChangePassword updates the current user's password.
+func (h *AuthHandler) ChangePassword(c *gin.Context) {
+	userIDStr, _ := c.Get("userID")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid user", Code: "INVALID_USER"})
+		return
+	}
+	var req changePasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	if err := h.authService.ChangePassword(c.Request.Context(), userID, req.CurrentPassword, req.NewPassword); err != nil {
+		switch {
+		case errors.Is(err, services.ErrPasswordMismatch):
+			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Current password is incorrect", Code: "WRONG_PASSWORD"})
+		default:
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "UPDATE_FAILED"})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
+}
+
 // Logout handles user logout
 // @Summary Logout
 // @Description Invalidate refresh token

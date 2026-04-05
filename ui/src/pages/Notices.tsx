@@ -1,178 +1,105 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell, Plus, Calendar, AlertTriangle, Info, Megaphone, Radio } from 'lucide-react'
-import { notices } from '../data/mockData'
+import { Bell, Plus, Pin } from 'lucide-react'
+import { useApi } from '../hooks/useApi'
+import { noticesApi } from '../api/resources'
+import { useAuth } from '../context/AuthContext'
+import PageShell from '../components/PageShell'
+import Modal from '../components/Modal'
 
-const typeConfig = {
-  'Maintenance': { color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', icon: AlertTriangle },
-  'Meeting': { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: Calendar },
-  'Event': { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', icon: Megaphone },
-  'Finance': { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: Info },
-}
-
-const priorityBorders = {
-  'Critical': 'border-l-red-500',
-  'High': 'border-l-orange-500',
-  'Normal': 'border-l-cyan-500',
-}
+const CATEGORIES = ['GENERAL', 'MAINTENANCE', 'AGM', 'EMERGENCY', 'FESTIVAL', 'RULE_CHANGE']
 
 export default function Notices() {
-  const { t } = useTranslation()
-  const [showModal, setShowModal] = useState(false)
-  const [selectedNotice, setSelectedNotice] = useState<typeof notices[0] | null>(null)
+  const { t, i18n } = useTranslation()
+  const { isAdmin } = useAuth()
+  const isMr = i18n.language === 'mr'
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState({ title: '', titleMr: '', body: '', bodyMr: '', category: 'GENERAL', isPinned: false })
+
+  const { data, loading, error, reload } = useApi(() => noticesApi.list(), [])
+
+  const create = async () => {
+    try {
+      await noticesApi.create(form)
+      setModalOpen(false)
+      setForm({ title: '', titleMr: '', body: '', bodyMr: '', category: 'GENERAL', isPinned: false })
+      reload()
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Radio className="w-6 h-6 text-cyan-400" />
-            <h1 className="font-display text-3xl font-bold gradient-text">{t('notices.title').toUpperCase()}</h1>
-          </div>
-          <p className="text-slate-400">{t('notices.description', 'Digital noticeboard for society communications')}</p>
-        </div>
-        <button onClick={() => setShowModal(true)} className="cyber-button mt-4 sm:mt-0">
-          <span className="flex items-center gap-2">
-            <Plus size={18} />
-            {t('notices.postNotice', 'Post Notice')}
-          </span>
-        </button>
-      </div>
-
-      {/* Notice Categories */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {Object.entries(typeConfig).map(([type, config]) => {
-          const count = notices.filter(n => n.type === type).length
-          const Icon = config.icon
-          return (
-            <div key={type} className="stat-card cursor-pointer group">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl border ${config.color} group-hover:scale-110 transition-transform`}>
-                  <Icon size={22} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white font-display">{count}</p>
-                  <p className="text-sm text-slate-400">{type}</p>
-                </div>
-              </div>
+    <PageShell
+      title={t('notices.title')}
+      icon={Bell}
+      loading={loading}
+      error={error}
+      onRetry={reload}
+      actions={
+        isAdmin && (
+          <button onClick={() => setModalOpen(true)} className="cyber-button flex items-center gap-2 px-4 py-2">
+            <Plus size={16} /> {t('notices.newNotice')}
+          </button>
+        )
+      }
+    >
+      <div className="space-y-3">
+        {(data?.notices ?? []).map((n) => (
+          <div key={n.id} className={`glass-card p-5 ${n.isPinned ? 'border-l-4 border-cyan-500' : ''}`}>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h3 className="font-semibold text-white flex-1 flex items-center gap-2">
+                {n.isPinned && <Pin size={14} className="text-cyan-400" />}
+                {isMr && n.titleMr ? n.titleMr : n.title}
+              </h3>
+              <span className="px-2 py-0.5 text-xs rounded border bg-purple-500/10 text-purple-400 border-purple-500/30">
+                {t(`notices.${n.category.toLowerCase().replace('_', '')}`, n.category)}
+              </span>
             </div>
-          )
-        })}
-      </div>
-
-      {/* Notices */}
-      <div className="space-y-4">
-        {notices.map((notice) => {
-          const TypeIcon = typeConfig[notice.type as keyof typeof typeConfig]?.icon || Bell
-          return (
-            <div
-              key={notice.id}
-              className={`glass-card-hover p-6 border-l-4 ${priorityBorders[notice.priority as keyof typeof priorityBorders]} cursor-pointer`}
-              onClick={() => setSelectedNotice(notice)}
-            >
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl border ${typeConfig[notice.type as keyof typeof typeConfig]?.color || 'bg-slate-700/50 text-slate-400'}`}>
-                  <TypeIcon size={22} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-white text-lg">{notice.title}</h3>
-                    {notice.priority === 'Critical' && (
-                      <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 border border-red-500/30 rounded-full animate-pulse">
-                        {t('notices.urgent')}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-slate-400 line-clamp-2">{notice.content}</p>
-                  <div className="flex items-center gap-4 mt-4 text-sm">
-                    <span className={`px-3 py-1 rounded-lg border ${typeConfig[notice.type as keyof typeof typeConfig]?.color || 'bg-slate-700/50 text-slate-400'}`}>
-                      {notice.type}
-                    </span>
-                    <span className="text-slate-500">{notice.date}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* View Notice Modal */}
-      {selectedNotice && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-lg">
-            <div className="p-6 border-b border-purple-500/20">
-              <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 text-xs rounded-lg border ${typeConfig[selectedNotice.type as keyof typeof typeConfig]?.color}`}>
-                  {selectedNotice.type}
-                </span>
-                {selectedNotice.priority === 'Critical' && (
-                  <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
-                    {t('notices.urgent')}
-                  </span>
-                )}
-              </div>
-              <h2 className="text-xl font-bold text-white mt-3 font-display">{selectedNotice.title}</h2>
-              <p className="text-sm text-slate-500 mt-1">{t('notices.postedOn')} {selectedNotice.date}</p>
-            </div>
-            <div className="p-6">
-              <p className="text-slate-300 whitespace-pre-wrap leading-relaxed">{selectedNotice.content}</p>
-            </div>
-            <div className="p-6 border-t border-purple-500/20 flex justify-end">
-              <button onClick={() => setSelectedNotice(null)} className="cyber-button">
-                <span>{t('common.close')}</span>
-              </button>
+            <p className="text-sm text-slate-400 mb-3 whitespace-pre-line">{isMr && n.bodyMr ? n.bodyMr : n.body}</p>
+            <div className="text-xs text-slate-500">
+              {n.createdBy?.name} • {new Date(n.createdAt).toLocaleDateString()}
             </div>
           </div>
-        </div>
-      )}
+        ))}
+        {data?.count === 0 && <p className="text-center text-slate-500 py-8">{t('common.noRecords')}</p>}
+      </div>
 
-      {/* Post Notice Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-lg">
-            <div className="p-6 border-b border-purple-500/20">
-              <h2 className="text-xl font-semibold text-white font-display">{t('notices.postNewNotice', 'Post New Notice')}</h2>
-            </div>
-            <div className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('notices.titleLabel', 'Title')}</label>
-                <input type="text" className="input-cyber" placeholder={t('notices.titlePlaceholder', 'Notice title')} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('notices.content')}</label>
-                <textarea rows={5} className="input-cyber" placeholder={t('notices.contentPlaceholder', 'Notice details...')} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('notices.type', 'Type')}</label>
-                  <select className="input-cyber">
-                    {Object.keys(typeConfig).map(type => (
-                      <option key={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('notices.priority', 'Priority')}</label>
-                  <select className="input-cyber">
-                    <option>{t('notices.normal', 'Normal')}</option>
-                    <option>{t('notices.high', 'High')}</option>
-                    <option>{t('notices.critical', 'Critical')}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-purple-500/20 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl transition-colors">
-                {t('common.cancel')}
-              </button>
-              <button onClick={() => setShowModal(false)} className="cyber-button">
-                <span>{t('notices.postNotice', 'Post Notice')}</span>
-              </button>
-            </div>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t('notices.newNotice')} size="lg">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('notices.title2')} (EN)</label>
+            <input className="input-cyber" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('notices.title2')} (मराठी)</label>
+            <input className="input-cyber" value={form.titleMr} onChange={(e) => setForm({ ...form, titleMr: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('notices.body')} (EN)</label>
+            <textarea rows={3} className="input-cyber" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('notices.body')} (मराठी)</label>
+            <textarea rows={3} className="input-cyber" value={form.bodyMr} onChange={(e) => setForm({ ...form, bodyMr: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3 items-end">
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('common.category')}</label>
+              <select className="input-cyber" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{t(`notices.${c.toLowerCase().replace('_', '')}`, c)}</option>
+                ))}
+              </select>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-slate-300">
+              <input type="checkbox" checked={form.isPinned} onChange={(e) => setForm({ ...form, isPinned: e.target.checked })} />
+              {t('notices.pin')}
+            </label>
+          </div>
+          <button onClick={create} className="cyber-button w-full">{t('common.save')}</button>
         </div>
-      )}
-    </div>
+      </Modal>
+    </PageShell>
   )
 }

@@ -1,185 +1,166 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, AlertCircle, Clock, CheckCircle, XCircle, MessageSquare } from 'lucide-react'
-import { grievances } from '../data/mockData'
+import { MessageSquare, Plus } from 'lucide-react'
+import { useApi } from '../hooks/useApi'
+import { grievancesApi, Grievance } from '../api/resources'
+import { useAuth } from '../context/AuthContext'
+import PageShell from '../components/PageShell'
+import Modal from '../components/Modal'
 
-const statusConfig: Record<string, { color: string; icon: React.ElementType; key: string }> = {
-  'Open': { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: AlertCircle, key: 'grievances.open' },
-  'In Progress': { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock, key: 'grievances.inProgress' },
-  'Resolved': { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', icon: CheckCircle, key: 'grievances.resolved' },
-  'Closed': { color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', icon: XCircle, key: 'grievances.closed' },
+const PRIORITY_COLORS: Record<string, string> = {
+  URGENT: 'bg-red-500/10 text-red-400 border-red-500/30',
+  HIGH: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  MEDIUM: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+  LOW: 'bg-green-500/10 text-green-400 border-green-500/30',
 }
 
-const priorityConfig: Record<string, string> = {
-  'Critical': 'bg-red-500 animate-pulse',
-  'High': 'bg-orange-500',
-  'Medium': 'bg-yellow-500',
-  'Low': 'bg-emerald-500',
+const STATUS_COLORS: Record<string, string> = {
+  OPEN: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  IN_PROGRESS: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+  RESOLVED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  CLOSED: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
+  REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',
 }
+
+const CATEGORIES = ['MAINTENANCE', 'SECURITY', 'NOISE', 'PARKING', 'CLEANLINESS', 'WATER', 'ELECTRICITY', 'OTHER']
+const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
 
 export default function Grievances() {
-  const { t } = useTranslation()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('All')
-  const [showModal, setShowModal] = useState(false)
+  const { t, i18n } = useTranslation()
+  const { isAdmin } = useAuth()
+  const isMr = i18n.language === 'mr'
+  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState({ title: '', description: '', category: 'MAINTENANCE', priority: 'MEDIUM' })
 
-  const filteredGrievances = grievances.filter(g => {
-    const matchesSearch = g.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      g.flat.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'All' || g.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+  const { data, loading, error, reload } = useApi(
+    () => grievancesApi.list(statusFilter ? { status: statusFilter } : undefined),
+    [statusFilter]
+  )
+
+  const create = async () => {
+    try {
+      await grievancesApi.create(form as Partial<Grievance>)
+      setModalOpen(false)
+      setForm({ title: '', description: '', category: 'MAINTENANCE', priority: 'MEDIUM' })
+      reload()
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
+
+  const updateStatus = async (g: Grievance, status: string) => {
+    try {
+      await grievancesApi.updateStatus(g.id, status)
+      reload()
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <MessageSquare className="w-6 h-6 text-orange-400" />
-            <h1 className="font-display text-3xl font-bold gradient-text">{t('grievances.title').toUpperCase()}</h1>
-          </div>
-          <p className="text-slate-400">{t('grievances.manageComplaints')}</p>
-        </div>
-        <button onClick={() => setShowModal(true)} className="cyber-button mt-4 sm:mt-0">
-          <span className="flex items-center gap-2">
-            <Plus size={18} />
-            {t('grievances.newGrievance')}
-          </span>
+    <PageShell
+      title={t('grievances.title')}
+      subtitle={t('grievances.manageComplaints')}
+      icon={MessageSquare}
+      loading={loading}
+      error={error}
+      onRetry={reload}
+      actions={
+        <button onClick={() => setModalOpen(true)} className="cyber-button flex items-center gap-2 px-4 py-2">
+          <Plus size={16} /> {t('grievances.newGrievance')}
         </button>
+      }
+    >
+      <div className="glass-card p-4 mb-4 flex items-center gap-3 flex-wrap">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="input-cyber"
+        >
+          <option value="">{t('grievances.allStatus')}</option>
+          <option value="OPEN">{t('grievances.open')}</option>
+          <option value="IN_PROGRESS">{t('grievances.inProgress')}</option>
+          <option value="RESOLVED">{t('grievances.resolved')}</option>
+          <option value="CLOSED">{t('grievances.closed')}</option>
+        </select>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {Object.entries(statusConfig).map(([status, config]) => {
-          const count = grievances.filter(g => g.status === status).length
-          const Icon = config.icon
-          return (
-            <div key={status} className="stat-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-white font-display">{count}</p>
-                  <p className="text-sm text-slate-400">{t(config.key)}</p>
-                </div>
-                <div className={`p-3 rounded-xl border ${config.color}`}>
-                  <Icon size={20} />
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Filters */}
-      <div className="glass-card p-5 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-            <input
-              type="text"
-              placeholder={t('grievances.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-cyber pl-12"
-            />
-          </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="input-cyber"
-          >
-            <option value="All">{t('grievances.allStatus')}</option>
-            {Object.entries(statusConfig).map(([status, config]) => (
-              <option key={status} value={status}>{t(config.key)}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Grievance List */}
-      <div className="space-y-4">
-        {filteredGrievances.map((grievance) => (
-          <div key={grievance.id} className="glass-card-hover p-6">
-            <div className="flex items-start gap-4">
-              <div className={`w-3 h-3 rounded-full mt-2 ${priorityConfig[grievance.priority]}`} />
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-3 mb-3">
-                  <h3 className="font-semibold text-white text-lg">{grievance.subject}</h3>
-                  <span className={`px-3 py-1 text-xs rounded-lg border ${statusConfig[grievance.status]?.color}`}>
-                    {t(statusConfig[grievance.status]?.key || grievance.status)}
+      <div className="space-y-3">
+        {(data?.grievances ?? []).map((g) => (
+          <div key={g.id} className="glass-card p-5">
+            <div className="flex items-start justify-between mb-3 gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-xs text-slate-500 font-mono">{g.ticketNo}</span>
+                  <span className={`px-2 py-0.5 text-xs rounded border ${PRIORITY_COLORS[g.priority]}`}>
+                    {t(`grievances.${g.priority.toLowerCase()}`)}
                   </span>
-                  <span className="px-3 py-1 text-xs bg-slate-700/50 text-slate-300 rounded-lg border border-slate-600/30">
-                    {t(`grievances.${grievance.priority.toLowerCase()}`)}
+                  <span className={`px-2 py-0.5 text-xs rounded border ${STATUS_COLORS[g.status]}`}>
+                    {t(`grievances.${g.status.toLowerCase().replace('_', '')}`, g.status)}
                   </span>
                 </div>
-                <p className="text-sm text-slate-400 mb-4">{grievance.description}</p>
-                <div className="flex flex-wrap gap-6 text-sm text-slate-500">
-                  <span>{t('residents.flat')}: <span className="text-purple-400">{grievance.flat}</span></span>
-                  <span>{t('grievances.assignedTo')}: <span className="text-cyan-400">{grievance.assignedTo}</span></span>
-                  <span>{t('grievances.created')}: <span className="text-slate-400">{grievance.createdAt}</span></span>
+                <h3 className="font-semibold text-white">{isMr && g.titleMr ? g.titleMr : g.title}</h3>
+                <p className="text-sm text-slate-400 mt-1">{isMr && g.descriptionMr ? g.descriptionMr : g.description}</p>
+                <div className="flex items-center gap-3 mt-3 text-xs text-slate-500">
+                  <span>{g.raisedBy?.name}</span>
+                  <span>•</span>
+                  <span>{new Date(g.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 text-sm font-medium text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition-all">
-                  {t('common.view')}
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20 transition-all">
-                  {t('grievances.update')}
-                </button>
-              </div>
+              {isAdmin && g.status !== 'RESOLVED' && g.status !== 'CLOSED' && (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => updateStatus(g, 'IN_PROGRESS')}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30"
+                  >
+                    {t('grievances.inProgress')}
+                  </button>
+                  <button
+                    onClick={() => updateStatus(g, 'RESOLVED')}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30"
+                  >
+                    {t('grievances.markResolved')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
+        {data?.count === 0 && <p className="text-center text-slate-500 py-8">{t('common.noRecords')}</p>}
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-lg">
-            <div className="p-6 border-b border-purple-500/20">
-              <h2 className="text-xl font-semibold text-white font-display">{t('grievances.newGrievance')}</h2>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t('grievances.newGrievance')}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('grievances.subject')}</label>
+            <input className="input-cyber" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">{t('grievances.description')}</label>
+            <textarea rows={4} className="input-cyber" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('grievances.category')}</label>
+              <select className="input-cyber" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{t(`grievances.${c.toLowerCase()}`, c)}</option>
+                ))}
+              </select>
             </div>
-            <div className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('grievances.subject')}</label>
-                <input type="text" className="input-cyber" placeholder={t('grievances.subjectPlaceholder')} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">{t('grievances.description')}</label>
-                <textarea rows={4} className="input-cyber" placeholder={t('grievances.descriptionPlaceholder')} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('grievances.priority')}</label>
-                  <select className="input-cyber">
-                    <option value="Low">{t('grievances.low')}</option>
-                    <option value="Medium">{t('grievances.medium')}</option>
-                    <option value="High">{t('grievances.high')}</option>
-                    <option value="Critical">{t('grievances.critical')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('grievances.category')}</label>
-                  <select className="input-cyber">
-                    <option value="Maintenance">{t('grievances.maintenance')}</option>
-                    <option value="Security">{t('grievances.security')}</option>
-                    <option value="Parking">{t('grievances.parking')}</option>
-                    <option value="Noise">{t('grievances.noise')}</option>
-                    <option value="Other">{t('grievances.other')}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-purple-500/20 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 text-slate-400 hover:bg-slate-800 rounded-xl transition-colors">
-                {t('common.cancel')}
-              </button>
-              <button onClick={() => setShowModal(false)} className="cyber-button">
-                <span>{t('common.submit')}</span>
-              </button>
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">{t('grievances.priority')}</label>
+              <select className="input-cyber" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                {PRIORITIES.map((p) => (
+                  <option key={p} value={p}>{t(`grievances.${p.toLowerCase()}`)}</option>
+                ))}
+              </select>
             </div>
           </div>
+          <button onClick={create} className="cyber-button w-full">{t('common.save')}</button>
         </div>
-      )}
-    </div>
+      </Modal>
+    </PageShell>
   )
 }

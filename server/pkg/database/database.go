@@ -77,6 +77,45 @@ func Migrate(db *gorm.DB) error {
 		return fmt.Errorf("migration failed: %w", err)
 	}
 
+	// Phase 3: soc_mitra_* domain tables (depend on Member/Flat)
+	err = db.AutoMigrate(
+		&models.MemberOwnership{},
+		&models.HousingDocument{},
+		&models.Grievance{},
+		&models.GrievanceComment{},
+		&models.Vehicle{},
+		&models.Notice{},
+		&models.Event{},
+		&models.EventRSVP{},
+		&models.Tenant{},
+		&models.TenantMovement{},
+		&models.FinancialTransaction{},
+		&models.ByLaw{},
+		&models.ByLawAmendmentLog{},
+		&models.Meeting{},
+		&models.MeetingAttendee{},
+		&models.MeetingActionItem{},
+		&models.MeetingDocument{},
+		&models.Task{},
+		&models.Document{},
+		&models.DocumentAccess{},
+		&models.DocumentAuditLog{},
+		&models.Notification{},
+		&models.NotificationTemplate{},
+		&models.Poll{},
+		&models.PollOption{},
+		&models.PollVote{},
+		&models.HallBooking{},
+		&models.InventoryItem{},
+		&models.Suggestion{},
+		&models.SuggestionUpvote{},
+		&models.ParkingSlot{},
+		&models.MaintenanceBill{},
+	)
+	if err != nil {
+		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)
+	}
+
 	log.Println("Database migrations completed")
 	return nil
 }
