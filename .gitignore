@@ -47,3 +47,7 @@ temp/
 
 # Local development
 *.local
+
+# Build artifacts
+*.apk
+*-qr.png
