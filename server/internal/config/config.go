@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -66,8 +67,15 @@ func Load() *Config {
 		VAPIDEmail:      getEnv("VAPID_EMAIL", "mailto:admin@sainath-society.com"),
 
 		// CORS
-		AllowedOrigins: []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowedOrigins: getOrigins(),
 	}
+}
+
+func getOrigins() []string {
+	if v := os.Getenv("ALLOWED_ORIGINS"); v != "" {
+		return strings.Split(v, ",")
+	}
+	return []string{"http://localhost:5173", "http://localhost:3000", "*"}
 }
 
 func getEnv(key, defaultValue string) string {
