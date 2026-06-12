@@ -18,6 +18,7 @@ func SetupRoutes(
 	jwtManager *jwt.Manager,
 	userRepo *repository.UserRepository,
 	domain *DomainRepositories,
+	notifier *services.Notifier,
 	db *gorm.DB,
 ) {
 	// Services
@@ -28,25 +29,26 @@ func SetupRoutes(
 	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	registrationHandler := handlers.NewRegistrationHandler(registrationService)
-	grievanceHandler := handlers.NewGrievanceHandler(domain.Grievance, domain.Notification)
-	taskHandler := handlers.NewTaskHandler(domain.Task)
+	grievanceHandler := handlers.NewGrievanceHandler(domain.Grievance, domain.Notification, notifier)
+	taskHandler := handlers.NewTaskHandler(domain.Task, notifier)
 	vehicleHandler := handlers.NewVehicleHandler(domain.Vehicle)
-	noticeHandler := handlers.NewNoticeHandler(domain.Notice)
-	eventHandler := handlers.NewEventHandler(domain.Event)
-	tenantHandler := handlers.NewTenantHandler(domain.Tenant)
+	noticeHandler := handlers.NewNoticeHandler(domain.Notice, notifier)
+	eventHandler := handlers.NewEventHandler(domain.Event, notifier)
+	tenantHandler := handlers.NewTenantHandler(domain.Tenant, notifier)
 	transactionHandler := handlers.NewTransactionHandler(domain.Transaction)
 	bylawHandler := handlers.NewByLawHandler(domain.ByLaw)
-	meetingHandler := handlers.NewMeetingHandler(domain.Meeting)
+	meetingHandler := handlers.NewMeetingHandler(domain.Meeting, notifier)
 	ownershipHandler := handlers.NewOwnershipHandler(domain.Ownership)
 	documentHandler := handlers.NewDocumentHandler(domain.Document)
-	pollHandler := handlers.NewPollHandler(domain.Poll)
-	hallBookingHandler := handlers.NewHallBookingHandler(domain.HallBooking)
+	pollHandler := handlers.NewPollHandler(domain.Poll, notifier)
+	hallBookingHandler := handlers.NewHallBookingHandler(domain.HallBooking, notifier)
 	inventoryHandler := handlers.NewInventoryHandler(domain.Inventory)
 	suggestionHandler := handlers.NewSuggestionHandler(domain.Suggestion)
 	parkingHandler := handlers.NewParkingHandler(domain.Parking)
-	billHandler := handlers.NewBillHandler(domain.Bill)
+	billHandler := handlers.NewBillHandler(domain.Bill, notifier)
 	residentHandler := handlers.NewResidentHandler(domain.Member)
 	flatHandler := handlers.NewFlatHandler(domain.Flat)
+	notificationHandler := handlers.NewNotificationHandler(domain.Notification, domain.Member)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -238,6 +240,12 @@ func SetupRoutes(
 		pk.GET("/slots/:id", parkingHandler.GetByID)
 		pk.POST("/slots/:id/allocate", parkingHandler.Allocate)
 		pk.POST("/slots/:id/release", parkingHandler.Release)
+
+		// Notifications — inbox + admin email broadcast.
+		notif := protected.Group("/notifications")
+		notif.GET("/inbox", notificationHandler.ListInbox)
+		notif.POST("/send-email", notificationHandler.SendEmail)
+		notif.POST("/send-email-all", notificationHandler.SendEmailToAll)
 
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")

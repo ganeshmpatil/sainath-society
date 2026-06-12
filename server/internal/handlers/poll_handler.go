@@ -12,14 +12,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type PollHandler struct {
-	repo *repositories.PollRepository
+	repo     *repositories.PollRepository
+	notifier *services.Notifier
 }
 
-func NewPollHandler(repo *repositories.PollRepository) *PollHandler {
-	return &PollHandler{repo: repo}
+func NewPollHandler(repo *repositories.PollRepository, notifier *services.Notifier) *PollHandler {
+	return &PollHandler{repo: repo, notifier: notifier}
 }
 
 type pollOptionReq struct {
@@ -100,6 +102,13 @@ func (h *PollHandler) Publish(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Fetch poll to get title and end date for notification
+	p, _ := h.repo.GetByID(actor, id)
+	if p != nil {
+		go h.notifier.PollPublished(p.Title, p.EndsAt.Format("02 Jan 2006"), p.ID)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Poll published"})
 }
 

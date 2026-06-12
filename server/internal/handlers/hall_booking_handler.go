@@ -12,14 +12,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type HallBookingHandler struct {
-	repo *repositories.HallBookingRepository
+	repo     *repositories.HallBookingRepository
+	notifier *services.Notifier
 }
 
-func NewHallBookingHandler(repo *repositories.HallBookingRepository) *HallBookingHandler {
-	return &HallBookingHandler{repo: repo}
+func NewHallBookingHandler(repo *repositories.HallBookingRepository, notifier *services.Notifier) *HallBookingHandler {
+	return &HallBookingHandler{repo: repo, notifier: notifier}
 }
 
 type createHallBookingReq struct {
@@ -116,6 +118,10 @@ func (h *HallBookingHandler) Decide(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+
+	// Fetch booking before update to get booker info
+	b, _ := h.repo.GetByID(actor, id)
+
 	if err := h.repo.Decide(actor, id, req.Approve, req.Reason); err != nil {
 		if errors.Is(err, repositories.ErrSlotUnavailable) {
 			c.JSON(http.StatusConflict, response.ErrorResponse{Error: err.Error(), Code: "SLOT_UNAVAILABLE"})
@@ -124,6 +130,12 @@ func (h *HallBookingHandler) Decide(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify the booker about the decision
+	if b != nil {
+		go h.notifier.HallBookingDecided(b.BookedByMemberID, b.Purpose, req.Approve, id)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Decision recorded"})
 }
 

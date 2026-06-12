@@ -11,15 +11,17 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type GrievanceHandler struct {
-	repo     *repositories.GrievanceRepository
+	repo      *repositories.GrievanceRepository
 	notifRepo *repositories.NotificationRepository
+	notifier  *services.Notifier
 }
 
-func NewGrievanceHandler(repo *repositories.GrievanceRepository, notifRepo *repositories.NotificationRepository) *GrievanceHandler {
-	return &GrievanceHandler{repo: repo, notifRepo: notifRepo}
+func NewGrievanceHandler(repo *repositories.GrievanceRepository, notifRepo *repositories.NotificationRepository, notifier *services.Notifier) *GrievanceHandler {
+	return &GrievanceHandler{repo: repo, notifRepo: notifRepo, notifier: notifier}
 }
 
 type createGrievanceReq struct {
@@ -57,18 +59,8 @@ func (h *GrievanceHandler) Create(c *gin.Context) {
 		return
 	}
 
-	// Fire-and-forget notification to the member (WhatsApp/in-app).
-	_ = h.notifRepo.Enqueue(&models.Notification{
-		RecipientID:  actor.MemberID,
-		Channel:      models.ChannelWhatsApp,
-		Subject:      "तक्रार नोंदवली",
-		Body:         "आपली तक्रार क्रमांक " + g.TicketNo + " यशस्वीरित्या नोंदवली गेली आहे.",
-		BodyMr:       "आपली तक्रार क्रमांक " + g.TicketNo + " यशस्वीरित्या नोंदवली गेली आहे.",
-		Language:     "mr",
-		EventType:    "GRIEVANCE_CREATED",
-		ResourceType: "grievance",
-		ResourceID:   &g.ID,
-	})
+	// Notify raiser + all admins
+	go h.notifier.GrievanceCreated(actor.MemberID, g.TicketNo, g.Title, g.ID)
 
 	c.JSON(http.StatusCreated, g)
 }
@@ -125,10 +117,20 @@ func (h *GrievanceHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+
+	// Fetch grievance before update to get raiser info
+	g, _ := h.repo.GetByID(actor, id)
+
 	if err := h.repo.UpdateStatus(actor, id, req.Status, req.Resolution); err != nil {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify the raiser about status change
+	if g != nil {
+		go h.notifier.GrievanceStatusChanged(g.RaisedByMemberID, g.TicketNo, string(req.Status), id)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated"})
 }
 

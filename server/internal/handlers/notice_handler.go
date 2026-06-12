@@ -10,14 +10,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type NoticeHandler struct {
-	repo *repositories.NoticeRepository
+	repo     *repositories.NoticeRepository
+	notifier *services.Notifier
 }
 
-func NewNoticeHandler(repo *repositories.NoticeRepository) *NoticeHandler {
-	return &NoticeHandler{repo: repo}
+func NewNoticeHandler(repo *repositories.NoticeRepository, notifier *services.Notifier) *NoticeHandler {
+	return &NoticeHandler{repo: repo, notifier: notifier}
 }
 
 type createNoticeReq struct {
@@ -49,6 +51,10 @@ func (h *NoticeHandler) Create(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify all members about new notice
+	go h.notifier.NoticeCreated(n.Title, n.TitleMr, n.ID)
+
 	c.JSON(http.StatusCreated, n)
 }
 

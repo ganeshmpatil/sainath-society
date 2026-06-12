@@ -74,6 +74,20 @@ func (r *MemberRepository) Update(actor *ActorContext, id uuid.UUID, patch map[s
 	return r.db.Model(&models.Member{}).Where("id = ?", id).Updates(patch).Error
 }
 
+// ListActiveWithEmail returns all active members who have an email address set.
+func (r *MemberRepository) ListActiveWithEmail() ([]models.Member, error) {
+	var rows []models.Member
+	err := r.db.Where("is_active = ? AND email IS NOT NULL AND email != ''", true).Find(&rows).Error
+	return rows, err
+}
+
+// ListByRole returns all active members with a given role (no ACL needed, internal use).
+func (r *MemberRepository) ListByRole(role *models.Role) ([]models.Member, error) {
+	var rows []models.Member
+	err := r.db.Where("is_active = ? AND role = ?", true, *role).Find(&rows).Error
+	return rows, err
+}
+
 // Deactivate — admin only.
 func (r *MemberRepository) Deactivate(actor *ActorContext, id uuid.UUID) error {
 	if !actor.IsAdmin() {

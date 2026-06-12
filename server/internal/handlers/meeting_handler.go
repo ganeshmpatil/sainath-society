@@ -11,14 +11,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type MeetingHandler struct {
-	repo *repositories.MeetingRepository
+	repo     *repositories.MeetingRepository
+	notifier *services.Notifier
 }
 
-func NewMeetingHandler(repo *repositories.MeetingRepository) *MeetingHandler {
-	return &MeetingHandler{repo: repo}
+func NewMeetingHandler(repo *repositories.MeetingRepository, notifier *services.Notifier) *MeetingHandler {
+	return &MeetingHandler{repo: repo, notifier: notifier}
 }
 
 type createMeetingReq struct {
@@ -51,6 +53,10 @@ func (h *MeetingHandler) Create(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify all members about the scheduled meeting
+	go h.notifier.MeetingScheduled(m.Title, m.ScheduledAt.Format("02 Jan 2006 3:04 PM"), m.ID)
+
 	c.JSON(http.StatusCreated, m)
 }
 
@@ -159,6 +165,10 @@ func (h *MeetingHandler) AddActionItem(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify the assigned member about the action item
+	go h.notifier.TaskAssigned(req.OwnerMemberID, item.Title, item.ID)
+
 	c.JSON(http.StatusCreated, item)
 }
 

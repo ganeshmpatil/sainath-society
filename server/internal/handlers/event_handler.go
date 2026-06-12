@@ -11,14 +11,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type EventHandler struct {
-	repo *repositories.EventRepository
+	repo     *repositories.EventRepository
+	notifier *services.Notifier
 }
 
-func NewEventHandler(repo *repositories.EventRepository) *EventHandler {
-	return &EventHandler{repo: repo}
+func NewEventHandler(repo *repositories.EventRepository, notifier *services.Notifier) *EventHandler {
+	return &EventHandler{repo: repo, notifier: notifier}
 }
 
 type createEventReq struct {
@@ -51,6 +53,10 @@ func (h *EventHandler) Create(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify all members about the new event
+	go h.notifier.EventCreated(e.Title, e.StartTime.Format("02 Jan 2006 3:04 PM"), e.ID)
+
 	c.JSON(http.StatusCreated, e)
 }
 

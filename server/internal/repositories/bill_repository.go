@@ -90,6 +90,13 @@ func (r *BillRepository) GenerateForPeriod(actor *ActorContext, req BillGenerati
 	return created, skipped, nil
 }
 
+// ListByPeriod returns all bills for a given billing period (internal use for notifications).
+func (r *BillRepository) ListByPeriod(period string) ([]models.MaintenanceBill, error) {
+	var rows []models.MaintenanceBill
+	err := r.db.Where("billing_period = ?", period).Find(&rows).Error
+	return rows, err
+}
+
 // ListForActor returns bills visible to the actor.
 //   Member: only own (member_id = actor)
 //   Admin:  all (optional ?flatId= filter)

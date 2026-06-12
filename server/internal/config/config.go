@@ -24,6 +24,10 @@ type Config struct {
 	JWTAccessExpiry  time.Duration
 	JWTRefreshExpiry time.Duration
 
+	// Email (Resend)
+	ResendAPIKey  string
+	ResendFromEmail string
+
 	// CORS
 	AllowedOrigins []string
 }
@@ -46,6 +50,10 @@ func Load() *Config {
 		JWTSecret:        getEnv("JWT_SECRET", "your-super-secret-key-change-in-production"),
 		JWTAccessExpiry:  getDurationEnv("JWT_ACCESS_EXPIRY", 15*time.Minute),
 		JWTRefreshExpiry: getDurationEnv("JWT_REFRESH_EXPIRY", 7*24*time.Hour),
+
+		// Email (Resend)
+		ResendAPIKey:    getEnv("RESEND_API_KEY", ""),
+		ResendFromEmail: getEnv("RESEND_FROM_EMAIL", "onboarding@resend.dev"),
 
 		// CORS
 		AllowedOrigins: []string{"http://localhost:5173", "http://localhost:3000"},

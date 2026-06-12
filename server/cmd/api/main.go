@@ -85,13 +85,26 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 
-	// Setup routes
-	SetupRoutes(r, jwtManager, userRepo, domainRepos, db)
+	// Create shared notifier for event-driven notifications
+	notifier := services.NewNotifier(domainRepos.Notification, domainRepos.Member)
 
-	// Start notification worker (WhatsApp dispatcher)
+	// Setup routes
+	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db)
+
+	// Build email sender: use Resend if API key is configured, else mock.
+	var emailSender services.EmailSender
+	if cfg.ResendAPIKey != "" {
+		emailSender = services.NewResendSender(cfg.ResendAPIKey, cfg.ResendFromEmail)
+		log.Println("Email sender: Resend (live)")
+	} else {
+		emailSender = services.NewMockEmailSender()
+		log.Println("Email sender: mock (set RESEND_API_KEY to enable)")
+	}
+
+	// Start notification worker (WhatsApp + Email dispatcher)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	worker := services.NewNotificationWorker(domainRepos.Notification, services.NewMockWhatsAppSender())
+	worker := services.NewNotificationWorker(domainRepos.Notification, services.NewMockWhatsAppSender(), emailSender)
 	go worker.Run(ctx)
 
 	// Start server

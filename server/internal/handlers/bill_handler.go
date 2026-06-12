@@ -10,14 +10,16 @@ import (
 	"sainath-society/internal/dto/response"
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type BillHandler struct {
-	repo *repositories.BillRepository
+	repo     *repositories.BillRepository
+	notifier *services.Notifier
 }
 
-func NewBillHandler(repo *repositories.BillRepository) *BillHandler {
-	return &BillHandler{repo: repo}
+func NewBillHandler(repo *repositories.BillRepository, notifier *services.Notifier) *BillHandler {
+	return &BillHandler{repo: repo, notifier: notifier}
 }
 
 type generateBillsReq struct {
@@ -51,6 +53,21 @@ func (h *BillHandler) Generate(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify each member about their generated bill
+	if created > 0 {
+		go func() {
+			bills, err := h.repo.ListByPeriod(req.BillingPeriod)
+			if err != nil {
+				return
+			}
+			dueStr := req.DueDate.Format("02 Jan 2006")
+			for _, b := range bills {
+				h.notifier.BillGenerated(b.MemberID, b.BillNo, b.TotalAmount, dueStr, b.ID)
+			}
+		}()
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"created": created, "skipped": skipped,
 		"billingPeriod": req.BillingPeriod,
@@ -121,9 +138,19 @@ func (h *BillHandler) MarkPaid(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+
+	// Fetch bill before to get member + bill number
+	bill, _ := h.repo.GetByID(actor, id)
+
 	if err := h.repo.MarkPaid(actor, id, req.Amount, req.TxnID); err != nil {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify member about payment received
+	if bill != nil {
+		go h.notifier.BillPaid(bill.MemberID, bill.BillNo, req.Amount, id)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Marked paid"})
 }

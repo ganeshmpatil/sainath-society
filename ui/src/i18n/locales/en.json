@@ -174,6 +174,7 @@
     "hallBooking": "Hall Booking",
     "moveInOut": "Move In/Out",
     "bylaws": "Bylaws",
+    "emailNotifications": "Email Notifications",
     "logout": "Logout"
   },
   "residents": {
@@ -543,6 +544,27 @@
     "recordMovement": "Record Movement",
     "approve": "Approve",
     "movements": "Movements"
+  },
+  "emailNotifications": {
+    "title": "Email Notifications",
+    "sendEmail": "Send Email",
+    "sendToAll": "Send to All Members",
+    "sendToSelected": "Send to Selected",
+    "subject": "Subject",
+    "body": "Message Body (EN)",
+    "bodyMr": "Message Body (Marathi)",
+    "selectRecipients": "Select Recipients",
+    "recipientsSelected": "recipients selected",
+    "allMembers": "All members with email",
+    "queued": "emails queued",
+    "skipped": "skipped",
+    "inbox": "Inbox",
+    "sent": "Sent",
+    "failed": "Failed",
+    "noEmail": "No email set",
+    "sentSuccess": "Email notifications queued successfully!",
+    "subjectPlaceholder": "Enter email subject...",
+    "bodyPlaceholder": "Enter message body..."
   },
   "bylaws": {
     "title": "Society Bylaws",

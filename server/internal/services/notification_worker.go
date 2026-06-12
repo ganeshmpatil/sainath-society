@@ -33,14 +33,16 @@ func NewMockWhatsAppSender() WhatsAppSender { return &mockWhatsAppSender{} }
 type NotificationWorker struct {
 	repo     *repositories.NotificationRepository
 	whatsapp WhatsAppSender
+	email    EmailSender
 	interval time.Duration
 	batch    int
 }
 
-func NewNotificationWorker(repo *repositories.NotificationRepository, wa WhatsAppSender) *NotificationWorker {
+func NewNotificationWorker(repo *repositories.NotificationRepository, wa WhatsAppSender, em EmailSender) *NotificationWorker {
 	return &NotificationWorker{
 		repo:     repo,
 		whatsapp: wa,
+		email:    em,
 		interval: 10 * time.Second,
 		batch:    25,
 	}
@@ -72,32 +74,59 @@ func (w *NotificationWorker) dispatchBatch(ctx context.Context) {
 	}
 	for i := range pending {
 		n := &pending[i]
-		if n.Channel != models.ChannelWhatsApp {
-			// Only WhatsApp is implemented in this worker; other channels
-			// would be dispatched by their own workers (SMS, Email, Push).
-			continue
-		}
+
 		body := n.BodyMr
 		if body == "" || n.Language == "en" {
 			body = n.Body
 		}
-		// We need the recipient's mobile — load via the embedded member
-		// preload if available, otherwise fall back to notification-level
-		// data. For simplicity, the repo's Enqueue caller should set it.
-		var mobile string
-		if n.Recipient != nil {
-			mobile = n.Recipient.Mobile
-		}
-		if mobile == "" {
-			_ = w.repo.MarkFailed(n.ID, "missing recipient mobile")
-			continue
-		}
 
-		ref, err := w.whatsapp.Send(ctx, mobile, body)
-		if err != nil {
-			_ = w.repo.MarkFailed(n.ID, err.Error())
+		switch n.Channel {
+		case models.ChannelWhatsApp:
+			w.dispatchWhatsApp(ctx, n, body)
+		case models.ChannelEmail:
+			w.dispatchEmail(ctx, n, body)
+		default:
+			// SMS, Push, In-App — not yet implemented
 			continue
 		}
-		_ = w.repo.MarkSent(n.ID, ref)
 	}
+}
+
+func (w *NotificationWorker) dispatchWhatsApp(ctx context.Context, n *models.Notification, body string) {
+	var mobile string
+	if n.Recipient != nil {
+		mobile = n.Recipient.Mobile
+	}
+	if mobile == "" {
+		_ = w.repo.MarkFailed(n.ID, "missing recipient mobile")
+		return
+	}
+	ref, err := w.whatsapp.Send(ctx, mobile, body)
+	if err != nil {
+		_ = w.repo.MarkFailed(n.ID, err.Error())
+		return
+	}
+	_ = w.repo.MarkSent(n.ID, ref)
+}
+
+func (w *NotificationWorker) dispatchEmail(ctx context.Context, n *models.Notification, body string) {
+	var email string
+	if n.Recipient != nil {
+		email = n.Recipient.Email
+	}
+	if email == "" {
+		_ = w.repo.MarkFailed(n.ID, "missing recipient email")
+		return
+	}
+	subject := n.Subject
+	if subject == "" {
+		subject = "Sainath Society Notification"
+	}
+	htmlBody := WrapInEmailTemplate(subject, body)
+	ref, err := w.email.Send(ctx, email, subject, htmlBody)
+	if err != nil {
+		_ = w.repo.MarkFailed(n.ID, err.Error())
+		return
+	}
+	_ = w.repo.MarkSent(n.ID, ref)
 }

@@ -25,6 +25,7 @@ export interface Resident {
   id: string
   name: string
   mobile: string
+  email?: string
   flatId?: string
   role: 'MEMBER' | 'ADMIN'
   designation?: string
@@ -454,4 +455,26 @@ export const tasksApi = {
   create: (data: Partial<Task>) => apiClient.post<Task>('/tasks', data),
   updateStatus: (id: string, status: string) =>
     apiClient.request(`/tasks/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+}
+
+// ---------- Notifications ----------
+export interface Notification {
+  id: string
+  recipientId: string
+  channel: 'WHATSAPP' | 'SMS' | 'EMAIL' | 'IN_APP' | 'PUSH'
+  status: 'PENDING' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED'
+  subject?: string
+  body: string
+  bodyMr?: string
+  eventType?: string
+  sentAt?: string
+  failureReason?: string
+  createdAt: string
+}
+export const notificationsApi = {
+  inbox: () => apiClient.get<Notification[]>('/notifications/inbox'),
+  sendEmail: (data: { recipientIds: string[]; subject: string; body: string; bodyMr?: string; eventType?: string }) =>
+    apiClient.post<{ message: string; queued: number; skipped: number }>('/notifications/send-email', data),
+  sendEmailToAll: (data: { subject: string; body: string; bodyMr?: string; eventType?: string }) =>
+    apiClient.post<{ message: string; queued: number; totalMembers: number }>('/notifications/send-email-all', data),
 }

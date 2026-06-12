@@ -20,6 +20,7 @@ import Inventory from './pages/Inventory'
 import HallBooking from './pages/HallBooking'
 import MoveInOut from './pages/MoveInOut'
 import Bylaws from './pages/Bylaws'
+import EmailNotifications from './pages/EmailNotifications'
 import { Loader2 } from 'lucide-react'
 
 // Loading screen component
@@ -117,6 +118,7 @@ function AppContent() {
           <Route path="/hall-booking" element={<HallBooking />} />
           <Route path="/move-in-out" element={<MoveInOut />} />
           <Route path="/bylaws" element={<Bylaws />} />
+          <Route path="/email-notifications" element={<EmailNotifications />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

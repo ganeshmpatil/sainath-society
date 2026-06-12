@@ -13,6 +13,7 @@ type Member struct {
 	ID        uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name      string     `gorm:"type:varchar(100);not null" json:"name"`
 	Mobile    string     `gorm:"type:varchar(15);uniqueIndex;not null" json:"mobile"`
+	Email     string     `gorm:"type:varchar(100)" json:"email,omitempty"`
 	FlatID    *uuid.UUID `gorm:"type:uuid" json:"flatId,omitempty"`
 	Role      Role       `gorm:"type:varchar(20);not null;default:'MEMBER'" json:"role"`
 	Designation string   `gorm:"type:varchar(50)" json:"designation,omitempty"`

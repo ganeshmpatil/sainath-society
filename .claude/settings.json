@@ -12,7 +12,25 @@
       "Bash(ls /home/ganesh/Ganesh/workspace/poc/sainath-society/ui/src/pages/*.tsx)",
       "Bash(git init:*)",
       "Bash(git branch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gh auth:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Read(//home/ganesh/.ssh/**)",
+      "Bash(git config:*)",
+      "Bash(systemctl --user status docker-desktop)",
+      "Bash(pg_isready)",
+      "Bash(curl -s -X POST http://localhost:8080/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"chairman@sainath.com\",\"password\":\"Admin@123\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('vehicle id:',d.get\\('id'\\),'reg:',d.get\\('registrationNo'\\),'owner:',d.get\\('ownerMemberId'\\)\\)\")",
+      "Bash(npx vite:*)",
+      "Bash(curl -sI http://localhost:5173/)",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/mr.json'\\)\\); r=d.get\\('residents',{}\\); print\\('addResident:', r.get\\('addResident'\\)\\); print\\('name:', r.get\\('name'\\)\\); print\\('contact:', r.get\\('contact'\\)\\); print\\('designation:', r.get\\('designation'\\)\\); print\\('save:', d.get\\('common',{}\\).get\\('save'\\)\\)\")"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }

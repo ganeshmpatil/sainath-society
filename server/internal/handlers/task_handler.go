@@ -11,14 +11,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type TaskHandler struct {
-	repo *repositories.TaskRepository
+	repo     *repositories.TaskRepository
+	notifier *services.Notifier
 }
 
-func NewTaskHandler(repo *repositories.TaskRepository) *TaskHandler {
-	return &TaskHandler{repo: repo}
+func NewTaskHandler(repo *repositories.TaskRepository, notifier *services.Notifier) *TaskHandler {
+	return &TaskHandler{repo: repo, notifier: notifier}
 }
 
 type createTaskReq struct {
@@ -61,6 +63,12 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify assignee if admin assigned to someone else
+	if actor.IsAdmin() && req.OwnerMemberID != nil && *req.OwnerMemberID != actor.MemberID {
+		go h.notifier.TaskAssigned(*req.OwnerMemberID, t.Title, t.ID)
+	}
+
 	c.JSON(http.StatusCreated, t)
 }
 

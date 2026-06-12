@@ -11,14 +11,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type TenantHandler struct {
-	repo *repositories.TenantRepository
+	repo     *repositories.TenantRepository
+	notifier *services.Notifier
 }
 
-func NewTenantHandler(repo *repositories.TenantRepository) *TenantHandler {
-	return &TenantHandler{repo: repo}
+func NewTenantHandler(repo *repositories.TenantRepository, notifier *services.Notifier) *TenantHandler {
+	return &TenantHandler{repo: repo, notifier: notifier}
 }
 
 type createTenantReq struct {
@@ -90,10 +92,20 @@ func (h *TenantHandler) Approve(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+
+	// Fetch tenant before approval to get landlord + name
+	t, _ := h.repo.GetByID(actor, id)
+
 	if err := h.repo.Approve(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify landlord about tenant approval
+	if t != nil {
+		go h.notifier.TenantApproved(t.OwnerMemberID, t.Name, id)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Tenant approved"})
 }
 
