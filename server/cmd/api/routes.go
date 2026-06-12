@@ -20,6 +20,7 @@ func SetupRoutes(
 	domain *DomainRepositories,
 	notifier *services.Notifier,
 	db *gorm.DB,
+	vapidPublicKey string,
 ) {
 	// Services
 	authService := services.NewAuthService(userRepo, jwtManager)
@@ -49,6 +50,8 @@ func SetupRoutes(
 	residentHandler := handlers.NewResidentHandler(domain.Member)
 	flatHandler := handlers.NewFlatHandler(domain.Flat)
 	notificationHandler := handlers.NewNotificationHandler(domain.Notification, domain.Member)
+	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact)
+	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -246,6 +249,19 @@ func SetupRoutes(
 		notif.GET("/inbox", notificationHandler.ListInbox)
 		notif.POST("/send-email", notificationHandler.SendEmail)
 		notif.POST("/send-email-all", notificationHandler.SendEmailToAll)
+
+		// Emergency contacts — everyone reads, admin manages.
+		ec := protected.Group("/emergency-contacts")
+		ec.GET("", emergencyContactHandler.List)
+		ec.POST("", emergencyContactHandler.Create)
+		ec.PATCH("/:id", emergencyContactHandler.Update)
+		ec.DELETE("/:id", emergencyContactHandler.Delete)
+
+		// Web Push subscription management.
+		push := protected.Group("/push")
+		push.GET("/vapid-key", pushHandler.VAPIDPublicKey)
+		push.POST("/subscribe", pushHandler.Subscribe)
+		push.POST("/unsubscribe", pushHandler.Unsubscribe)
 
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")

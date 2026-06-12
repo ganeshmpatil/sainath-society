@@ -74,7 +74,9 @@ func main() {
 		Parking:       repositories.NewParkingRepository(db),
 		Bill:          repositories.NewBillRepository(db),
 		Member:        repositories.NewMemberRepository(db),
-		Flat:          repositories.NewFlatRepository(db),
+		Flat:             repositories.NewFlatRepository(db),
+		EmergencyContact: repositories.NewEmergencyContactRepository(db),
+		PushSubscription: repositories.NewPushSubscriptionRepository(db),
 	}
 
 	// Create Gin router
@@ -88,8 +90,20 @@ func main() {
 	// Create shared notifier for event-driven notifications
 	notifier := services.NewNotifier(domainRepos.Notification, domainRepos.Member)
 
+	// Wire Web Push if VAPID keys are configured
+	if cfg.VAPIDPublicKey != "" && cfg.VAPIDPrivateKey != "" {
+		pushService := services.NewWebPushService(
+			domainRepos.PushSubscription,
+			cfg.VAPIDPublicKey, cfg.VAPIDPrivateKey, cfg.VAPIDEmail,
+		)
+		notifier.SetPushService(pushService)
+		log.Println("Web Push: enabled (VAPID configured)")
+	} else {
+		log.Println("Web Push: disabled (set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to enable)")
+	}
+
 	// Setup routes
-	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db)
+	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db, cfg.VAPIDPublicKey)
 
 	// Build email sender: use Resend if API key is configured, else mock.
 	var emailSender services.EmailSender
@@ -147,6 +161,8 @@ type DomainRepositories struct {
 	Suggestion   *repositories.SuggestionRepository
 	Parking      *repositories.ParkingRepository
 	Bill         *repositories.BillRepository
-	Member       *repositories.MemberRepository
-	Flat         *repositories.FlatRepository
+	Member           *repositories.MemberRepository
+	Flat             *repositories.FlatRepository
+	EmergencyContact *repositories.EmergencyContactRepository
+	PushSubscription *repositories.PushSubscriptionRepository
 }

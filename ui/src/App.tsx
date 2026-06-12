@@ -21,7 +21,9 @@ import HallBooking from './pages/HallBooking'
 import MoveInOut from './pages/MoveInOut'
 import Bylaws from './pages/Bylaws'
 import EmailNotifications from './pages/EmailNotifications'
+import EmergencyContacts from './pages/EmergencyContacts'
 import { Loader2 } from 'lucide-react'
+import { usePushNotifications } from './hooks/usePushNotifications'
 
 // Loading screen component
 function LoadingScreen() {
@@ -73,6 +75,9 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const { isAuthenticated, isLoading, user, logout } = useAuth()
 
+  // Subscribe to Web Push notifications when user is authenticated
+  usePushNotifications(isAuthenticated)
+
   if (isLoading) {
     return <LoadingScreen />
   }
@@ -119,6 +124,7 @@ function AppContent() {
           <Route path="/move-in-out" element={<MoveInOut />} />
           <Route path="/bylaws" element={<Bylaws />} />
           <Route path="/email-notifications" element={<EmailNotifications />} />
+          <Route path="/emergency-contacts" element={<EmergencyContacts />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

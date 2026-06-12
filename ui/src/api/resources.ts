@@ -478,3 +478,27 @@ export const notificationsApi = {
   sendEmailToAll: (data: { subject: string; body: string; bodyMr?: string; eventType?: string }) =>
     apiClient.post<{ message: string; queued: number; totalMembers: number }>('/notifications/send-email-all', data),
 }
+
+// ---------- Emergency Contacts ----------
+export interface EmergencyContact {
+  id: string
+  name: string
+  nameMr?: string
+  category: 'COMMITTEE' | 'EMERGENCY' | 'UTILITY' | 'OTHER'
+  phone: string
+  altPhone?: string
+  role?: string
+  roleMr?: string
+  sortOrder: number
+  isActive: boolean
+}
+export const emergencyContactsApi = {
+  list: () =>
+    apiClient.get<{ contacts: EmergencyContact[]; committee: Resident[]; count: number }>('/emergency-contacts'),
+  create: (data: Partial<EmergencyContact>) =>
+    apiClient.post<EmergencyContact>('/emergency-contacts', data),
+  update: (id: string, data: Record<string, unknown>) =>
+    apiClient.request(`/emergency-contacts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    apiClient.delete(`/emergency-contacts/${id}`),
+}

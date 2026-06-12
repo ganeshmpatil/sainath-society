@@ -67,7 +67,7 @@ export default function MoveInOut() {
                   </span>
                 </div>
                 <div className="flex gap-4 mt-2 text-xs text-slate-500 flex-wrap">
-                  <span>{t('moveInOut.mobile')}: {tn.mobile}</span>
+                  <a href={`tel:${tn.mobile}`} className="hover:text-green-400 transition-colors">{t('moveInOut.mobile')}: {tn.mobile}</a>
                   <span>{t('moveInOut.flat')}: {tn.flat?.flatNumber ?? '—'}</span>
                   <span>{t('moveInOut.familyCount')}: {tn.familyCount}</span>
                   {!!tn.monthlyRent && <span>{t('moveInOut.monthlyRent')}: ₹{tn.monthlyRent}</span>}

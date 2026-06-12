@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Home, Users, Building2, MessageSquare, Bell, FileText,
   Lightbulb, DollarSign, Car, Vote, Calendar, CheckSquare,
-  Package, CalendarDays, ArrowLeftRight, BookOpen, Mail, Menu, X, LogOut, User
+  Package, CalendarDays, ArrowLeftRight, BookOpen, Mail, Phone, Menu, X, LogOut, User
 } from 'lucide-react'
 import LanguageSelector from './LanguageSelector'
 
@@ -38,6 +38,7 @@ const menuItems = [
   { path: '/inventory', icon: Package, labelKey: 'sidebar.inventory' },
   { path: '/hall-booking', icon: CalendarDays, labelKey: 'sidebar.hallBooking' },
   { path: '/move-in-out', icon: ArrowLeftRight, labelKey: 'sidebar.moveInOut' },
+  { path: '/emergency-contacts', icon: Phone, labelKey: 'sidebar.emergencyContacts' },
   { path: '/email-notifications', icon: Mail, labelKey: 'sidebar.emailNotifications' },
 ]
 

@@ -25,8 +25,13 @@ type Config struct {
 	JWTRefreshExpiry time.Duration
 
 	// Email (Resend)
-	ResendAPIKey  string
+	ResendAPIKey    string
 	ResendFromEmail string
+
+	// Web Push (VAPID)
+	VAPIDPublicKey  string
+	VAPIDPrivateKey string
+	VAPIDEmail      string // mailto: contact for push providers
 
 	// CORS
 	AllowedOrigins []string
@@ -54,6 +59,11 @@ func Load() *Config {
 		// Email (Resend)
 		ResendAPIKey:    getEnv("RESEND_API_KEY", ""),
 		ResendFromEmail: getEnv("RESEND_FROM_EMAIL", "onboarding@resend.dev"),
+
+		// Web Push (VAPID)
+		VAPIDPublicKey:  getEnv("VAPID_PUBLIC_KEY", ""),
+		VAPIDPrivateKey: getEnv("VAPID_PRIVATE_KEY", ""),
+		VAPIDEmail:      getEnv("VAPID_EMAIL", "mailto:admin@sainath-society.com"),
 
 		// CORS
 		AllowedOrigins: []string{"http://localhost:5173", "http://localhost:3000"},

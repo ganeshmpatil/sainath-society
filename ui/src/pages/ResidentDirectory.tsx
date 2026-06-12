@@ -80,10 +80,13 @@ export default function ResidentDirectory() {
               )}
             </div>
             {r.designation && <p className="text-xs text-purple-400 mb-2">{r.designation}</p>}
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <Phone size={14} />
+            <a
+              href={`tel:${r.mobile}`}
+              className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-green-400 transition-colors group/call"
+            >
+              <Phone size={14} className="group-hover/call:text-green-400" />
               <span>{r.mobile}</span>
-            </div>
+            </a>
           </div>
         ))}
         {filtered.length === 0 && (

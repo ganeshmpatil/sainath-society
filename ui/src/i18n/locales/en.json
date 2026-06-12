@@ -174,6 +174,7 @@
     "hallBooking": "Hall Booking",
     "moveInOut": "Move In/Out",
     "bylaws": "Bylaws",
+    "emergencyContacts": "Emergency Contacts",
     "emailNotifications": "Email Notifications",
     "logout": "Logout"
   },
@@ -565,6 +566,23 @@
     "sentSuccess": "Email notifications queued successfully!",
     "subjectPlaceholder": "Enter email subject...",
     "bodyPlaceholder": "Enter message body..."
+  },
+  "emergencyContacts": {
+    "title": "Emergency Contacts",
+    "subtitle": "Important phone numbers & quick dial",
+    "committeeMembers": "Committee Members",
+    "emergencyServices": "Emergency Services",
+    "utility": "Utility & Services",
+    "other": "Other Contacts",
+    "addContact": "Add Contact",
+    "name": "Name",
+    "categoryLabel": "Category",
+    "phone": "Phone",
+    "altPhone": "Alt Phone",
+    "roleLabel": "Role / Designation",
+    "emergency": "Emergency",
+    "noCustomContacts": "Add society-specific contacts like plumber, electrician, watchman etc.",
+    "call": "Call"
   },
   "bylaws": {
     "title": "Society Bylaws",

@@ -16,13 +16,21 @@ import (
 type Notifier struct {
 	notifRepo  *repositories.NotificationRepository
 	memberRepo *repositories.MemberRepository
+	push       *WebPushService // nil if VAPID not configured
 }
 
 func NewNotifier(notifRepo *repositories.NotificationRepository, memberRepo *repositories.MemberRepository) *Notifier {
 	return &Notifier{notifRepo: notifRepo, memberRepo: memberRepo}
 }
 
-// NotifyOne queues an email (+ WhatsApp) notification to a single member.
+// SetPushService attaches the Web Push service after construction
+// (avoids circular dependency during bootstrap).
+func (n *Notifier) SetPushService(push *WebPushService) {
+	n.push = push
+}
+
+// NotifyOne queues an email (+ WhatsApp) notification to a single member
+// and sends a Web Push notification immediately.
 func (n *Notifier) NotifyOne(recipientID uuid.UUID, subject, body, bodyMr, eventType string, resourceType string, resourceID *uuid.UUID) {
 	for _, ch := range []models.NotificationChannel{models.ChannelEmail, models.ChannelWhatsApp} {
 		_ = n.notifRepo.Enqueue(&models.Notification{
@@ -37,10 +45,24 @@ func (n *Notifier) NotifyOne(recipientID uuid.UUID, subject, body, bodyMr, event
 			ResourceID:   resourceID,
 		})
 	}
+	// Web Push — immediate, non-blocking
+	if n.push != nil {
+		rid := ""
+		if resourceID != nil {
+			rid = resourceID.String()
+		}
+		go n.push.SendToMember(recipientID, PushPayload{
+			Title:      subject,
+			Body:       body,
+			Icon:       "/sai.jpg",
+			EventType:  eventType,
+			ResourceID: rid,
+		})
+	}
 }
 
-// NotifyAllMembers broadcasts an email (+ WhatsApp) notification to every
-// active member who has an email set.
+// NotifyAllMembers broadcasts an email (+ WhatsApp + Push) notification to
+// every active member who has an email set.
 func (n *Notifier) NotifyAllMembers(subject, body, bodyMr, eventType string, resourceType string, resourceID *uuid.UUID) {
 	members, err := n.memberRepo.ListActiveWithEmail()
 	if err != nil {
@@ -62,6 +84,20 @@ func (n *Notifier) NotifyAllMembers(subject, body, bodyMr, eventType string, res
 			})
 		}
 	}
+	// Web Push broadcast — immediate
+	if n.push != nil {
+		rid := ""
+		if resourceID != nil {
+			rid = resourceID.String()
+		}
+		go n.push.Broadcast(PushPayload{
+			Title:      subject,
+			Body:       body,
+			Icon:       "/sai.jpg",
+			EventType:  eventType,
+			ResourceID: rid,
+		})
+	}
 }
 
 // NotifyAdmins sends a notification to all admin members.
@@ -72,7 +108,9 @@ func (n *Notifier) NotifyAdmins(subject, body, bodyMr, eventType string, resourc
 		log.Printf("notifier: failed to list admins: %v", err)
 		return
 	}
+	var adminIDs []uuid.UUID
 	for _, m := range members {
+		adminIDs = append(adminIDs, m.ID)
 		for _, ch := range []models.NotificationChannel{models.ChannelEmail, models.ChannelWhatsApp} {
 			_ = n.notifRepo.Enqueue(&models.Notification{
 				RecipientID:  m.ID,
@@ -86,6 +124,20 @@ func (n *Notifier) NotifyAdmins(subject, body, bodyMr, eventType string, resourc
 				ResourceID:   resourceID,
 			})
 		}
+	}
+	// Web Push to admins
+	if n.push != nil && len(adminIDs) > 0 {
+		rid := ""
+		if resourceID != nil {
+			rid = resourceID.String()
+		}
+		go n.push.SendToMembers(adminIDs, PushPayload{
+			Title:      subject,
+			Body:       body,
+			Icon:       "/sai.jpg",
+			EventType:  eventType,
+			ResourceID: rid,
+		})
 	}
 }
 
