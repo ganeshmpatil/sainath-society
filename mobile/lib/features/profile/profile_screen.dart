@@ -117,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       GestureDetector(
                         onTap: () => context.pop(),
-                        child: const Icon(Icons.arrow_back_ios_rounded,
+                        child: Icon(Icons.arrow_back_ios_rounded,
                             size: 20, color: AppColors.textSecondary),
                       ),
                       const SizedBox(width: 12),
@@ -152,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Center(
                     child: Text(
                       '${user?.flatNumber ?? ''} • ${user?.isAdmin == true ? l.t('common.admin') : l.t('common.member')}',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 12, color: AppColors.textTertiary),
                     ),
                   ),
@@ -164,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   TextField(
                     controller: _nameCtrl,
                     style: const TextStyle(fontSize: 14),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       prefixIcon: Icon(Icons.person_outline,
                           size: 20, color: AppColors.textTertiary),
                     ),
@@ -178,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     style: const TextStyle(fontSize: 14),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       prefixIcon: Icon(Icons.email_outlined,
                           size: 20, color: AppColors.textTertiary),
                     ),
@@ -192,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     controller: _phoneCtrl,
                     keyboardType: TextInputType.phone,
                     style: const TextStyle(fontSize: 14),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       prefixIcon: Icon(Icons.phone_outlined,
                           size: 20, color: AppColors.textTertiary),
                     ),
@@ -230,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _label(String text) => Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textSecondary,
@@ -244,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(icon, size: 18, color: AppColors.textTertiary),
             const SizedBox(width: 10),
             Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 12, color: AppColors.textTertiary)),
             const Spacer(),
             Text(value,

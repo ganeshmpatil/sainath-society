@@ -32,11 +32,11 @@ class _FVS extends State<_FV> {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('flatDetails.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('flatDetails.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('flatDetails.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 12, bottom: 12), child: FilterChipsRow(
@@ -48,7 +48,7 @@ class _FVS extends State<_FV> {
           if (_fi > 0) { final w = ['', 'A', 'B', 'C'];
             items = items.where((f) => ((f['flatNumber'] ?? '') as String).startsWith(w[_fi])).toList(); }
           if (items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
             final f = items[i];
             final flat = f['flatNumber'] ?? '';
@@ -57,14 +57,14 @@ class _FVS extends State<_FV> {
             final floor = f['floor']?.toString() ?? '';
             return GlassCard(child: Row(children: [
               Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.primary.withAlpha(25), borderRadius: BorderRadius.circular(12)),
-                child: Center(child: Text(flat, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)))),
+                child: Center(child: Text(flat, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)))),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(flat, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 Text([if (owner.isNotEmpty) owner, if (area.isNotEmpty) '${area} sq.ft', if (floor.isNotEmpty) 'Floor $floor'].join(' • '),
-                    style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                    style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               ])),
-              const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textTertiary),
+              Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textTertiary),
             ]));
           }, childCount: items.length));
         }),

@@ -27,17 +27,17 @@ class _MV extends StatelessWidget {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('moveInOut.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('moveInOut.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('moveInOut.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
             final t = state.items[i];
             final name = t['tenantName'] ?? t['name'] ?? '';
@@ -51,7 +51,7 @@ class _MV extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(t['flat']?['flatNumber'] ?? '', style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                Text(t['flat']?['flatNumber'] ?? '', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               ])),
               StatusBadge(label: isIn ? l.t('moveInOut.moveIn') : l.t('moveInOut.moveOut'),
                   color: isIn ? AppColors.resolved : AppColors.urgent),

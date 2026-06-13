@@ -27,17 +27,17 @@ class _MV extends StatelessWidget {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('meetings.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('meetings.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('meetings.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
             final m = state.items[i];
             final title = (isMr ? m['titleMr'] : null) ?? m['title'] ?? '';
@@ -51,11 +51,11 @@ class _MV extends StatelessWidget {
               Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               Row(children: [
-                const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textTertiary), const SizedBox(width: 4),
-                Text(_fmt(date), style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textTertiary), const SizedBox(width: 4),
+                Text(_fmt(date), style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
                 if (loc.isNotEmpty) ...[const SizedBox(width: 12),
-                  const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textTertiary), const SizedBox(width: 4),
-                  Text(loc, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary))],
+                  Icon(Icons.location_on_outlined, size: 14, color: AppColors.textTertiary), const SizedBox(width: 4),
+                  Text(loc, style: TextStyle(fontSize: 11, color: AppColors.textTertiary))],
               ]),
             ]));
           }, childCount: state.items.length));

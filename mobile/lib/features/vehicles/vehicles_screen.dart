@@ -30,17 +30,17 @@ class _VV extends StatelessWidget {
         child: CustomScrollView(slivers: [
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
             GestureDetector(onTap: () => context.pop(),
-                child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+                child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
             const SizedBox(width: 12),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(l.t('vehicles.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              Text(l.t('vehicles.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+              Text(l.t('vehicles.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
             ]),
           ]))),
           BlocBuilder<ListCubit, ListData>(builder: (context, state) {
             if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
             if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-                child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+                child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
             return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
               final v = state.items[i];
               final type = v['vehicleType'] ?? 'CAR';
@@ -53,7 +53,7 @@ class _VV extends StatelessWidget {
                   Text(v['registrationNo'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text([v['make'] ?? '', v['model'] ?? '', if ((v['color'] ?? '').isNotEmpty) v['color']].join(' • '),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                      style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
                 ])),
                 StatusBadge(label: type, color: AppColors.secondary),
               ]));

@@ -145,7 +145,7 @@ class _ViewState extends State<_View> {
                             Text(l.t(widget.titleKey),
                                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
                             Text(l.t(widget.subtitleKey),
-                                style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                                style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                           ],
                         ),
                       ),
@@ -183,7 +183,7 @@ class _ViewState extends State<_View> {
                       child: Padding(
                         padding: const EdgeInsets.all(40),
                         child: Center(child: Text(l.t('common.noRecords'),
-                            style: const TextStyle(color: AppColors.textTertiary))),
+                            style: TextStyle(color: AppColors.textTertiary))),
                       ),
                     );
                   }

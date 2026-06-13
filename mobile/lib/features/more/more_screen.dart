@@ -44,6 +44,7 @@ class MoreScreen extends StatelessWidget {
     context.watch<LocaleCubit>();
     final authState = context.watch<AuthBloc>().state;
     final user = authState is Authenticated ? authState.user : null;
+    final currentTheme = context.watch<ThemeCubit>().state;
 
     return Scaffold(
       body: SafeArea(
@@ -58,9 +59,9 @@ class MoreScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(l.t('common.allModules'),
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                         Text(l.t('app.tagline'),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                            style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                       ],
                     ),
                     const Spacer(),
@@ -82,7 +83,7 @@ class MoreScreen extends StatelessWidget {
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: '${l.t('common.search')} modules...',
-                    prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
+                    prefixIcon: Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -130,7 +131,7 @@ class MoreScreen extends StatelessWidget {
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -142,9 +143,56 @@ class MoreScreen extends StatelessWidget {
               ),
             ),
 
-            // Divider
-            const SliverToBoxAdapter(
-              child: Divider(height: 32, indent: 16, endIndent: 16),
+            const SliverToBoxAdapter(child: Divider(height: 32, indent: 16, endIndent: 16)),
+
+            // Theme Picker
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.t('common.theme'),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _ThemeOption(
+                            label: l.t('theme.royalGold'),
+                            colors: const [Color(0xFFD4AF37), Color(0xFFF4D03F)],
+                            bgColor: const Color(0xFF0C0C1D),
+                            isSelected: currentTheme == AppThemeType.royalGold,
+                            onTap: () => context.read<ThemeCubit>().setTheme(AppThemeType.royalGold),
+                          ),
+                          const SizedBox(width: 10),
+                          _ThemeOption(
+                            label: l.t('theme.oceanBlue'),
+                            colors: const [Color(0xFF38BDF8), Color(0xFF6366F1)],
+                            bgColor: const Color(0xFF050D1A),
+                            isSelected: currentTheme == AppThemeType.oceanBlue,
+                            onTap: () => context.read<ThemeCubit>().setTheme(AppThemeType.oceanBlue),
+                          ),
+                          const SizedBox(width: 10),
+                          _ThemeOption(
+                            label: l.t('theme.freshEmerald'),
+                            colors: const [Color(0xFF059669), Color(0xFF10B981)],
+                            bgColor: const Color(0xFFF8FAFC),
+                            isSelected: currentTheme == AppThemeType.freshEmerald,
+                            onTap: () => context.read<ThemeCubit>().setTheme(AppThemeType.freshEmerald),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
 
             // Profile
@@ -173,59 +221,13 @@ class MoreScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(user?.name ?? '',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                           Text('${user?.flatNumber ?? ''} • ${user?.isAdmin == true ? l.t('common.admin') : l.t('common.member')}',
-                              style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                              style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textTertiary),
-                  ],
-                ),
-              ),
-            ),
-
-            // Theme toggle
-            SliverToBoxAdapter(
-              child: GlassCard(
-                onTap: () => context.read<ThemeCubit>().toggle(),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryBg,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        context.watch<ThemeCubit>().state == ThemeMode.dark
-                            ? Icons.dark_mode_rounded
-                            : Icons.light_mode_rounded,
-                        size: 20,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l.t('common.theme'),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryBg,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        context.watch<ThemeCubit>().state == ThemeMode.dark
-                            ? l.t('common.dark')
-                            : l.t('common.light'),
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                      ),
-                    ),
+                    Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textTertiary),
                   ],
                 ),
               ),
@@ -269,5 +271,64 @@ class MoreScreen extends StatelessWidget {
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     if (parts.isNotEmpty && parts[0].isNotEmpty) return parts[0][0].toUpperCase();
     return '?';
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  final String label;
+  final List<Color> colors;
+  final Color bgColor;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeOption({
+    required this.label,
+    required this.colors,
+    required this.bgColor,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? colors[0] : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                height: 24,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: colors),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? colors[0] : (bgColor.computeLuminance() > 0.5 ? const Color(0xFF64748B) : const Color(0x80FFFFFF)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

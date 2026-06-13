@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sainath Society — Premium Theme Prototypes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+
+.theme-selector {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.95); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 16px 0;
+}
+.theme-selector h1 {
+  text-align: center; font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 12px; font-weight: 500;
+}
+.theme-tabs {
+  display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px;
+}
+.theme-tab {
+  padding: 10px 24px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1);
+  background: transparent; color: rgba(255,255,255,0.5); cursor: pointer;
+  font-size: 13px; font-weight: 600; transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+.theme-tab:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+.theme-tab.active { background: #fff; color: #000; border-color: #fff; }
+
+.themes-container { padding-top: 100px; }
+
+.theme-section {
+  display: none; padding: 40px 20px 80px;
+}
+.theme-section.active { display: block; }
+
+.theme-label {
+  text-align: center; margin-bottom: 40px;
+}
+.theme-label h2 {
+  font-size: 28px; font-weight: 800; margin-bottom: 8px;
+}
+.theme-label p { color: rgba(255,255,255,0.4); font-size: 14px; }
+
+.screens {
+  display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+}
+.screen-wrapper {
+  text-align: center;
+}
+.screen-wrapper .label {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-bottom: 12px;
+}
+
+.phone {
+  width: 375px; height: 812px; border-radius: 40px; overflow: hidden;
+  position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ===== THEME 1: ROYAL GOLD ===== */
+.t1-login {
+  background: linear-gradient(160deg, #0C0C1D 0%, #1A1028 40%, #0C0C1D 100%);
+}
+.t1-login .top-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%);
+}
+.t1-login .content { position: relative; padding: 60px 28px 28px; height: 100%; display: flex; flex-direction: column; }
+.t1-login .logo-area { text-align: center; margin-bottom: 48px; margin-top: 40px; }
+.t1-login .logo-ring {
+  width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px;
+  border: 2px solid rgba(212,175,55,0.4);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
+}
+.t1-login .logo-ring span { font-size: 32px; }
+.t1-login .app-name {
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700;
+  background: linear-gradient(135deg, #D4AF37, #F4D03F, #D4AF37);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+.t1-login .app-sub {
+  font-size: 12px; color: rgba(212,175,55,0.5); letter-spacing: 3px;
+  text-transform: uppercase; margin-top: 6px;
+}
+.t1-login .form { flex: 1; }
+.t1-login .input-group { margin-bottom: 16px; }
+.t1-login .input-label {
+  font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.t1-login .input-field {
+  width: 100%; padding: 16px 18px; border-radius: 14px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.15);
+  color: #fff; font-size: 15px; font-family: 'Inter', sans-serif;
+}
+.t1-login .input-field::placeholder { color: rgba(255,255,255,0.2); }
+.t1-login .forgot {
+  text-align: right; font-size: 12px; color: rgba(212,175,55,0.6);
+  margin-top: 8px; margin-bottom: 32px;
+}
+.t1-login .btn-primary {
+  width: 100%; padding: 18px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #D4AF37, #C5A028);
+  color: #0C0C1D; font-size: 15px; font-weight: 700; cursor: pointer;
+  letter-spacing: 0.5px; font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 32px rgba(212,175,55,0.25);
+}
+.t1-login .divider {
+  display: flex; align-items: center; gap: 12px; margin: 24px 0;
+}
+.t1-login .divider span { font-size: 11px; color: rgba(255,255,255,0.2); }
+.t1-login .divider::before, .t1-login .divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06);
+}
+.t1-login .bottom-text {
+  text-align: center; font-size: 13px; color: rgba(255,255,255,0.3);
+  margin-top: auto; padding-bottom: 20px;
+}
+.t1-login .bottom-text a { color: #D4AF37; text-decoration: none; font-weight: 600; }
+
+/* T1 Residents */
+.t1-residents {
+  background: linear-gradient(180deg, #0C0C1D 0%, #12101E 100%);
+}
+.t1-residents .header {
+  padding: 56px 20px 20px;
+  background: linear-gradient(180deg, rgba(212,175,55,0.06) 0%, transparent 100%);
+}
+.t1-residents .header-row { display: flex; align-items: center; justify-content: space-between; }
+.t1-residents .header h2 {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700;
+  background: linear-gradient(135deg, #D4AF37, #F4D03F);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.t1-residents .header .count {
+  font-size: 11px; color: rgba(212,175,55,0.5); letter-spacing: 1px; margin-top: 4px;
+}
+.t1-residents .header .bell {
+  width: 40px; height: 40px; border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.2); display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.t1-residents .search {
+  margin: 16px 20px 8px; padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.1);
+  display: flex; align-items: center; gap: 10px;
+}
+.t1-residents .search span { color: rgba(255,255,255,0.2); font-size: 14px; }
+.t1-residents .wings {
+  display: flex; gap: 6px; padding: 12px 20px; overflow-x: auto;
+}
+.t1-residents .wing-chip {
+  padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.4); white-space: nowrap;
+}
+.t1-residents .wing-chip.active {
+  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05));
+  border-color: rgba(212,175,55,0.3); color: #D4AF37;
+}
+.t1-residents .list { padding: 8px 20px; }
+.t1-residents .resident-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 16px; margin-bottom: 10px;
+}
+.t1-residents .avatar {
+  width: 46px; height: 46px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
+  color: #0C0C1D;
+}
+.t1-residents .avatar.g1 { background: linear-gradient(135deg, #D4AF37, #F4D03F); }
+.t1-residents .avatar.g2 { background: linear-gradient(135deg, #C5A028, #E8C547); }
+.t1-residents .avatar.g3 { background: linear-gradient(135deg, #B8860B, #DAA520); }
+.t1-residents .info { flex: 1; }
+.t1-residents .info .name { font-size: 14px; font-weight: 600; color: #fff; }
+.t1-residents .info .meta {
+  font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 3px;
+}
+.t1-residents .call-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.2); display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+
+/* ===== THEME 2: OCEAN BLUE ===== */
+.t2-login {
+  background: linear-gradient(160deg, #050D1A 0%, #0A1628 40%, #050D1A 100%);
+}
+.t2-login .top-glow {
+  position: absolute; top: -120px; right: -80px;
+  width: 350px; height: 350px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, transparent 70%);
+}
+.t2-login .bottom-glow {
+  position: absolute; bottom: -100px; left: -60px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+}
+.t2-login .content { position: relative; padding: 60px 28px 28px; height: 100%; display: flex; flex-direction: column; }
+.t2-login .logo-area { text-align: center; margin-bottom: 48px; margin-top: 40px; }
+.t2-login .logo-icon {
+  width: 72px; height: 72px; border-radius: 22px; margin: 0 auto 18px;
+  background: linear-gradient(135deg, #38BDF8, #6366F1);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 40px rgba(56,189,248,0.25);
+}
+.t2-login .logo-icon span { font-size: 30px; }
+.t2-login .app-name {
+  font-size: 24px; font-weight: 800; color: #fff; letter-spacing: 0.5px;
+}
+.t2-login .app-sub {
+  font-size: 13px; color: rgba(56,189,248,0.5); margin-top: 6px;
+  font-weight: 500;
+}
+.t2-login .form { flex: 1; }
+.t2-login .input-group { margin-bottom: 16px; }
+.t2-login .input-label {
+  font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 8px; font-weight: 500;
+}
+.t2-login .input-field {
+  width: 100%; padding: 16px 18px; border-radius: 14px;
+  background: rgba(56,189,248,0.04); border: 1px solid rgba(56,189,248,0.12);
+  color: #fff; font-size: 15px; font-family: 'Inter', sans-serif;
+}
+.t2-login .input-field::placeholder { color: rgba(255,255,255,0.15); }
+.t2-login .forgot {
+  text-align: right; font-size: 12px; color: rgba(56,189,248,0.6);
+  margin-top: 8px; margin-bottom: 32px; font-weight: 500;
+}
+.t2-login .btn-primary {
+  width: 100%; padding: 18px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #38BDF8, #6366F1);
+  color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 32px rgba(56,189,248,0.2);
+}
+.t2-login .bottom-text {
+  text-align: center; font-size: 13px; color: rgba(255,255,255,0.3);
+  margin-top: auto; padding-bottom: 20px;
+}
+.t2-login .bottom-text a { color: #38BDF8; text-decoration: none; font-weight: 600; }
+
+/* T2 Residents */
+.t2-residents { background: #050D1A; }
+.t2-residents .header {
+  padding: 56px 20px 16px;
+  background: linear-gradient(180deg, rgba(56,189,248,0.05) 0%, transparent 100%);
+}
+.t2-residents .header-row { display: flex; align-items: center; justify-content: space-between; }
+.t2-residents .header h2 { font-size: 24px; font-weight: 800; color: #fff; }
+.t2-residents .header .count { font-size: 12px; color: rgba(56,189,248,0.5); margin-top: 4px; }
+.t2-residents .header .bell {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(56,189,248,0.08); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.t2-residents .search {
+  margin: 12px 20px 8px; padding: 14px 16px; border-radius: 14px;
+  background: rgba(56,189,248,0.04); border: 1px solid rgba(56,189,248,0.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.t2-residents .search span { color: rgba(255,255,255,0.2); font-size: 14px; }
+.t2-residents .wings { display: flex; gap: 6px; padding: 12px 20px; }
+.t2-residents .wing-chip {
+  padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.35);
+}
+.t2-residents .wing-chip.active {
+  background: linear-gradient(135deg, #38BDF8, #6366F1);
+  color: #fff; box-shadow: 0 4px 16px rgba(56,189,248,0.2);
+}
+.t2-residents .list { padding: 8px 20px; }
+.t2-residents .resident-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 16px; margin-bottom: 10px;
+}
+.t2-residents .avatar {
+  width: 46px; height: 46px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff;
+}
+.t2-residents .avatar.g1 { background: linear-gradient(135deg, #38BDF8, #6366F1); }
+.t2-residents .avatar.g2 { background: linear-gradient(135deg, #6366F1, #A855F7); }
+.t2-residents .avatar.g3 { background: linear-gradient(135deg, #38BDF8, #34D399); }
+.t2-residents .info { flex: 1; }
+.t2-residents .info .name { font-size: 14px; font-weight: 600; color: #fff; }
+.t2-residents .info .meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+.t2-residents .call-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: rgba(56,189,248,0.08); display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+
+/* ===== THEME 3: FRESH EMERALD (LIGHT) ===== */
+.t3-login {
+  background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 50%, #F0FDF4 100%);
+}
+.t3-login .top-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 320px;
+  background: linear-gradient(135deg, #059669, #10B981);
+  border-radius: 0 0 40px 40px;
+}
+.t3-login .content { position: relative; padding: 60px 28px 28px; height: 100%; display: flex; flex-direction: column; }
+.t3-login .logo-area { text-align: center; margin-bottom: 48px; margin-top: 20px; }
+.t3-login .logo-circle {
+  width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 16px;
+  background: rgba(255,255,255,0.25); backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.t3-login .logo-circle span { font-size: 30px; }
+.t3-login .app-name {
+  font-size: 24px; font-weight: 800; color: #fff;
+}
+.t3-login .app-sub {
+  font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px;
+  letter-spacing: 1px;
+}
+.t3-login .form-card {
+  background: #fff; border-radius: 24px; padding: 32px 24px;
+  box-shadow: 0 8px 40px rgba(5,150,105,0.08);
+  margin-top: 20px;
+}
+.t3-login .form-card h3 {
+  font-size: 20px; font-weight: 700; color: #0F172A; margin-bottom: 4px;
+}
+.t3-login .form-card .sub {
+  font-size: 13px; color: #94A3B8; margin-bottom: 24px;
+}
+.t3-login .input-group { margin-bottom: 16px; }
+.t3-login .input-label {
+  font-size: 12px; color: #64748B; margin-bottom: 6px; font-weight: 600;
+}
+.t3-login .input-field {
+  width: 100%; padding: 14px 16px; border-radius: 12px;
+  background: #F8FAFC; border: 1.5px solid #E2E8F0;
+  color: #0F172A; font-size: 15px; font-family: 'Inter', sans-serif;
+}
+.t3-login .input-field::placeholder { color: #CBD5E1; }
+.t3-login .forgot {
+  text-align: right; font-size: 12px; color: #059669; font-weight: 600;
+  margin-top: 6px; margin-bottom: 24px;
+}
+.t3-login .btn-primary {
+  width: 100%; padding: 16px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #059669, #10B981);
+  color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 6px 24px rgba(5,150,105,0.3);
+}
+.t3-login .bottom-text {
+  text-align: center; font-size: 13px; color: #94A3B8;
+  margin-top: auto; padding-bottom: 20px;
+}
+.t3-login .bottom-text a { color: #059669; text-decoration: none; font-weight: 600; }
+
+/* T3 Residents */
+.t3-residents { background: #F8FAFC; }
+.t3-residents .header {
+  padding: 56px 20px 16px; background: #fff;
+  border-bottom: 1px solid #F1F5F9;
+}
+.t3-residents .header-row { display: flex; align-items: center; justify-content: space-between; }
+.t3-residents .header h2 { font-size: 24px; font-weight: 800; color: #0F172A; }
+.t3-residents .header .count { font-size: 12px; color: #94A3B8; margin-top: 4px; }
+.t3-residents .header .bell {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: #F0FDF4; display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.t3-residents .search {
+  margin: 12px 20px 8px; padding: 14px 16px; border-radius: 14px;
+  background: #fff; border: 1.5px solid #E2E8F0;
+  display: flex; align-items: center; gap: 10px;
+}
+.t3-residents .search span { color: #CBD5E1; font-size: 14px; }
+.t3-residents .wings { display: flex; gap: 6px; padding: 12px 20px; }
+.t3-residents .wing-chip {
+  padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  background: #fff; border: 1.5px solid #E2E8F0; color: #64748B;
+}
+.t3-residents .wing-chip.active {
+  background: #059669; border-color: #059669; color: #fff;
+}
+.t3-residents .list { padding: 8px 20px; }
+.t3-residents .resident-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: #fff; border: 1px solid #F1F5F9;
+  border-radius: 16px; margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.t3-residents .avatar {
+  width: 46px; height: 46px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff;
+}
+.t3-residents .avatar.g1 { background: linear-gradient(135deg, #059669, #34D399); }
+.t3-residents .avatar.g2 { background: linear-gradient(135deg, #0D9488, #2DD4BF); }
+.t3-residents .avatar.g3 { background: linear-gradient(135deg, #059669, #10B981); }
+.t3-residents .info { flex: 1; }
+.t3-residents .info .name { font-size: 14px; font-weight: 600; color: #0F172A; }
+.t3-residents .info .meta { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+.t3-residents .call-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: #F0FDF4; display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+
+/* ===== THEME 4: SAFFRON ELEGANCE ===== */
+.t4-login {
+  background: linear-gradient(160deg, #1A0A00 0%, #2D1408 30%, #1A0A00 100%);
+}
+.t4-login .top-glow {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,153,0,0.08) 0%, transparent 70%);
+}
+.t4-login .content { position: relative; padding: 60px 28px 28px; height: 100%; display: flex; flex-direction: column; }
+.t4-login .logo-area { text-align: center; margin-bottom: 48px; margin-top: 30px; }
+.t4-login .om-symbol {
+  font-size: 52px; margin-bottom: 12px;
+  background: linear-gradient(135deg, #FF9900, #FF6B00, #FF9900);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(255,153,0,0.3));
+}
+.t4-login .app-name {
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700;
+  background: linear-gradient(135deg, #FF9900, #FFB347, #FF9900);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.t4-login .app-sub {
+  font-size: 11px; color: rgba(255,153,0,0.4); letter-spacing: 4px;
+  text-transform: uppercase; margin-top: 8px;
+}
+.t4-login .app-sub-mr {
+  font-size: 14px; color: rgba(255,179,71,0.5); margin-top: 4px;
+}
+.t4-login .form { flex: 1; }
+.t4-login .input-group { margin-bottom: 16px; }
+.t4-login .input-label {
+  font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.t4-login .input-field {
+  width: 100%; padding: 16px 18px; border-radius: 14px;
+  background: rgba(255,153,0,0.04); border: 1px solid rgba(255,153,0,0.12);
+  color: #fff; font-size: 15px; font-family: 'Inter', sans-serif;
+}
+.t4-login .input-field::placeholder { color: rgba(255,255,255,0.15); }
+.t4-login .forgot {
+  text-align: right; font-size: 12px; color: rgba(255,153,0,0.5);
+  margin-top: 8px; margin-bottom: 32px;
+}
+.t4-login .btn-primary {
+  width: 100%; padding: 18px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #FF9900, #FF6B00);
+  color: #1A0A00; font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 32px rgba(255,153,0,0.25);
+}
+.t4-login .bottom-text {
+  text-align: center; font-size: 13px; color: rgba(255,255,255,0.25);
+  margin-top: auto; padding-bottom: 20px;
+}
+.t4-login .bottom-text a { color: #FF9900; text-decoration: none; font-weight: 600; }
+
+/* T4 Residents */
+.t4-residents { background: #1A0A00; }
+.t4-residents .header {
+  padding: 56px 20px 16px;
+  background: linear-gradient(180deg, rgba(255,153,0,0.04) 0%, transparent 100%);
+}
+.t4-residents .header-row { display: flex; align-items: center; justify-content: space-between; }
+.t4-residents .header h2 {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700;
+  background: linear-gradient(135deg, #FF9900, #FFB347);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.t4-residents .header .count { font-size: 11px; color: rgba(255,153,0,0.4); margin-top: 4px; letter-spacing: 1px; }
+.t4-residents .header .bell {
+  width: 40px; height: 40px; border-radius: 12px;
+  border: 1px solid rgba(255,153,0,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.t4-residents .search {
+  margin: 12px 20px 8px; padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,153,0,0.03); border: 1px solid rgba(255,153,0,0.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.t4-residents .search span { color: rgba(255,255,255,0.2); font-size: 14px; }
+.t4-residents .wings { display: flex; gap: 6px; padding: 12px 20px; }
+.t4-residents .wing-chip {
+  padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  background: rgba(255,153,0,0.04); border: 1px solid rgba(255,153,0,0.08);
+  color: rgba(255,255,255,0.35);
+}
+.t4-residents .wing-chip.active {
+  background: linear-gradient(135deg, rgba(255,153,0,0.2), rgba(255,107,0,0.1));
+  border-color: rgba(255,153,0,0.3); color: #FF9900;
+}
+.t4-residents .list { padding: 8px 20px; }
+.t4-residents .resident-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: rgba(255,153,0,0.02); border: 1px solid rgba(255,153,0,0.06);
+  border-radius: 16px; margin-bottom: 10px;
+}
+.t4-residents .avatar {
+  width: 46px; height: 46px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
+  color: #1A0A00;
+}
+.t4-residents .avatar.g1 { background: linear-gradient(135deg, #FF9900, #FFB347); }
+.t4-residents .avatar.g2 { background: linear-gradient(135deg, #FF6B00, #FF9900); }
+.t4-residents .avatar.g3 { background: linear-gradient(135deg, #FFB347, #FF9900); }
+.t4-residents .info { flex: 1; }
+.t4-residents .info .name { font-size: 14px; font-weight: 600; color: #fff; }
+.t4-residents .info .meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+.t4-residents .call-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  border: 1px solid rgba(255,153,0,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+
+/* ===== THEME 5: MINIMAL FROST (LIGHT) ===== */
+.t5-login {
+  background: #FFFFFF;
+}
+.t5-login .accent-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #7C3AED, #EC4899, #F97316);
+}
+.t5-login .content { position: relative; padding: 60px 28px 28px; height: 100%; display: flex; flex-direction: column; }
+.t5-login .logo-area { text-align: center; margin-bottom: 56px; margin-top: 50px; }
+.t5-login .logo-box {
+  width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 18px;
+  background: #0F172A; display: flex; align-items: center; justify-content: center;
+}
+.t5-login .logo-box span { font-size: 28px; }
+.t5-login .app-name {
+  font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px;
+}
+.t5-login .app-sub {
+  font-size: 13px; color: #94A3B8; margin-top: 4px;
+}
+.t5-login .form { flex: 1; }
+.t5-login .input-group { margin-bottom: 16px; }
+.t5-login .input-label {
+  font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 600;
+}
+.t5-login .input-field {
+  width: 100%; padding: 16px 18px; border-radius: 12px;
+  background: #F8FAFC; border: 1.5px solid #E2E8F0;
+  color: #0F172A; font-size: 15px; font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s;
+}
+.t5-login .input-field::placeholder { color: #CBD5E1; }
+.t5-login .input-field:focus { border-color: #7C3AED; outline: none; }
+.t5-login .forgot {
+  text-align: right; font-size: 12px; color: #7C3AED; font-weight: 600;
+  margin-top: 6px; margin-bottom: 28px;
+}
+.t5-login .btn-primary {
+  width: 100%; padding: 18px; border-radius: 14px; border: none;
+  background: #0F172A; color: #fff; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+.t5-login .btn-sub {
+  font-size: 11px; color: #94A3B8; text-align: center; margin-top: 8px;
+}
+.t5-login .bottom-text {
+  text-align: center; font-size: 13px; color: #94A3B8;
+  margin-top: auto; padding-bottom: 20px;
+}
+.t5-login .bottom-text a { color: #7C3AED; text-decoration: none; font-weight: 600; }
+
+/* T5 Residents */
+.t5-residents { background: #FFFFFF; }
+.t5-residents .accent-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #7C3AED, #EC4899, #F97316);
+}
+.t5-residents .header { padding: 56px 20px 16px; position: relative; }
+.t5-residents .header-row { display: flex; align-items: center; justify-content: space-between; }
+.t5-residents .header h2 { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+.t5-residents .header .count { font-size: 12px; color: #94A3B8; margin-top: 4px; }
+.t5-residents .header .bell {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: #F1F5F9; display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.t5-residents .search {
+  margin: 8px 20px; padding: 14px 16px; border-radius: 12px;
+  background: #F8FAFC; border: 1.5px solid #E2E8F0;
+  display: flex; align-items: center; gap: 10px;
+}
+.t5-residents .search span { color: #CBD5E1; font-size: 14px; }
+.t5-residents .wings { display: flex; gap: 6px; padding: 12px 20px; }
+.t5-residents .wing-chip {
+  padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: #F8FAFC; color: #64748B;
+}
+.t5-residents .wing-chip.active {
+  background: #0F172A; color: #fff;
+}
+.t5-residents .list { padding: 4px 20px; }
+.t5-residents .resident-card {
+  display: flex; align-items: center; gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid #F1F5F9;
+}
+.t5-residents .avatar {
+  width: 44px; height: 44px; border-radius: 12px; display: flex;
+  align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff;
+}
+.t5-residents .avatar.g1 { background: #7C3AED; }
+.t5-residents .avatar.g2 { background: #EC4899; }
+.t5-residents .avatar.g3 { background: #F97316; }
+.t5-residents .info { flex: 1; }
+.t5-residents .info .name { font-size: 14px; font-weight: 600; color: #0F172A; }
+.t5-residents .info .meta { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+.t5-residents .call-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #F1F5F9; display: flex;
+  align-items: center; justify-content: center; font-size: 15px;
+}
+
+@media (max-width: 860px) {
+  .screens { flex-direction: column; align-items: center; }
+  .phone { width: 340px; height: 736px; }
+}
+</style>
+</head>
+<body>
+
+<div class="theme-selector">
+  <h1>Choose a Theme</h1>
+  <div class="theme-tabs">
+    <button class="theme-tab active" onclick="showTheme(1)">Royal Gold</button>
+    <button class="theme-tab" onclick="showTheme(2)">Ocean Blue</button>
+    <button class="theme-tab" onclick="showTheme(3)">Fresh Emerald</button>
+    <button class="theme-tab" onclick="showTheme(4)">Saffron Elegance</button>
+    <button class="theme-tab" onclick="showTheme(5)">Minimal Frost</button>
+  </div>
+</div>
+
+<div class="themes-container">
+
+<!-- THEME 1: ROYAL GOLD -->
+<div class="theme-section active" id="theme1">
+  <div class="theme-label">
+    <h2>Royal Gold</h2>
+    <p>Dark luxury with gold accents — premium society feel</p>
+  </div>
+  <div class="screens">
+    <div class="screen-wrapper">
+      <div class="label">Login</div>
+      <div class="phone t1-login">
+        <div class="top-glow"></div>
+        <div class="content">
+          <div class="logo-area">
+            <div class="logo-ring"><span>🙏</span></div>
+            <div class="app-name">Sainath Society</div>
+            <div class="app-sub">सोसायटी मित्र</div>
+          </div>
+          <div class="form">
+            <div class="input-group">
+              <div class="input-label">Email</div>
+              <input class="input-field" placeholder="Enter your email" />
+            </div>
+            <div class="input-group">
+              <div class="input-label">Password</div>
+              <input class="input-field" type="password" placeholder="Enter password" />
+            </div>
+            <div class="forgot">Forgot password?</div>
+            <button class="btn-primary">Sign In</button>
+          </div>
+          <div class="bottom-text">Don't have an account? <a>Register here</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-wrapper">
+      <div class="label">Residents</div>
+      <div class="phone t1-residents">
+        <div class="header">
+          <div class="header-row">
+            <div>
+              <h2>Residents</h2>
+              <div class="count">87 MEMBERS</div>
+            </div>
+            <div class="bell">🔔</div>
+          </div>
+        </div>
+        <div class="search"><span>🔍</span><span>Search by name or flat...</span></div>
+        <div class="wings">
+          <div class="wing-chip active">All</div>
+          <div class="wing-chip">A</div>
+          <div class="wing-chip">B</div>
+          <div class="wing-chip">C</div>
+          <div class="wing-chip">D</div>
+          <div class="wing-chip">E</div>
+          <div class="wing-chip">E1</div>
+          <div class="wing-chip">F</div>
+        </div>
+        <div class="list">
+          <div class="resident-card"><div class="avatar g1">GP</div><div class="info"><div class="name">Ganesh Patil</div><div class="meta">A-101 • Admin • Chairman</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">SJ</div><div class="info"><div class="name">Sanjay Jadhav</div><div class="meta">A-102 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">PK</div><div class="info"><div class="name">Priya Kulkarni</div><div class="meta">A-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">RD</div><div class="info"><div class="name">Rajesh Deshmukh</div><div class="meta">B-101 • Owner • Treasurer</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">AM</div><div class="info"><div class="name">Anita More</div><div class="meta">B-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">VN</div><div class="info"><div class="name">Vikram Naik</div><div class="meta">C-101 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">MT</div><div class="info"><div class="name">Meena Thakur</div><div class="meta">C-201 • Owner</div></div><div class="call-btn">📞</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME 2: OCEAN BLUE -->
+<div class="theme-section" id="theme2">
+  <div class="theme-label">
+    <h2>Ocean Blue</h2>
+    <p>Deep navy with electric blue gradients — modern tech feel</p>
+  </div>
+  <div class="screens">
+    <div class="screen-wrapper">
+      <div class="label">Login</div>
+      <div class="phone t2-login">
+        <div class="top-glow"></div><div class="bottom-glow"></div>
+        <div class="content">
+          <div class="logo-area">
+            <div class="logo-icon"><span>🏛️</span></div>
+            <div class="app-name">Sainath Society</div>
+            <div class="app-sub">सोसायटी मित्र</div>
+          </div>
+          <div class="form">
+            <div class="input-group"><div class="input-label">Email</div><input class="input-field" placeholder="Enter your email" /></div>
+            <div class="input-group"><div class="input-label">Password</div><input class="input-field" type="password" placeholder="Enter password" /></div>
+            <div class="forgot">Forgot password?</div>
+            <button class="btn-primary">Sign In</button>
+          </div>
+          <div class="bottom-text">Don't have an account? <a>Register here</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-wrapper">
+      <div class="label">Residents</div>
+      <div class="phone t2-residents">
+        <div class="header">
+          <div class="header-row"><div><h2>Residents</h2><div class="count">87 members</div></div><div class="bell">🔔</div></div>
+        </div>
+        <div class="search"><span>🔍</span><span>Search by name or flat...</span></div>
+        <div class="wings">
+          <div class="wing-chip active">All</div><div class="wing-chip">A</div><div class="wing-chip">B</div><div class="wing-chip">C</div><div class="wing-chip">D</div><div class="wing-chip">E</div><div class="wing-chip">E1</div><div class="wing-chip">F</div>
+        </div>
+        <div class="list">
+          <div class="resident-card"><div class="avatar g1">GP</div><div class="info"><div class="name">Ganesh Patil</div><div class="meta">A-101 • Admin • Chairman</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">SJ</div><div class="info"><div class="name">Sanjay Jadhav</div><div class="meta">A-102 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">PK</div><div class="info"><div class="name">Priya Kulkarni</div><div class="meta">A-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">RD</div><div class="info"><div class="name">Rajesh Deshmukh</div><div class="meta">B-101 • Owner • Treasurer</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">AM</div><div class="info"><div class="name">Anita More</div><div class="meta">B-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">VN</div><div class="info"><div class="name">Vikram Naik</div><div class="meta">C-101 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">MT</div><div class="info"><div class="name">Meena Thakur</div><div class="meta">C-201 • Owner</div></div><div class="call-btn">📞</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME 3: FRESH EMERALD -->
+<div class="theme-section" id="theme3">
+  <div class="theme-label">
+    <h2>Fresh Emerald</h2>
+    <p>Clean light theme with vibrant green — trustworthy & fresh</p>
+  </div>
+  <div class="screens">
+    <div class="screen-wrapper">
+      <div class="label">Login</div>
+      <div class="phone t3-login">
+        <div class="top-accent"></div>
+        <div class="content">
+          <div class="logo-area">
+            <div class="logo-circle"><span>🙏</span></div>
+            <div class="app-name">Sainath Society</div>
+            <div class="app-sub">Society Mitra</div>
+          </div>
+          <div class="form-card">
+            <h3>Welcome back</h3>
+            <div class="sub">Sign in to your account</div>
+            <div class="input-group"><div class="input-label">Email</div><input class="input-field" placeholder="Enter your email" /></div>
+            <div class="input-group"><div class="input-label">Password</div><input class="input-field" type="password" placeholder="Enter password" /></div>
+            <div class="forgot">Forgot password?</div>
+            <button class="btn-primary">Sign In</button>
+          </div>
+          <div class="bottom-text">Don't have an account? <a>Register here</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-wrapper">
+      <div class="label">Residents</div>
+      <div class="phone t3-residents">
+        <div class="header">
+          <div class="header-row"><div><h2>Residents</h2><div class="count">87 members</div></div><div class="bell">🔔</div></div>
+        </div>
+        <div class="search"><span>🔍</span><span>Search by name or flat...</span></div>
+        <div class="wings">
+          <div class="wing-chip active">All</div><div class="wing-chip">A</div><div class="wing-chip">B</div><div class="wing-chip">C</div><div class="wing-chip">D</div><div class="wing-chip">E</div><div class="wing-chip">E1</div><div class="wing-chip">F</div>
+        </div>
+        <div class="list">
+          <div class="resident-card"><div class="avatar g1">GP</div><div class="info"><div class="name">Ganesh Patil</div><div class="meta">A-101 • Admin • Chairman</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">SJ</div><div class="info"><div class="name">Sanjay Jadhav</div><div class="meta">A-102 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">PK</div><div class="info"><div class="name">Priya Kulkarni</div><div class="meta">A-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">RD</div><div class="info"><div class="name">Rajesh Deshmukh</div><div class="meta">B-101 • Owner • Treasurer</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">AM</div><div class="info"><div class="name">Anita More</div><div class="meta">B-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">VN</div><div class="info"><div class="name">Vikram Naik</div><div class="meta">C-101 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">MT</div><div class="info"><div class="name">Meena Thakur</div><div class="meta">C-201 • Owner</div></div><div class="call-btn">📞</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME 4: SAFFRON ELEGANCE -->
+<div class="theme-section" id="theme4">
+  <div class="theme-label">
+    <h2>Saffron Elegance</h2>
+    <p>Deep warmth with saffron accents — cultural & spiritual</p>
+  </div>
+  <div class="screens">
+    <div class="screen-wrapper">
+      <div class="label">Login</div>
+      <div class="phone t4-login">
+        <div class="top-glow"></div>
+        <div class="content">
+          <div class="logo-area">
+            <div class="om-symbol">🙏</div>
+            <div class="app-name">Sainath Society</div>
+            <div class="app-sub">Society Mitra</div>
+            <div class="app-sub-mr">सोसायटी मित्र</div>
+          </div>
+          <div class="form">
+            <div class="input-group"><div class="input-label">Email</div><input class="input-field" placeholder="Enter your email" /></div>
+            <div class="input-group"><div class="input-label">Password</div><input class="input-field" type="password" placeholder="Enter password" /></div>
+            <div class="forgot">Forgot password?</div>
+            <button class="btn-primary">Sign In</button>
+          </div>
+          <div class="bottom-text">Don't have an account? <a>Register here</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-wrapper">
+      <div class="label">Residents</div>
+      <div class="phone t4-residents">
+        <div class="header">
+          <div class="header-row"><div><h2>Residents</h2><div class="count">87 MEMBERS</div></div><div class="bell">🔔</div></div>
+        </div>
+        <div class="search"><span>🔍</span><span>Search by name or flat...</span></div>
+        <div class="wings">
+          <div class="wing-chip active">All</div><div class="wing-chip">A</div><div class="wing-chip">B</div><div class="wing-chip">C</div><div class="wing-chip">D</div><div class="wing-chip">E</div><div class="wing-chip">E1</div><div class="wing-chip">F</div>
+        </div>
+        <div class="list">
+          <div class="resident-card"><div class="avatar g1">GP</div><div class="info"><div class="name">Ganesh Patil</div><div class="meta">A-101 • Admin • Chairman</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">SJ</div><div class="info"><div class="name">Sanjay Jadhav</div><div class="meta">A-102 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">PK</div><div class="info"><div class="name">Priya Kulkarni</div><div class="meta">A-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">RD</div><div class="info"><div class="name">Rajesh Deshmukh</div><div class="meta">B-101 • Owner • Treasurer</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">AM</div><div class="info"><div class="name">Anita More</div><div class="meta">B-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">VN</div><div class="info"><div class="name">Vikram Naik</div><div class="meta">C-101 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">MT</div><div class="info"><div class="name">Meena Thakur</div><div class="meta">C-201 • Owner</div></div><div class="call-btn">📞</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME 5: MINIMAL FROST -->
+<div class="theme-section" id="theme5">
+  <div class="theme-label">
+    <h2>Minimal Frost</h2>
+    <p>Ultra-clean white with bold typography — Apple-inspired</p>
+  </div>
+  <div class="screens">
+    <div class="screen-wrapper">
+      <div class="label">Login</div>
+      <div class="phone t5-login">
+        <div class="accent-bar"></div>
+        <div class="content">
+          <div class="logo-area">
+            <div class="logo-box"><span>🏛️</span></div>
+            <div class="app-name">Sainath Society</div>
+            <div class="app-sub">सोसायटी मित्र</div>
+          </div>
+          <div class="form">
+            <div class="input-group"><div class="input-label">Email</div><input class="input-field" placeholder="you@email.com" /></div>
+            <div class="input-group"><div class="input-label">Password</div><input class="input-field" type="password" placeholder="Enter password" /></div>
+            <div class="forgot">Forgot password?</div>
+            <button class="btn-primary">Sign In</button>
+            <div class="btn-sub">Secure login with 256-bit encryption</div>
+          </div>
+          <div class="bottom-text">Don't have an account? <a>Register here</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-wrapper">
+      <div class="label">Residents</div>
+      <div class="phone t5-residents">
+        <div class="accent-bar"></div>
+        <div class="header">
+          <div class="header-row"><div><h2>Residents</h2><div class="count">87 members</div></div><div class="bell">🔔</div></div>
+        </div>
+        <div class="search"><span>🔍</span><span>Search by name or flat...</span></div>
+        <div class="wings">
+          <div class="wing-chip active">All</div><div class="wing-chip">A</div><div class="wing-chip">B</div><div class="wing-chip">C</div><div class="wing-chip">D</div><div class="wing-chip">E</div><div class="wing-chip">E1</div><div class="wing-chip">F</div>
+        </div>
+        <div class="list">
+          <div class="resident-card"><div class="avatar g1">GP</div><div class="info"><div class="name">Ganesh Patil</div><div class="meta">A-101 • Admin • Chairman</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">SJ</div><div class="info"><div class="name">Sanjay Jadhav</div><div class="meta">A-102 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">PK</div><div class="info"><div class="name">Priya Kulkarni</div><div class="meta">A-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">RD</div><div class="info"><div class="name">Rajesh Deshmukh</div><div class="meta">B-101 • Owner • Treasurer</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g2">AM</div><div class="info"><div class="name">Anita More</div><div class="meta">B-201 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g3">VN</div><div class="info"><div class="name">Vikram Naik</div><div class="meta">C-101 • Owner</div></div><div class="call-btn">📞</div></div>
+          <div class="resident-card"><div class="avatar g1">MT</div><div class="info"><div class="name">Meena Thakur</div><div class="meta">C-201 • Owner</div></div><div class="call-btn">📞</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTheme(n) {
+  document.querySelectorAll('.theme-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.theme-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('theme' + n).classList.add('active');
+  document.querySelectorAll('.theme-tab')[n - 1].classList.add('active');
+}
+</script>
+</body>
+</html>

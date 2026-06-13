@@ -60,7 +60,7 @@ class _FVS extends State<_FV> {
         return CustomScrollView(slivers: [
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('finance.title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-            Text(l.t('finance.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('finance.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]))),
           SliverToBoxAdapter(child: Container(
             margin: const EdgeInsets.all(16), padding: const EdgeInsets.all(20),
@@ -69,7 +69,7 @@ class _FVS extends State<_FV> {
               borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.primary.withAlpha(50))),
             child: Row(children: [
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(l.t('finance.myPendingDues'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, letterSpacing: 1)),
+                Text(l.t('finance.myPendingDues'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary, letterSpacing: 1)),
                 const SizedBox(height: 4),
                 Text('₹${state.pendingAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
@@ -85,7 +85,7 @@ class _FVS extends State<_FV> {
             onSelected: (i) { setState(() => _fi = i); context.read<_FC>().load(_fv[i]); },
           ))),
           if (state.bills.isEmpty) SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary))))),
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary))))),
           SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _BC(bill: state.bills[i]), childCount: state.bills.length)),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ]);
@@ -109,7 +109,7 @@ class _BC extends StatelessWidget {
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Maintenance - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         const SizedBox(height: 2),
-        Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+        Text('₹${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
       ])),
       StatusBadge.status(status),
     ]));

@@ -27,17 +27,17 @@ class _IV extends StatelessWidget {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('inventory.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('inventory.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('inventory.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
             final item = state.items[i];
             final name = item['name'] ?? item['itemName'] ?? '';
@@ -45,11 +45,11 @@ class _IV extends StatelessWidget {
             final condition = item['condition'] ?? '';
             return GlassCard(child: Row(children: [
               Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.borderLight.withAlpha(40), borderRadius: BorderRadius.circular(12)),
-                child: const Icon(Icons.inventory_2_rounded, size: 22, color: AppColors.textSecondary)),
+                child: Icon(Icons.inventory_2_rounded, size: 22, color: AppColors.textSecondary)),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                if (qty.isNotEmpty) Text('Qty: $qty', style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                if (qty.isNotEmpty) Text('Qty: $qty', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               ])),
               if (condition.isNotEmpty) StatusBadge(label: condition, color: condition == 'GOOD' ? AppColors.resolved : AppColors.medium),
             ]));

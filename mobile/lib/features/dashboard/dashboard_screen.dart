@@ -11,7 +11,6 @@ import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/language_toggle.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/shimmer_loading.dart';
-import '../../shared/widgets/stat_card.dart';
 import '../../shared/widgets/status_badge.dart';
 import 'dashboard_cubit.dart';
 
@@ -63,7 +62,7 @@ class _DashboardView extends StatelessWidget {
                           children: [
                             Text(
                               '${_greeting(l)},',
-                              style: const TextStyle(fontSize: 13, color: AppColors.textTertiary),
+                              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
                             ),
                             Text(
                               user?.name ?? '',
@@ -82,7 +81,7 @@ class _DashboardView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.borderLight),
                         ),
-                        child: const Icon(Icons.notifications_outlined,
+                        child: Icon(Icons.notifications_outlined,
                             size: 20, color: AppColors.primary),
                       ),
                     ],
@@ -108,7 +107,7 @@ class _DashboardView extends StatelessWidget {
                         ),
                         child: Text(
                           '${l.t('common.admin')} / ${user!.flatNumber}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.secondary,
@@ -141,7 +140,7 @@ class _DashboardView extends StatelessWidget {
                             children: [
                               const Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
                               const SizedBox(height: 12),
-                              Text(l.t('common.error'), style: const TextStyle(color: AppColors.textSecondary)),
+                              Text(l.t('common.error'), style: TextStyle(color: AppColors.textSecondary)),
                               const SizedBox(height: 12),
                               TextButton(
                                 onPressed: () => context.read<DashboardCubit>().load(),
@@ -157,46 +156,6 @@ class _DashboardView extends StatelessWidget {
                   final data = (state as DashboardLoaded).data;
                   return SliverList(
                     delegate: SliverChildListDelegate([
-                      // Stat cards
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 1.3,
-                          children: [
-                            StatCard(
-                              icon: Icons.people_rounded,
-                              label: l.t('dashboard.totalMembers'),
-                              value: '${data.memberCount}',
-                              iconColor: AppColors.open,
-                            ),
-                            StatCard(
-                              icon: Icons.apartment_rounded,
-                              label: l.t('dashboard.totalFlats'),
-                              value: '${data.flatCount}',
-                              iconColor: AppColors.primary,
-                            ),
-                            StatCard(
-                              icon: Icons.warning_amber_rounded,
-                              label: l.t('dashboard.activeGrievances'),
-                              value: '${data.grievanceCount}',
-                              iconColor: AppColors.high,
-                            ),
-                            StatCard(
-                              icon: Icons.currency_rupee_rounded,
-                              label: l.t('dashboard.pendingDues'),
-                              value: '${(data.pendingAmount / 1000).toStringAsFixed(0)}K',
-                              iconColor: AppColors.resolved,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
                       // Quick actions
                       SectionHeader(title: l.t('common.quickActions')),
                       _QuickActionsGrid(),
@@ -238,7 +197,7 @@ class _DashboardView extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
       ),
     );
   }
@@ -295,7 +254,7 @@ class _QuickActionsGrid extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -348,7 +307,7 @@ class _NoticeItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   _formatDate(date),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textTertiary),
+                  style: TextStyle(fontSize: 11, color: AppColors.textTertiary),
                 ),
               ],
             ),
@@ -398,7 +357,7 @@ class _GrievanceItem extends StatelessWidget {
                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(ticket,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textTertiary, fontFamily: 'monospace')),
+                    style: TextStyle(fontSize: 11, color: AppColors.textTertiary, fontFamily: 'monospace')),
               ],
             ),
           ),

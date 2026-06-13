@@ -46,6 +46,9 @@ const Map<String, String> stringsEn = {
   'common.theme': 'Theme',
   'common.light': 'Light',
   'common.dark': 'Dark',
+  'theme.royalGold': 'Royal Gold',
+  'theme.oceanBlue': 'Ocean Blue',
+  'theme.freshEmerald': 'Emerald',
 
   // Profile
   'profile.name': 'Full Name',

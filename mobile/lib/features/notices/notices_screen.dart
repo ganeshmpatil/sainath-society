@@ -57,7 +57,7 @@ class _NoticesViewState extends State<_NoticesView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(l.t('notices.title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-                      Text(l.t('notices.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                      Text(l.t('notices.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                     ],
                   ),
                 ),
@@ -82,7 +82,7 @@ class _NoticesViewState extends State<_NoticesView> {
                   if (state.items.isEmpty) {
                     return SliverToBoxAdapter(
                       child: Padding(padding: const EdgeInsets.all(40),
-                          child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))),
+                          child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))),
                     );
                   }
                   return SliverList(
@@ -167,12 +167,12 @@ class _NoticeCard extends StatelessWidget {
         Row(children: [
           StatusBadge(label: cat, color: isImportant ? AppColors.urgent : AppColors.secondary),
           const Spacer(),
-          Text(_fmtDate(date), style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+          Text(_fmtDate(date), style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
         ]),
         const SizedBox(height: 8),
         Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         if (body.isNotEmpty) ...[const SizedBox(height: 4),
-          Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))],
+          Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: AppColors.textSecondary))],
       ]),
     );
   }

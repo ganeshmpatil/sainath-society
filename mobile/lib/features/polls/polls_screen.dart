@@ -26,17 +26,17 @@ class _PV extends StatelessWidget {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('polls.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('polls.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('polls.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _PC(poll: state.items[i], isMr: isMr), childCount: state.items.length));
         }),
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -66,19 +66,19 @@ class _PC extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [StatusBadge.status(status), const Spacer(),
           Text('${isActive ? l.t('polls.endsOn') : l.t('polls.endedOn')}: ${_sd(ea)}',
-              style: const TextStyle(fontSize: 11, color: AppColors.textTertiary))]),
+              style: TextStyle(fontSize: 11, color: AppColors.textTertiary))]),
         const SizedBox(height: 12),
         Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-        if (desc.isNotEmpty) ...[const SizedBox(height: 6), Text(desc, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))],
+        if (desc.isNotEmpty) ...[const SizedBox(height: 6), Text(desc, style: TextStyle(fontSize: 12, color: AppColors.textSecondary))],
         if (options.isNotEmpty) ...[const SizedBox(height: 16), ...options.map((o) => _ob(o, tv))],
         if (tv > 0) ...[const SizedBox(height: 14),
-          Container(padding: const EdgeInsets.only(top: 12), decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.borderLight))),
+          Container(padding: EdgeInsets.only(top: 12), decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.borderLight))),
             child: Row(children: [
-              Text('$tv ${l.t('polls.membersVoted')}', style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+              Text('$tv ${l.t('polls.membersVoted')}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               const Spacer(),
               if (isActive) Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(border: Border.all(color: AppColors.primary.withAlpha(100)), borderRadius: BorderRadius.circular(10)),
-                child: Text(l.t('polls.castVote'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.primary))),
+                child: Text(l.t('polls.castVote'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.primary))),
             ])),
         ],
       ]),

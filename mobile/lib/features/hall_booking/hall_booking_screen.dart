@@ -27,17 +27,17 @@ class _HV extends StatelessWidget {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('hallBooking.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            Text(l.t('hallBooking.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(l.t('hallBooking.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]),
         ]))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
             final b = state.items[i];
             final purpose = b['purpose'] ?? '';
@@ -45,11 +45,11 @@ class _HV extends StatelessWidget {
             final date = b['bookingDate'] ?? '';
             return GlassCard(child: Row(children: [
               Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.primary.withAlpha(30), borderRadius: BorderRadius.circular(12)),
-                child: const Icon(Icons.event_available_rounded, size: 22, color: AppColors.primary)),
+                child: Icon(Icons.event_available_rounded, size: 22, color: AppColors.primary)),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(purpose.isEmpty ? 'Hall Booking' : purpose, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(date, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                Text(date, style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               ])),
               StatusBadge.status(status),
             ]));

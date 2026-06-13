@@ -57,7 +57,7 @@ class _GrievancesView extends StatelessWidget {
                       Text(l.t('grievances.title'),
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
                       Text(l.t('grievances.subtitle'),
-                          style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                          style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                     ],
                   ),
                 ),
@@ -91,7 +91,7 @@ class _GrievancesView extends StatelessWidget {
                         padding: const EdgeInsets.all(40),
                         child: Center(
                           child: Text(l.t('common.noRecords'),
-                              style: const TextStyle(color: AppColors.textTertiary)),
+                              style: TextStyle(color: AppColors.textTertiary)),
                         ),
                       ),
                     );
@@ -247,7 +247,7 @@ class _GrievancesView extends StatelessWidget {
 
   static Widget _label(String text) => Text(
     text,
-    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
   );
 }
 
@@ -278,7 +278,7 @@ class _GrievanceCard extends StatelessWidget {
           Row(
             children: [
               Text(ticket,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textTertiary, fontFamily: 'monospace')),
+                  style: TextStyle(fontSize: 11, color: AppColors.textTertiary, fontFamily: 'monospace')),
               const SizedBox(width: 6),
               StatusBadge.priority(priority),
               const SizedBox(width: 6),
@@ -292,13 +292,13 @@ class _GrievanceCard extends StatelessWidget {
             Text(desc,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           ],
           const SizedBox(height: 10),
           Row(
             children: [
               Text(_formatDate(date),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                  style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               const Spacer(),
               Text('→ Details',
                   style: TextStyle(fontSize: 11, color: AppColors.primary)),

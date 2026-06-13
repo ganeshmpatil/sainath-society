@@ -33,19 +33,19 @@ class _RVS extends State<_RV> {
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+              child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.t('residents.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             BlocBuilder<ListCubit, ListData>(builder: (_, s) => Text('${s.count} ${l.t('residents.members')}',
-                style: const TextStyle(fontSize: 12, color: AppColors.textTertiary))),
+                style: TextStyle(fontSize: 12, color: AppColors.textTertiary))),
           ])),
         ]))),
         SliverToBoxAdapter(child: Container(
           margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
           child: TextField(decoration: InputDecoration(hintText: l.t('residents.searchHint'),
-            prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
+            prefixIcon: Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
             border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none)),
         )),
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(bottom: 12), child: FilterChipsRow(
@@ -60,7 +60,7 @@ class _RVS extends State<_RV> {
               return wing == w[_fi];
             }).toList(); }
           if (items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-              child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+              child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _RC(r: items[i]), childCount: items.length));
         }),
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -87,7 +87,7 @@ class _RC extends StatelessWidget {
         Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         const SizedBox(height: 2),
         Text([flat, role == 'ADMIN' ? 'Admin' : 'Owner', if (desg.isNotEmpty) desg].join(' • '),
-            style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+            style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
       ])),
       GestureDetector(
         onTap: () {
@@ -102,7 +102,7 @@ class _RC extends StatelessWidget {
             color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(Icons.phone_outlined, size: 18, color: AppColors.primary),
+          child: Icon(Icons.phone_outlined, size: 18, color: AppColors.primary),
         ),
       ),
     ]));

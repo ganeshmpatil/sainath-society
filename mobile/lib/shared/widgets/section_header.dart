@@ -23,7 +23,7 @@ class SectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -36,7 +36,7 @@ class SectionHeader extends StatelessWidget {
               onTap: onSeeAll,
               child: Text(
                 '${l.t('common.seeAll')} →',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: AppColors.primary,

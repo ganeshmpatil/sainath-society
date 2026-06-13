@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         context.go('/login');
                       }
                     },
-                    child: const Icon(Icons.arrow_back_ios_rounded,
+                    child: Icon(Icons.arrow_back_ios_rounded,
                         color: AppColors.textSecondary, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 28),
               if (_step == 0) ...[
-                const Text('Enter your flat number to verify your membership',
+                Text('Enter your flat number to verify your membership',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
                 _label('Wing / Tower'),
@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextField(
                   controller: _mobile,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: '+91 XXXXX XXXXX',
                     prefixIcon: Icon(Icons.phone_outlined, size: 20, color: AppColors.textTertiary),
                   ),
@@ -111,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ],
               if (_step == 1) ...[
-                const Text('Enter the OTP sent to your registered mobile',
+                Text('Enter the OTP sent to your registered mobile',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
                 _label('OTP'),
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ],
               if (_step == 2) ...[
-                const Text('Set your password to complete registration',
+                Text('Set your password to complete registration',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
                 _label(l.t('auth.email')),
@@ -159,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: const Text(
+                child: Text(
                   'Your flat must be registered in the society database. Contact the secretary if you\'re not listed.',
                   style: TextStyle(fontSize: 12, color: AppColors.textTertiary, height: 1.6),
                 ),
@@ -169,12 +169,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(l.t('auth.haveAccount'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                      style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () => context.go('/login'),
                     child: Text(l.t('auth.loginHere'),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
                   ),
                 ],
               ),
@@ -188,6 +188,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _label(String text) => Align(
         alignment: Alignment.centerLeft,
         child: Text(text,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
       );
 }

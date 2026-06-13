@@ -115,7 +115,7 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
                       children: [
                         Text(ticket, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                         Text(l.t('grievances.detail'),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                            style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                       ],
                     ),
                   ],
@@ -146,7 +146,7 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
                   children: [
                     Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Text(desc, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.6)),
+                    Text(desc, style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.6)),
                   ],
                 ),
               ),
@@ -179,7 +179,7 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                           Text(
                             '${l.t('grievances.raisedBy')} • ${_formatDate(date)}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textTertiary),
+                            style: TextStyle(fontSize: 11, color: AppColors.textTertiary),
                           ),
                         ],
                       ),
@@ -312,7 +312,7 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
                   color: completed ? AppColors.textPrimary : AppColors.textTertiary,
                 )),
             if (sub.isNotEmpty)
-              Text(sub, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+              Text(sub, style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
           ],
         ),
       ],

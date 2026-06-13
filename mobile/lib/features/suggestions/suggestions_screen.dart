@@ -29,17 +29,17 @@ class _SV extends StatelessWidget {
         child: CustomScrollView(slivers: [
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Row(children: [
             GestureDetector(onTap: () => context.pop(),
-                child: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
+                child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
             const SizedBox(width: 12),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(l.t('suggestions.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              Text(l.t('suggestions.subtitle'), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+              Text(l.t('suggestions.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
             ]),
           ]))),
           BlocBuilder<ListCubit, ListData>(builder: (context, state) {
             if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
             if (state.items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
-                child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
+                child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
             return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
               final s = state.items[i];
               final title = (isMr ? s['titleMr'] : null) ?? s['title'] ?? '';
@@ -51,7 +51,7 @@ class _SV extends StatelessWidget {
                   Expanded(child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
                 ]),
                 if (body.isNotEmpty) ...[const SizedBox(height: 6),
-                  Text(body, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))],
+                  Text(body, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: AppColors.textSecondary))],
               ]));
             }, childCount: state.items.length));
           }),

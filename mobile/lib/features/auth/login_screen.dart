@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Text(
                     l.t('auth.loginSubtitle'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textTertiary,
                     ),
@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       l.t('auth.email'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     style: const TextStyle(fontSize: 14),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'chairman@sainath.com',
                       prefixIcon:
                           Icon(Icons.email_outlined, size: 20, color: AppColors.textTertiary),
@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       l.t('auth.password'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
                       hintText: '••••••••',
-                      prefixIcon: const Icon(Icons.lock_outlined,
+                      prefixIcon: Icon(Icons.lock_outlined,
                           size: 20, color: AppColors.textTertiary),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         l.t('auth.noAccount'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textTertiary,
                         ),
@@ -195,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () => context.go('/register'),
                         child: Text(
                           l.t('auth.registerHere'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
