@@ -231,6 +231,20 @@ const Map<String, String> stringsMr = {
   'meetings.committee': 'समिती',
   'meetings.emergency': 'आणीबाणी',
   'meetings.review': 'आढावा',
+  'meetings.detail': 'सभा तपशील',
+  'meetings.minutesOfMeeting': 'सभेचे इतिवृत्त',
+  'meetings.noMinutes': 'इतिवृत्त अद्याप नोंदवलेले नाही',
+  'meetings.editMinutes': 'इतिवृत्त संपादित करा',
+  'meetings.saveMinutes': 'इतिवृत्त जतन करा',
+  'meetings.lockMinutes': 'इतिवृत्त लॉक करा',
+  'meetings.minutesLocked': 'इतिवृत्त लॉक केले',
+  'meetings.minutesPlaceholder': 'सभेचे इतिवृत्त टाका...',
+  'meetings.actionItems': 'कृती बाबी',
+  'meetings.noActionItems': 'अद्याप कोणत्याही कृती बाबी नाहीत',
+  'meetings.addActionItem': 'कृती बाब जोडा',
+  'meetings.assignee': 'नियुक्त व्यक्ती',
+  'meetings.selectMember': 'सदस्य निवडा',
+  'meetings.attendees': 'उपस्थित सदस्य',
 
   // Hall Booking
   'hallBooking.title': 'हॉल बुकिंग',
@@ -337,6 +351,11 @@ const Map<String, String> stringsMr = {
   'register.verifyOtp': 'OTP पडताळा',
   'register.setPassword': 'नोंदणी पूर्ण करण्यासाठी पासवर्ड सेट करा',
   'register.flatNotListed': 'तुमचा फ्लॅट सोसायटी डेटाबेसमध्ये नोंदणीकृत असणे आवश्यक आहे. नोंदणी नसल्यास सचिवांशी संपर्क साधा.',
+
+  // Notifications
+  'notifications.title': 'सूचना',
+  'notifications.subtitle': 'तुमचे अलर्ट आणि अपडेट्स',
+  'notifications.empty': 'अद्याप कोणत्याही सूचना नाहीत',
 
   // Misc UI
   'notices.tapToRead': 'वाचण्यासाठी टॅप करा',

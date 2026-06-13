@@ -135,3 +135,28 @@ func (h *NotificationHandler) ListInbox(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, rows)
 }
+
+// MarkRead marks a notification as read.
+func (h *NotificationHandler) MarkRead(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid id", Code: "INVALID_ID"})
+		return
+	}
+	if err := h.repo.MarkRead(id); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "failed to mark read", Code: "INTERNAL_ERROR"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "marked as read"})
+}
+
+// UnreadCount returns the count of unread notifications.
+func (h *NotificationHandler) UnreadCount(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	count, err := h.repo.UnreadCount(actor.MemberID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "failed to count", Code: "INTERNAL_ERROR"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}

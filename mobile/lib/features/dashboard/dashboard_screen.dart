@@ -13,6 +13,7 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/status_badge.dart';
 import '../../shared/utils/date_format.dart';
+import '../notifications/notification_badge.dart';
 import 'dashboard_cubit.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -74,17 +75,7 @@ class _DashboardView extends StatelessWidget {
                       ),
                       const LanguageToggle(),
                       const SizedBox(width: 10),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: Icon(Icons.notifications_outlined,
-                            size: 20, color: AppColors.primary),
-                      ),
+                      const NotificationBell(),
                     ],
                   ),
                 ),

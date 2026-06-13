@@ -7,14 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// PushSubscription stores a Web Push subscription for a member's browser.
-// A member may have multiple subscriptions (multiple devices / browsers).
+// PushSubscription stores a push subscription for a member's device.
+// Platform distinguishes web push (VAPID) from mobile push (FCM).
 type PushSubscription struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MemberID  uuid.UUID `gorm:"type:uuid;not null;index" json:"memberId"`
+	Platform  string    `gorm:"type:varchar(10);not null;default:'web'" json:"platform"` // "web" or "fcm"
 	Endpoint  string    `gorm:"type:text;not null;uniqueIndex" json:"endpoint"`
-	KeyP256dh string    `gorm:"type:varchar(200);not null" json:"keyP256dh"`
-	KeyAuth   string    `gorm:"type:varchar(100);not null" json:"keyAuth"`
+	KeyP256dh string    `gorm:"type:varchar(200)" json:"keyP256dh"`
+	KeyAuth   string    `gorm:"type:varchar(100)" json:"keyAuth"`
 	UserAgent string    `gorm:"type:varchar(300)" json:"userAgent,omitempty"`
 	IsActive  bool      `gorm:"default:true" json:"isActive"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`

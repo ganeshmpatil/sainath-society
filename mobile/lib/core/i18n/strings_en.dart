@@ -231,6 +231,20 @@ const Map<String, String> stringsEn = {
   'meetings.committee': 'Committee',
   'meetings.emergency': 'Emergency',
   'meetings.review': 'Review',
+  'meetings.detail': 'Meeting Details',
+  'meetings.minutesOfMeeting': 'Minutes of Meeting',
+  'meetings.noMinutes': 'Minutes not recorded yet',
+  'meetings.editMinutes': 'Edit Minutes',
+  'meetings.saveMinutes': 'Save Minutes',
+  'meetings.lockMinutes': 'Lock Minutes',
+  'meetings.minutesLocked': 'Minutes locked',
+  'meetings.minutesPlaceholder': 'Enter minutes of meeting...',
+  'meetings.actionItems': 'Action Items',
+  'meetings.noActionItems': 'No action items yet',
+  'meetings.addActionItem': 'Add Action Item',
+  'meetings.assignee': 'Assignee',
+  'meetings.selectMember': 'Select member',
+  'meetings.attendees': 'Attendees',
 
   // Hall Booking
   'hallBooking.title': 'Hall Booking',
@@ -337,6 +351,11 @@ const Map<String, String> stringsEn = {
   'register.verifyOtp': 'Verify OTP',
   'register.setPassword': 'Set your password to complete registration',
   'register.flatNotListed': 'Your flat must be registered in the society database. Contact the secretary if you\'re not listed.',
+
+  // Notifications
+  'notifications.title': 'Notifications',
+  'notifications.subtitle': 'Your alerts & updates',
+  'notifications.empty': 'No notifications yet',
 
   // Misc UI
   'notices.tapToRead': 'Tap to read',

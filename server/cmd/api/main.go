@@ -103,6 +103,19 @@ func main() {
 		log.Println("Web Push: disabled (set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to enable)")
 	}
 
+	// Wire FCM if service account is configured
+	if cfg.FCMServiceAccountJSON != "" {
+		fcmService, err := services.NewFCMService(domainRepos.PushSubscription, []byte(cfg.FCMServiceAccountJSON))
+		if err != nil {
+			log.Printf("FCM: failed to initialize: %v", err)
+		} else {
+			notifier.SetFCMService(fcmService)
+			log.Println("FCM: enabled (service account configured)")
+		}
+	} else {
+		log.Println("FCM: disabled (set FCM_SERVICE_ACCOUNT_JSON to enable)")
+	}
+
 	// Setup routes
 	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db, cfg.VAPIDPublicKey)
 

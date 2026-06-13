@@ -259,6 +259,8 @@ func SetupRoutes(
 		// Notifications — inbox + admin email broadcast.
 		notif := protected.Group("/notifications")
 		notif.GET("/inbox", notificationHandler.ListInbox)
+		notif.GET("/unread-count", notificationHandler.UnreadCount)
+		notif.POST("/:id/read", notificationHandler.MarkRead)
 		notif.POST("/send-email", notificationHandler.SendEmail)
 		notif.POST("/send-email-all", notificationHandler.SendEmailToAll)
 
@@ -274,6 +276,8 @@ func SetupRoutes(
 		push.GET("/vapid-key", pushHandler.VAPIDPublicKey)
 		push.POST("/subscribe", pushHandler.Subscribe)
 		push.POST("/unsubscribe", pushHandler.Unsubscribe)
+		push.POST("/register-device", pushHandler.RegisterDevice)
+		push.POST("/unregister-device", pushHandler.UnregisterDevice)
 
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")

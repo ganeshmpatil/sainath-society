@@ -45,6 +45,13 @@ func (r *PushSubscriptionRepository) ListForMember(memberID uuid.UUID) ([]models
 	return rows, err
 }
 
+// ListForMemberByPlatform returns active subscriptions filtered by platform.
+func (r *PushSubscriptionRepository) ListForMemberByPlatform(memberID uuid.UUID, platform string) ([]models.PushSubscription, error) {
+	var rows []models.PushSubscription
+	err := r.db.Where("member_id = ? AND is_active = ? AND platform = ?", memberID, true, platform).Find(&rows).Error
+	return rows, err
+}
+
 // ListForMembers returns active subscriptions for a list of member IDs (batch push).
 func (r *PushSubscriptionRepository) ListForMembers(memberIDs []uuid.UUID) ([]models.PushSubscription, error) {
 	var rows []models.PushSubscription
@@ -52,9 +59,23 @@ func (r *PushSubscriptionRepository) ListForMembers(memberIDs []uuid.UUID) ([]mo
 	return rows, err
 }
 
+// ListForMembersByPlatform returns active subscriptions for members filtered by platform.
+func (r *PushSubscriptionRepository) ListForMembersByPlatform(memberIDs []uuid.UUID, platform string) ([]models.PushSubscription, error) {
+	var rows []models.PushSubscription
+	err := r.db.Where("member_id IN ? AND is_active = ? AND platform = ?", memberIDs, true, platform).Find(&rows).Error
+	return rows, err
+}
+
 // ListAll returns all active subscriptions (for broadcast).
 func (r *PushSubscriptionRepository) ListAll() ([]models.PushSubscription, error) {
 	var rows []models.PushSubscription
 	err := r.db.Where("is_active = ?", true).Find(&rows).Error
+	return rows, err
+}
+
+// ListAllByPlatform returns all active subscriptions filtered by platform.
+func (r *PushSubscriptionRepository) ListAllByPlatform(platform string) ([]models.PushSubscription, error) {
+	var rows []models.PushSubscription
+	err := r.db.Where("is_active = ? AND platform = ?", true, platform).Find(&rows).Error
 	return rows, err
 }

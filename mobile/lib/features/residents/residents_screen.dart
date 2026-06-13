@@ -26,6 +26,7 @@ class _RV extends StatefulWidget {
 
 class _RVS extends State<_RV> {
   int _fi = 0;
+  String _search = '';
   @override Widget build(BuildContext context) {
     final l = AppLocalizations.of(context); context.watch<LocaleCubit>();
     return Scaffold(body: SafeArea(child: RefreshIndicator(
@@ -44,9 +45,11 @@ class _RVS extends State<_RV> {
         SliverToBoxAdapter(child: Container(
           margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
-          child: TextField(decoration: InputDecoration(hintText: l.t('residents.searchHint'),
-            prefixIcon: Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
-            border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none)),
+          child: TextField(
+            onChanged: (v) => setState(() => _search = v.toLowerCase()),
+            decoration: InputDecoration(hintText: l.t('residents.searchHint'),
+              prefixIcon: Icon(Icons.search_rounded, size: 20, color: AppColors.textTertiary),
+              border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none)),
         )),
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(bottom: 12), child: FilterChipsRow(
           labels: [l.t('residents.allWings'), 'A', 'B', 'C', 'D', 'E', 'E1', 'F'], selectedIndex: _fi,
@@ -59,6 +62,13 @@ class _RVS extends State<_RV> {
               final wing = r['flat']?['wing']?['name'] ?? '';
               return wing == w[_fi];
             }).toList(); }
+          if (_search.isNotEmpty) {
+            items = items.where((r) {
+              final name = (r['name'] ?? '').toString().toLowerCase();
+              final flat = (r['flat']?['flatNumber'] ?? '').toString().toLowerCase();
+              return name.contains(_search) || flat.contains(_search);
+            }).toList();
+          }
           if (items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
               child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _RC(r: items[i]), childCount: items.length));

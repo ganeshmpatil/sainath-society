@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_client.dart';
+import '../notifications/push_notification_service.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -25,6 +26,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final response = await api.get('/auth/me');
       final user = UserInfo.fromJson(response.data);
       emit(Authenticated(user: user, accessToken: token));
+      // Register FCM token after auth
+      PushNotificationService.instance.init();
     } catch (_) {
       await prefs.remove('access_token');
       api.setAccessToken(null);
@@ -48,6 +51,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await prefs.setString('access_token', token);
 
       emit(Authenticated(user: user, accessToken: token));
+      // Register FCM token after login
+      PushNotificationService.instance.init();
     } catch (e) {
       String message = 'Login failed';
       if (e is DioException && e.response?.data is Map) {
@@ -59,6 +64,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    // Unregister FCM token before logout
+    await PushNotificationService.instance.unregister();
     try {
       await api.post('/auth/logout');
     } catch (_) {}

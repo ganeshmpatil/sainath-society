@@ -73,3 +73,51 @@ func (h *PushHandler) Unsubscribe(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "unsubscribed"})
 }
+
+type registerDeviceReq struct {
+	Token     string `json:"token" binding:"required"`
+	Platform  string `json:"platform"` // "fcm" (default)
+	DeviceInfo string `json:"deviceInfo"`
+}
+
+// RegisterDevice registers an FCM token for mobile push notifications.
+func (h *PushHandler) RegisterDevice(c *gin.Context) {
+	var req registerDeviceReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	platform := req.Platform
+	if platform == "" {
+		platform = "fcm"
+	}
+	actor := middleware.GetActor(c)
+	sub := &models.PushSubscription{
+		MemberID:  actor.MemberID,
+		Platform:  platform,
+		Endpoint:  req.Token,
+		UserAgent: req.DeviceInfo,
+		IsActive:  true,
+	}
+	if err := h.repo.Upsert(sub); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "REGISTER_FAILED"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "device registered"})
+}
+
+// UnregisterDevice removes an FCM token.
+func (h *PushHandler) UnregisterDevice(c *gin.Context) {
+	var req struct {
+		Token string `json:"token" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	if err := h.repo.Delete(req.Token); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "UNREGISTER_FAILED"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "device unregistered"})
+}

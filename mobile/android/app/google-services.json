@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "72550194165",
+    "project_id": "sainath-society",
+    "storage_bucket": "sainath-society.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72550194165:android:89d61ff4798d67fbcb1ebc",
+        "android_client_info": {
+          "package_name": "com.sainathsociety.sainath_society"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbRp6BUrn5MozPbzwwg7c5N4fmNmKzvzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

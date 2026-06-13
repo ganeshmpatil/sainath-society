@@ -34,6 +34,9 @@ type Config struct {
 	VAPIDPrivateKey string
 	VAPIDEmail      string // mailto: contact for push providers
 
+	// FCM (Firebase Cloud Messaging)
+	FCMServiceAccountJSON string // raw JSON content of Firebase service account
+
 	// CORS
 	AllowedOrigins []string
 }
@@ -65,6 +68,9 @@ func Load() *Config {
 		VAPIDPublicKey:  getEnv("VAPID_PUBLIC_KEY", ""),
 		VAPIDPrivateKey: getEnv("VAPID_PRIVATE_KEY", ""),
 		VAPIDEmail:      getEnv("VAPID_EMAIL", "mailto:admin@sainath-society.com"),
+
+		// FCM
+		FCMServiceAccountJSON: getEnv("FCM_SERVICE_ACCOUNT_JSON", ""),
 
 		// CORS
 		AllowedOrigins: getOrigins(),

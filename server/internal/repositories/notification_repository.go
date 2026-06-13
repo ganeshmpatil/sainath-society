@@ -64,3 +64,22 @@ func (r *NotificationRepository) ListForRecipient(actor *ActorContext) ([]models
 		Order("created_at DESC").Limit(100).Find(&rows).Error
 	return rows, err
 }
+
+// MarkRead marks a notification as read.
+func (r *NotificationRepository) MarkRead(id uuid.UUID) error {
+	now := time.Now()
+	return r.db.Model(&models.Notification{}).Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"status":  models.NotifRead,
+			"read_at": now,
+		}).Error
+}
+
+// UnreadCount returns the number of unread notifications for a member.
+func (r *NotificationRepository) UnreadCount(memberID uuid.UUID) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Notification{}).
+		Where("recipient_id = ? AND status != ?", memberID, models.NotifRead).
+		Count(&count).Error
+	return count, err
+}

@@ -17,6 +17,7 @@ type Notifier struct {
 	notifRepo  *repositories.NotificationRepository
 	memberRepo *repositories.MemberRepository
 	push       *WebPushService // nil if VAPID not configured
+	fcm        *FCMService     // nil if FCM not configured
 }
 
 func NewNotifier(notifRepo *repositories.NotificationRepository, memberRepo *repositories.MemberRepository) *Notifier {
@@ -27,6 +28,11 @@ func NewNotifier(notifRepo *repositories.NotificationRepository, memberRepo *rep
 // (avoids circular dependency during bootstrap).
 func (n *Notifier) SetPushService(push *WebPushService) {
 	n.push = push
+}
+
+// SetFCMService attaches the FCM service for mobile push notifications.
+func (n *Notifier) SetFCMService(fcm *FCMService) {
+	n.fcm = fcm
 }
 
 // NotifyOne queues an email (+ WhatsApp) notification to a single member
@@ -58,6 +64,14 @@ func (n *Notifier) NotifyOne(recipientID uuid.UUID, subject, body, bodyMr, event
 			EventType:  eventType,
 			ResourceID: rid,
 		})
+	}
+	// FCM — immediate, non-blocking
+	if n.fcm != nil {
+		data := map[string]string{"eventType": eventType, "resourceType": resourceType}
+		if resourceID != nil {
+			data["resourceId"] = resourceID.String()
+		}
+		go n.fcm.SendToMember(recipientID, FCMMessage{Title: subject, Body: body, Data: data})
 	}
 }
 
@@ -97,6 +111,14 @@ func (n *Notifier) NotifyAllMembers(subject, body, bodyMr, eventType string, res
 			EventType:  eventType,
 			ResourceID: rid,
 		})
+	}
+	// FCM broadcast — immediate
+	if n.fcm != nil {
+		data := map[string]string{"eventType": eventType, "resourceType": resourceType}
+		if resourceID != nil {
+			data["resourceId"] = resourceID.String()
+		}
+		go n.fcm.Broadcast(FCMMessage{Title: subject, Body: body, Data: data})
 	}
 }
 
@@ -138,6 +160,14 @@ func (n *Notifier) NotifyAdmins(subject, body, bodyMr, eventType string, resourc
 			EventType:  eventType,
 			ResourceID: rid,
 		})
+	}
+	// FCM to admins
+	if n.fcm != nil && len(adminIDs) > 0 {
+		data := map[string]string{"eventType": eventType, "resourceType": resourceType}
+		if resourceID != nil {
+			data["resourceId"] = resourceID.String()
+		}
+		go n.fcm.SendToMembers(adminIDs, FCMMessage{Title: subject, Body: body, Data: data})
 	}
 }
 

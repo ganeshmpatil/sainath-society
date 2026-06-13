@@ -9,15 +9,15 @@ import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/bylaws/bylaws_screen.dart';
-import '../features/decisions/decisions_screen.dart';
 import '../features/finance/finance_screen.dart';
 import '../features/flat_details/flat_details_screen.dart';
 import '../features/grievances/grievances_screen.dart';
 import '../features/grievances/grievance_detail_screen.dart';
 import '../features/hall_booking/hall_booking_screen.dart';
-import '../features/inventory/inventory_screen.dart';
+import '../features/meetings/meeting_detail_screen.dart';
 import '../features/meetings/meetings_screen.dart';
 import '../features/member_documents/member_documents_screen.dart';
+import '../features/notifications/notifications_screen.dart';
 import '../features/more/more_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/move_in_out/move_in_out_screen.dart';
@@ -123,15 +123,25 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/flat-details', builder: (_, __) => const FlatDetailsScreen()),
       GoRoute(path: '/vehicles', builder: (_, __) => const VehiclesScreen()),
       GoRoute(path: '/polls', builder: (_, __) => const PollsScreen()),
-      GoRoute(path: '/meetings', builder: (_, __) => const MeetingsScreen()),
+      GoRoute(
+        path: '/meetings',
+        builder: (_, __) => const MeetingsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => MeetingDetailScreen(
+              id: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
       GoRoute(path: '/tasks', builder: (_, __) => const TasksScreen()),
-      GoRoute(path: '/inventory', builder: (_, __) => const InventoryScreen()),
       GoRoute(path: '/hall-booking', builder: (_, __) => const HallBookingScreen()),
       GoRoute(path: '/bylaws', builder: (_, __) => const BylawsScreen()),
-      GoRoute(path: '/decisions', builder: (_, __) => const DecisionsScreen()),
       GoRoute(path: '/suggestions', builder: (_, __) => const SuggestionsScreen()),
       GoRoute(path: '/move-in-out', builder: (_, __) => const MoveInOutScreen()),
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),
+      GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],
   );
