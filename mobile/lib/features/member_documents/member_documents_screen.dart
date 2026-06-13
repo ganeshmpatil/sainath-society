@@ -122,7 +122,19 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
                 ),
               )).toList(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(l.t('common.cancel')),
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),

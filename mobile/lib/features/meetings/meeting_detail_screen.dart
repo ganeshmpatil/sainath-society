@@ -206,35 +206,53 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                GradientButton(
-                  label: l.t('common.submit'),
-                  onPressed: () async {
-                    if (title.isEmpty || selectedMemberId == null) return;
-                    try {
-                      final data = <String, dynamic>{
-                        'title': title,
-                        'description': description,
-                        'ownerMemberId': selectedMemberId,
-                      };
-                      if (dueDate != null) {
-                        data['dueDate'] =
-                            dueDate!.toUtc().toIso8601String();
-                      }
-                      await api.post(
-                          '/meetings/${widget.id}/action-items',
-                          data: data);
-                      if (ctx.mounted) Navigator.pop(ctx);
-                      _load();
-                    } catch (e) {
-                      if (ctx.mounted) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('${l.t('common.error')}: $e')),
-                        );
-                      }
-                    }
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(l.t('common.cancel')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GradientButton(
+                        label: l.t('common.submit'),
+                        onPressed: () async {
+                          if (title.isEmpty || selectedMemberId == null) return;
+                          try {
+                            final data = <String, dynamic>{
+                              'title': title,
+                              'description': description,
+                              'ownerMemberId': selectedMemberId,
+                            };
+                            if (dueDate != null) {
+                              data['dueDate'] =
+                                  dueDate!.toUtc().toIso8601String();
+                            }
+                            await api.post(
+                                '/meetings/${widget.id}/action-items',
+                                data: data);
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            _load();
+                          } catch (e) {
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('${l.t('common.error')}: $e')),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

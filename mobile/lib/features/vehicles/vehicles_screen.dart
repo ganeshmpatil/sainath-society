@@ -99,11 +99,22 @@ class _VV extends StatelessWidget {
             Expanded(child: TextField(onChanged: (v) => slot = v, decoration: InputDecoration(labelText: l.t('vehicles.parkingSlot')))),
           ]),
           const SizedBox(height: 20),
-          GradientButton(label: l.t('common.submit'), onPressed: () async {
-            if (regNo.isEmpty) return;
-            try { await api.post('/vehicles', data: {'registrationNo': regNo, 'vehicleType': type, 'make': make, 'model': model, 'color': color, 'parkingSlot': slot});
-              if (c.mounted) Navigator.pop(c); cubit.load(); } catch (_) {}
-          }),
+          Row(children: [
+            Expanded(child: OutlinedButton(
+              onPressed: () => Navigator.pop(c),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(l.t('common.cancel')),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: GradientButton(label: l.t('common.submit'), onPressed: () async {
+              if (regNo.isEmpty) return;
+              try { await api.post('/vehicles', data: {'registrationNo': regNo, 'vehicleType': type, 'make': make, 'model': model, 'color': color, 'parkingSlot': slot});
+                if (c.mounted) Navigator.pop(c); cubit.load(); } catch (_) {}
+            })),
+          ]),
         ])),
       ),
     );

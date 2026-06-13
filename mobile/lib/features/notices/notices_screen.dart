@@ -176,21 +176,32 @@ class _NoticesViewState extends State<_NoticesView> {
               ),
             ),
             const SizedBox(height: 20),
-            GradientButton(label: l.t('common.submit'), onPressed: () async {
-              if (title.isEmpty || body.isEmpty) return;
-              try {
-                if (pickedFile != null && pickedFile!.path != null) {
-                  final formData = FormData.fromMap({
-                    'title': title, 'body': body, 'category': category,
-                    'file': await MultipartFile.fromFile(pickedFile!.path!, filename: pickedFile!.name),
-                  });
-                  await api.postMultipart('/notices/with-attachment', data: formData);
-                } else {
-                  await api.post('/notices', data: {'title': title, 'body': body, 'category': category});
-                }
-                if (context.mounted) Navigator.pop(context); cubit.load();
-              } catch (_) {}
-            }),
+            Row(children: [
+              Expanded(child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(l.t('common.cancel')),
+              )),
+              const SizedBox(width: 12),
+              Expanded(child: GradientButton(label: l.t('common.submit'), onPressed: () async {
+                if (title.isEmpty || body.isEmpty) return;
+                try {
+                  if (pickedFile != null && pickedFile!.path != null) {
+                    final formData = FormData.fromMap({
+                      'title': title, 'body': body, 'category': category,
+                      'file': await MultipartFile.fromFile(pickedFile!.path!, filename: pickedFile!.name),
+                    });
+                    await api.postMultipart('/notices/with-attachment', data: formData);
+                  } else {
+                    await api.post('/notices', data: {'title': title, 'body': body, 'category': category});
+                  }
+                  if (context.mounted) Navigator.pop(context); cubit.load();
+                } catch (_) {}
+              })),
+            ]),
           ])),
         ),
       ),

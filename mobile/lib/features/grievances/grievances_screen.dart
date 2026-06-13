@@ -223,18 +223,36 @@ class _GrievancesView extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    GradientButton(
-                      label: l.t('grievances.submitGrievance'),
-                      onPressed: () async {
-                        if (title.isEmpty) return;
-                        final ok = await cubit.create({
-                          'title': title,
-                          'description': description,
-                          'category': category,
-                          'priority': priority,
-                        });
-                        if (ok && context.mounted) Navigator.pop(context);
-                      },
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text(l.t('common.cancel')),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GradientButton(
+                            label: l.t('grievances.submitGrievance'),
+                            onPressed: () async {
+                              if (title.isEmpty) return;
+                              final ok = await cubit.create({
+                                'title': title,
+                                'description': description,
+                                'category': category,
+                                'priority': priority,
+                              });
+                              if (ok && context.mounted) Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

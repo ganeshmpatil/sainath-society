@@ -80,11 +80,22 @@ class _SV extends StatelessWidget {
           const SizedBox(height: 14),
           TextField(onChanged: (v) => body = v, maxLines: 4, decoration: InputDecoration(labelText: l.t('suggestions.yourSuggestion'))),
           const SizedBox(height: 20),
-          GradientButton(label: l.t('common.submit'), onPressed: () async {
-            if (title.isEmpty) return;
-            try { await api.post('/suggestions', data: {'title': title, 'body': body});
-              if (c.mounted) Navigator.pop(c); cubit.load(); } catch (_) {}
-          }),
+          Row(children: [
+            Expanded(child: OutlinedButton(
+              onPressed: () => Navigator.pop(c),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(l.t('common.cancel')),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: GradientButton(label: l.t('common.submit'), onPressed: () async {
+              if (title.isEmpty) return;
+              try { await api.post('/suggestions', data: {'title': title, 'body': body});
+                if (c.mounted) Navigator.pop(c); cubit.load(); } catch (_) {}
+            })),
+          ]),
         ])),
       ),
     );
