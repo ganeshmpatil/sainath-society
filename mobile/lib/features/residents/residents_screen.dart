@@ -49,13 +49,16 @@ class _RVS extends State<_RV> {
             border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none)),
         )),
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(bottom: 12), child: FilterChipsRow(
-          labels: [l.t('residents.allWings'), 'A Wing', 'B Wing', 'C Wing'], selectedIndex: _fi,
+          labels: [l.t('residents.allWings'), 'A', 'B', 'C', 'D', 'E', 'E1', 'F'], selectedIndex: _fi,
           onSelected: (i) => setState(() => _fi = i)))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           var items = state.items;
-          if (_fi > 0) { final w = ['', 'A', 'B', 'C'];
-            items = items.where((r) => ((r['flat']?['flatNumber'] ?? '') as String).startsWith(w[_fi])).toList(); }
+          if (_fi > 0) { final w = ['', 'A', 'B', 'C', 'D', 'E', 'E1', 'F'];
+            items = items.where((r) {
+              final wing = r['flat']?['wing']?['name'] ?? '';
+              return wing == w[_fi];
+            }).toList(); }
           if (items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
               child: Center(child: Text(l.t('common.noRecords'), style: const TextStyle(color: AppColors.textTertiary)))));
           return SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _RC(r: items[i]), childCount: items.length));
