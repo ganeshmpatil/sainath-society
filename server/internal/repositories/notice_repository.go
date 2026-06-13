@@ -29,7 +29,9 @@ func (r *NoticeRepository) Create(actor *ActorContext, n *models.Notice) error {
 // List returns all currently visible notices to any member.
 // Notices are globally readable, but unpublished / expired ones are hidden for non-admins.
 func (r *NoticeRepository) List(actor *ActorContext) ([]models.Notice, error) {
-	q := r.db.Model(&models.Notice{}).Preload("CreatedBy").
+	q := r.db.Model(&models.Notice{}).
+		Select("id, title, title_mr, body, body_mr, category, is_pinned, is_published, publish_at, expires_at, attachment_url, attachment_name, attachment_mime, attachment_size, created_by_id, created_at, updated_at").
+		Preload("CreatedBy").
 		Order("is_pinned DESC, created_at DESC")
 	if !actor.IsAdmin() {
 		now := time.Now()

@@ -154,6 +154,9 @@ const Map<String, String> stringsMr = {
   'notices.festival': 'सण',
   'notices.publishedBy': 'प्रकाशक',
   'notices.noticeBody': 'सूचना मजकूर',
+  'notices.detail': 'सूचना तपशील',
+  'notices.attachFile': 'फाइल जोडा (PDF, फोटो, दस्तऐवज)',
+  'notices.expiresOn': 'मुदत समाप्ती',
 
   // Finance
   'finance.title': 'वित्त',
@@ -288,6 +291,35 @@ const Map<String, String> stringsMr = {
   'moveInOut.tenantName': 'भाडेकरूचे नाव',
   'moveInOut.moveDate': 'तारीख',
 
+  // Member Documents
+  'nav.memberDocs': 'माझी कागदपत्रे',
+  'memberDocs.title': 'माझी कागदपत्रे',
+  'memberDocs.subtitle': 'वैयक्तिक कागदपत्र लॉकर',
+  'memberDocs.selectType': 'कागदपत्र प्रकार निवडा',
+  'memberDocs.noDocuments': 'अद्याप कोणतेही कागदपत्र अपलोड केलेले नाही',
+  'memberDocs.tapToUpload': 'पहिले कागदपत्र अपलोड करण्यासाठी + वर टॅप करा',
+  'memberDocs.uploadSuccess': 'कागदपत्र यशस्वीरित्या अपलोड केले',
+  'memberDocs.fileTooLarge': 'फाइल आकार 10 MB मर्यादेपेक्षा जास्त आहे',
+  'memberDocs.downloading': 'डाउनलोड होत आहे...',
+  'memberDocs.download': 'डाउनलोड',
+  'memberDocs.deleteConfirm': 'हे कागदपत्र हटवायचे?',
+
+  // Change Password
+  'changePassword.title': 'पासवर्ड बदला',
+  'changePassword.currentPassword': 'सध्याचा पासवर्ड',
+  'changePassword.newPassword': 'नवीन पासवर्ड',
+  'changePassword.confirmPassword': 'नवीन पासवर्ड पुन्हा टाका',
+  'changePassword.enterCurrent': 'सध्याचा पासवर्ड टाका',
+  'changePassword.enterNew': 'नवीन पासवर्ड टाका (किमान ८ अक्षरे)',
+  'changePassword.enterConfirm': 'नवीन पासवर्ड पुन्हा टाका',
+  'changePassword.submit': 'पासवर्ड अपडेट करा',
+  'changePassword.success': 'पासवर्ड यशस्वीरित्या बदलला',
+  'changePassword.mismatch': 'पासवर्ड जुळत नाहीत',
+  'changePassword.minLength': 'पासवर्ड किमान ८ अक्षरांचा असावा',
+  'changePassword.sameAsOld': 'नवीन पासवर्ड सध्याच्या पासवर्डपेक्षा वेगळा असावा',
+  'changePassword.allFieldsRequired': 'सर्व फील्ड आवश्यक आहेत',
+  'changePassword.forcedMessage': 'तुम्ही तात्पुरता पासवर्ड वापरत आहात. पुढे जाण्यासाठी नवीन पासवर्ड सेट करा.',
+
   // Flat Details
   'flatDetails.title': 'फ्लॅट तपशील',
   'flatDetails.subtitle': 'मालकी माहिती',
@@ -295,4 +327,21 @@ const Map<String, String> stringsMr = {
   'flatDetails.owner': 'मालक',
   'flatDetails.area': 'क्षेत्रफळ (चौ.फू.)',
   'flatDetails.floor': 'मजला',
+
+  // Registration
+  'register.verifyMembership': 'तुमच्या सदस्यत्वाची पडताळणी करण्यासाठी फ्लॅट क्रमांक टाका',
+  'register.wingTower': 'विंग / टॉवर',
+  'register.selectWing': 'विंग निवडा...',
+  'register.sendOtp': 'OTP पाठवा',
+  'register.enterOtp': 'तुमच्या नोंदणीकृत मोबाईलवर पाठवलेला OTP टाका',
+  'register.verifyOtp': 'OTP पडताळा',
+  'register.setPassword': 'नोंदणी पूर्ण करण्यासाठी पासवर्ड सेट करा',
+  'register.flatNotListed': 'तुमचा फ्लॅट सोसायटी डेटाबेसमध्ये नोंदणीकृत असणे आवश्यक आहे. नोंदणी नसल्यास सचिवांशी संपर्क साधा.',
+
+  // Misc UI
+  'notices.tapToRead': 'वाचण्यासाठी टॅप करा',
+  'grievances.viewDetails': 'तपशील',
+  'finance.maintenanceLabel': 'देखभाल',
+  'profile.updateSuccess': 'प्रोफाइल यशस्वीरित्या अपडेट केले',
+  'profile.updateFailed': 'अपडेट अयशस्वी',
 };

@@ -73,9 +73,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Refresh auth state to pick up updated user info
         if (mounted) {
           context.read<AuthBloc>().add(const AuthCheckRequested());
+          final l = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully'),
+            SnackBar(
+              content: Text(l.t('profile.updateSuccess')),
               backgroundColor: AppColors.resolved,
             ),
           );
@@ -84,9 +85,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update: $e'),
+            content: Text('${l.t('profile.updateFailed')}: $e'),
             backgroundColor: AppColors.urgent,
           ),
         );
@@ -218,6 +220,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     label: l.t('common.save'),
                     isLoading: _saving,
                     onPressed: _changed ? _save : null,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Change Password button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/change-password'),
+                      icon: Icon(Icons.lock_reset_rounded, size: 20, color: AppColors.primary),
+                      label: Text(l.t('changePassword.title'),
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.primary.withAlpha(80)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
                   ),
                 ],
               ),

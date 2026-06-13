@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -122,10 +123,13 @@ func (s *OTPService) VerifyOTP(ctx context.Context, mobile, code, purpose string
 // sendSMS sends OTP via SMS (mock implementation)
 func (s *OTPService) sendSMS(mobile, code string) error {
 	// In production, integrate with SMS gateway (Twilio, AWS SNS, etc.)
-	// For now, just log the OTP
-	log.Printf("===========================================")
-	log.Printf("SMS OTP for %s: %s", mobile, code)
-	log.Printf("===========================================")
+	if os.Getenv("ENV") != "production" {
+		log.Printf("===========================================")
+		log.Printf("SMS OTP for %s: %s", mobile, code)
+		log.Printf("===========================================")
+	} else {
+		log.Printf("OTP sent to %s (code redacted)", mobile)
+	}
 	return nil
 }
 

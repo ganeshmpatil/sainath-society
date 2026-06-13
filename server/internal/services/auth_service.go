@@ -113,16 +113,17 @@ func (s *AuthService) Login(ctx context.Context, email, password, clientIP strin
 		ExpiresIn:   tokenPair.ExpiresIn,
 		ExpiresAt:   tokenPair.ExpiresAt,
 		User: response.UserResponse{
-			ID:          user.ID.String(),
-			Name:        member.Name,
-			Email:       user.Email,
-			Phone:       user.Mobile,
-			Role:        string(member.Role),
-			Designation: member.Designation,
-			FlatID:      flatID,
-			FlatNumber:  flatNumber,
-			Permissions: permissions,
-			IsActive:    user.IsActive,
+			ID:                 user.ID.String(),
+			Name:               member.Name,
+			Email:              user.Email,
+			Phone:              user.Mobile,
+			Role:               string(member.Role),
+			Designation:        member.Designation,
+			FlatID:             flatID,
+			FlatNumber:         flatNumber,
+			Permissions:        permissions,
+			IsActive:           user.IsActive,
+			MustChangePassword: user.MustChangePassword,
 		},
 	}, tokenPair.RefreshToken, nil
 }
@@ -217,16 +218,17 @@ func (s *AuthService) GetCurrentUser(ctx context.Context, userID uuid.UUID) (*re
 	permissions := models.GetPermissionsForRole(member.Role)
 
 	return &response.UserResponse{
-		ID:          user.ID.String(),
-		Name:        member.Name,
-		Email:       user.Email,
-		Phone:       user.Mobile,
-		Role:        string(member.Role),
-		Designation: member.Designation,
-		FlatID:      flatID,
-		FlatNumber:  flatNumber,
-		Permissions: permissions,
-		IsActive:    user.IsActive,
+		ID:                 user.ID.String(),
+		Name:               member.Name,
+		Email:              user.Email,
+		Phone:              user.Mobile,
+		Role:               string(member.Role),
+		Designation:        member.Designation,
+		FlatID:             flatID,
+		FlatNumber:         flatNumber,
+		Permissions:        permissions,
+		IsActive:           user.IsActive,
+		MustChangePassword: user.MustChangePassword,
 	}, nil
 }
 
@@ -262,6 +264,35 @@ func (s *AuthService) ChangePassword(ctx context.Context, userID uuid.UUID, curr
 	// Force re-login on all other sessions
 	_ = s.userRepo.UpdateRefreshToken(ctx, userID, "", nil)
 	return nil
+}
+
+// ResetPasswordByAdmin lets an admin set a one-time password for any member.
+// The target user's MustChangePassword flag is set to true so they are forced
+// to choose a new password on their next login.
+func (s *AuthService) ResetPasswordByAdmin(ctx context.Context, targetUserID uuid.UUID, newPassword string) error {
+	user, err := s.userRepo.FindByID(ctx, targetUserID)
+	if err != nil {
+		return ErrInvalidCredentials
+	}
+	newHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(newHash)
+	user.MustChangePassword = true
+	user.FailedLoginAttempts = 0
+	user.LockedUntil = nil
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+	// Invalidate existing sessions
+	_ = s.userRepo.UpdateRefreshToken(ctx, targetUserID, "", nil)
+	return nil
+}
+
+// FindUserByMemberID looks up the user row linked to a given member.
+func (s *AuthService) FindUserByMemberID(ctx context.Context, memberID uuid.UUID) (*models.User, error) {
+	return s.userRepo.FindByMemberID(ctx, memberID)
 }
 
 // avoid unused-import error if gorm is not referenced elsewhere in additions

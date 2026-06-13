@@ -7,6 +7,7 @@ import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/utils/date_format.dart';
 import '../../shared/widgets/filter_chips_row.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/gradient_button.dart';
@@ -300,7 +301,7 @@ class _GrievanceCard extends StatelessWidget {
               Text(_formatDate(date),
                   style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               const Spacer(),
-              Text('→ Details',
+              Text('→ ${AppLocalizations.of(context).t('grievances.viewDetails')}',
                   style: TextStyle(fontSize: 11, color: AppColors.primary)),
             ],
           ),
@@ -310,15 +311,4 @@ class _GrievanceCard extends StatelessWidget {
   }
 }
 
-String _formatDate(String iso) {
-  try {
-    final dt = DateTime.parse(iso);
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.day}/${dt.month}/${dt.year}';
-  } catch (_) {
-    return '';
-  }
-}
+String _formatDate(String iso) => formatTimeAgo(iso);

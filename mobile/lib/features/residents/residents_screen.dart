@@ -91,7 +91,7 @@ class _RC extends StatelessWidget {
       ])),
       GestureDetector(
         onTap: () {
-          final phone = r['phone'] ?? '';
+          final phone = r['mobile'] ?? '';
           if (phone.isNotEmpty) {
             launchUrl(Uri.parse('tel:$phone'));
           }

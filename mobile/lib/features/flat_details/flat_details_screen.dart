@@ -40,12 +40,12 @@ class _FVS extends State<_FV> {
           ]),
         ]))),
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 12, bottom: 12), child: FilterChipsRow(
-          labels: [l.t('residents.allWings'), 'A Wing', 'B Wing', 'C Wing'], selectedIndex: _fi,
+          labels: [l.t('residents.allWings'), 'A Wing', 'B Wing', 'C Wing', 'D Wing', 'E Wing', 'E1 Wing', 'F Wing'], selectedIndex: _fi,
           onSelected: (i) => setState(() => _fi = i)))),
         BlocBuilder<ListCubit, ListData>(builder: (context, state) {
           if (state.loading) return const SliverToBoxAdapter(child: ShimmerLoading());
           var items = state.items;
-          if (_fi > 0) { final w = ['', 'A', 'B', 'C'];
+          if (_fi > 0) { final w = ['', 'A', 'B', 'C', 'D', 'E', 'E1', 'F'];
             items = items.where((f) => ((f['flatNumber'] ?? '') as String).startsWith(w[_fi])).toList(); }
           if (items.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(40),
               child: Center(child: Text(l.t('common.noRecords'), style: TextStyle(color: AppColors.textTertiary)))));

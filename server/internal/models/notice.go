@@ -32,6 +32,12 @@ type Notice struct {
 	ExpiresAt    *time.Time     `json:"expiresAt,omitempty"`
 	AttachmentURL string        `gorm:"type:varchar(500)" json:"attachmentUrl,omitempty"`
 
+	// Inline attachment stored compressed in DB
+	AttachmentData []byte `gorm:"type:bytea" json:"-"`
+	AttachmentName string `gorm:"type:varchar(255)" json:"attachmentName,omitempty"`
+	AttachmentMime string `gorm:"type:varchar(100)" json:"attachmentMime,omitempty"`
+	AttachmentSize int64  `json:"attachmentSize,omitempty"`
+
 	// Audit
 	CreatedByID uuid.UUID `gorm:"type:uuid;not null" json:"createdById"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`

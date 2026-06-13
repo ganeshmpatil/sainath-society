@@ -73,14 +73,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 28),
               if (_step == 0) ...[
-                Text('Enter your flat number to verify your membership',
+                Text(l.t('register.verifyMembership'),
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
-                _label('Wing / Tower'),
+                _label(l.t('register.wingTower')),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(hintText: 'Select wing...'),
-                  items: ['A', 'B', 'C']
+                  decoration: InputDecoration(hintText: l.t('register.selectWing')),
+                  items: ['A', 'B', 'C', 'D', 'E', 'E1', 'F']
                       .map((w) => DropdownMenuItem(value: w, child: Text('Wing $w')))
                       .toList(),
                   onChanged: (_) {},
@@ -106,12 +106,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 24),
                 GradientButton(
-                  label: 'Send OTP',
+                  label: l.t('register.sendOtp'),
                   onPressed: () => setState(() => _step = 1),
                 ),
               ],
               if (_step == 1) ...[
-                Text('Enter the OTP sent to your registered mobile',
+                Text(l.t('register.enterOtp'),
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
                 _label('OTP'),
@@ -125,12 +125,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 24),
                 GradientButton(
-                  label: 'Verify OTP',
+                  label: l.t('register.verifyOtp'),
                   onPressed: () => setState(() => _step = 2),
                 ),
               ],
               if (_step == 2) ...[
-                Text('Set your password to complete registration',
+                Text(l.t('register.setPassword'),
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
                 _label(l.t('auth.email')),
@@ -160,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Text(
-                  'Your flat must be registered in the society database. Contact the secretary if you\'re not listed.',
+                  l.t('register.flatNotListed'),
                   style: TextStyle(fontSize: 12, color: AppColors.textTertiary, height: 1.6),
                 ),
               ),

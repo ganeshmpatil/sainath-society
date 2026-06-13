@@ -41,6 +41,7 @@ func SetupRoutes(
 	meetingHandler := handlers.NewMeetingHandler(domain.Meeting, notifier)
 	ownershipHandler := handlers.NewOwnershipHandler(domain.Ownership)
 	documentHandler := handlers.NewDocumentHandler(domain.Document)
+	memberDocumentHandler := handlers.NewMemberDocumentHandler(domain.MemberDocument)
 	pollHandler := handlers.NewPollHandler(domain.Poll, notifier)
 	hallBookingHandler := handlers.NewHallBookingHandler(domain.HallBooking, notifier)
 	inventoryHandler := handlers.NewInventoryHandler(domain.Inventory)
@@ -87,6 +88,7 @@ func SetupRoutes(
 		authProtected.GET("/me", authHandler.GetMe)
 		authProtected.POST("/logout", authHandler.Logout)
 		authProtected.PUT("/password", authHandler.ChangePassword)
+		authProtected.POST("/admin-reset-password", authHandler.AdminResetPassword)
 	}
 
 	// Protected soc_mitra_* routes — every route below passes through both
@@ -122,8 +124,10 @@ func SetupRoutes(
 		// Notices — admin writes, everyone reads.
 		n := protected.Group("/notices")
 		n.POST("", noticeHandler.Create)
+		n.POST("/with-attachment", noticeHandler.CreateWithAttachment)
 		n.GET("", noticeHandler.List)
 		n.GET("/:id", noticeHandler.GetByID)
+		n.GET("/:id/attachment", noticeHandler.DownloadAttachment)
 		n.PATCH("/:id", noticeHandler.Update)
 		n.DELETE("/:id", noticeHandler.Delete)
 
@@ -184,6 +188,14 @@ func SetupRoutes(
 		doc.GET("/:id", documentHandler.GetByID)
 		doc.POST("/:id/grant", documentHandler.Grant)
 		doc.POST("/:id/archive", documentHandler.Archive)
+
+		// Member document locker (personal ID docs stored compressed in DB).
+		mdoc := protected.Group("/member-documents")
+		mdoc.POST("/upload", memberDocumentHandler.Upload)
+		mdoc.GET("", memberDocumentHandler.List)
+		mdoc.GET("/:id", memberDocumentHandler.GetByID)
+		mdoc.GET("/:id/download", memberDocumentHandler.Download)
+		mdoc.DELETE("/:id", memberDocumentHandler.Delete)
 
 		// Residents (Member roster — everyone sees, admin mutates).
 		res := protected.Group("/residents")

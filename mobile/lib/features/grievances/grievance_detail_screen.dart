@@ -8,6 +8,7 @@ import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/utils/date_format.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/status_badge.dart';
@@ -54,7 +55,13 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     try {
       await api.patch('/grievances/${widget.id}/status', data: {'status': status});
       _load();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${AppLocalizations.of(context).t('common.error')}: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _addComment() async {
@@ -64,7 +71,13 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
           data: {'comment': _commentCtrl.text});
       _commentCtrl.clear();
       _load();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${AppLocalizations.of(context).t('common.error')}: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -344,15 +357,5 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     return '?';
   }
 
-  String _formatDate(String iso) {
-    try {
-      final dt = DateTime.parse(iso);
-      final diff = DateTime.now().difference(dt);
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      return '${dt.day}/${dt.month}/${dt.year}';
-    } catch (_) {
-      return '';
-    }
-  }
+  String _formatDate(String iso) => formatTimeAgo(iso);
 }

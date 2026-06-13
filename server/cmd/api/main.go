@@ -77,6 +77,7 @@ func main() {
 		Flat:             repositories.NewFlatRepository(db),
 		EmergencyContact: repositories.NewEmergencyContactRepository(db),
 		PushSubscription: repositories.NewPushSubscriptionRepository(db),
+		MemberDocument:   repositories.NewMemberDocumentRepository(db),
 	}
 
 	// Create Gin router
@@ -165,4 +166,5 @@ type DomainRepositories struct {
 	Flat             *repositories.FlatRepository
 	EmergencyContact *repositories.EmergencyContactRepository
 	PushSubscription *repositories.PushSubscriptionRepository
+	MemberDocument   *repositories.MemberDocumentRepository
 }

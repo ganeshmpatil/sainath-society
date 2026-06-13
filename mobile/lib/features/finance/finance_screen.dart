@@ -107,7 +107,7 @@ class _BC extends StatelessWidget {
         child: Icon(Icons.currency_rupee_rounded, size: 20, color: sc)),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Maintenance - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        Text('${AppLocalizations.of(context).t('finance.maintenanceLabel')} - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         const SizedBox(height: 2),
         Text('₹${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
       ])),

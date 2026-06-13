@@ -154,6 +154,9 @@ const Map<String, String> stringsEn = {
   'notices.festival': 'Festival',
   'notices.publishedBy': 'Published by',
   'notices.noticeBody': 'Notice body',
+  'notices.detail': 'Notice Details',
+  'notices.attachFile': 'Attach file (PDF, image, doc)',
+  'notices.expiresOn': 'Expires on',
 
   // Finance
   'finance.title': 'Finance',
@@ -288,6 +291,35 @@ const Map<String, String> stringsEn = {
   'moveInOut.tenantName': 'Tenant Name',
   'moveInOut.moveDate': 'Move Date',
 
+  // Member Documents
+  'nav.memberDocs': 'My Documents',
+  'memberDocs.title': 'My Documents',
+  'memberDocs.subtitle': 'Personal document locker',
+  'memberDocs.selectType': 'Select Document Type',
+  'memberDocs.noDocuments': 'No documents uploaded yet',
+  'memberDocs.tapToUpload': 'Tap + to upload your first document',
+  'memberDocs.uploadSuccess': 'Document uploaded successfully',
+  'memberDocs.fileTooLarge': 'File size exceeds 10 MB limit',
+  'memberDocs.downloading': 'Downloading...',
+  'memberDocs.download': 'Download',
+  'memberDocs.deleteConfirm': 'Delete this document?',
+
+  // Change Password
+  'changePassword.title': 'Change Password',
+  'changePassword.currentPassword': 'Current Password',
+  'changePassword.newPassword': 'New Password',
+  'changePassword.confirmPassword': 'Confirm New Password',
+  'changePassword.enterCurrent': 'Enter current password',
+  'changePassword.enterNew': 'Enter new password (min 8 chars)',
+  'changePassword.enterConfirm': 'Re-enter new password',
+  'changePassword.submit': 'Update Password',
+  'changePassword.success': 'Password changed successfully',
+  'changePassword.mismatch': 'Passwords do not match',
+  'changePassword.minLength': 'Password must be at least 8 characters',
+  'changePassword.sameAsOld': 'New password must be different from current',
+  'changePassword.allFieldsRequired': 'All fields are required',
+  'changePassword.forcedMessage': 'You are using a temporary password. Please set a new password to continue.',
+
   // Flat Details
   'flatDetails.title': 'Flat Details',
   'flatDetails.subtitle': 'Ownership info',
@@ -295,4 +327,21 @@ const Map<String, String> stringsEn = {
   'flatDetails.owner': 'Owner',
   'flatDetails.area': 'Area (sq.ft)',
   'flatDetails.floor': 'Floor',
+
+  // Registration
+  'register.verifyMembership': 'Enter your flat number to verify your membership',
+  'register.wingTower': 'Wing / Tower',
+  'register.selectWing': 'Select wing...',
+  'register.sendOtp': 'Send OTP',
+  'register.enterOtp': 'Enter the OTP sent to your registered mobile',
+  'register.verifyOtp': 'Verify OTP',
+  'register.setPassword': 'Set your password to complete registration',
+  'register.flatNotListed': 'Your flat must be registered in the society database. Contact the secretary if you\'re not listed.',
+
+  // Misc UI
+  'notices.tapToRead': 'Tap to read',
+  'grievances.viewDetails': 'Details',
+  'finance.maintenanceLabel': 'Maintenance',
+  'profile.updateSuccess': 'Profile updated successfully',
+  'profile.updateFailed': 'Failed to update',
 };

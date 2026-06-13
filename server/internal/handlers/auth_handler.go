@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +16,16 @@ import (
 
 // AuthHandler handles authentication endpoints
 type AuthHandler struct {
-	authService *services.AuthService
+	authService  *services.AuthService
+	secureCookie bool
 }
 
 // NewAuthHandler creates a new auth handler
 func NewAuthHandler(authService *services.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+	return &AuthHandler{
+		authService:  authService,
+		secureCookie: os.Getenv("ENV") == "production",
+	}
 }
 
 // Login handles user login
@@ -79,9 +84,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		refreshToken,
 		int(7*24*time.Hour.Seconds()), // 7 days
 		"/api/v1/auth",
-		"",    // domain
-		false, // secure (set true in production)
-		true,  // httpOnly
+		"",              // domain
+		h.secureCookie,  // secure
+		true,            // httpOnly
 	)
 
 	c.JSON(http.StatusOK, loginResp)
@@ -128,7 +133,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		int(7*24*time.Hour.Seconds()),
 		"/api/v1/auth",
 		"",
-		false,
+		h.secureCookie,
 		true,
 	)
 
@@ -206,6 +211,49 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 }
 
+// resetPasswordReq is the body for POST /auth/admin-reset-password.
+type resetPasswordReq struct {
+	MemberID    string `json:"memberId" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required,min=8"`
+}
+
+// AdminResetPassword lets an admin set a one-time password for any member.
+// The target user must change it after their next login.
+func (h *AuthHandler) AdminResetPassword(c *gin.Context) {
+	// Check caller is admin (from JWT claims)
+	role, _ := c.Get("userRole")
+	if role != "ADMIN" {
+		c.JSON(http.StatusForbidden, response.ErrorResponse{Error: "Admin access required", Code: "FORBIDDEN"})
+		return
+	}
+
+	var req resetPasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+
+	memberID, err := uuid.Parse(req.MemberID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid memberId", Code: "INVALID_ID"})
+		return
+	}
+
+	// Find user linked to this member
+	targetUser, err := h.authService.FindUserByMemberID(c.Request.Context(), memberID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, response.ErrorResponse{Error: "No user account found for this member", Code: "NOT_FOUND"})
+		return
+	}
+
+	if err := h.authService.ResetPasswordByAdmin(c.Request.Context(), targetUser.ID, req.NewPassword); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "RESET_FAILED"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset. User must change on next login."})
+}
+
 // Logout handles user logout
 // @Summary Logout
 // @Description Invalidate refresh token
@@ -248,7 +296,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		-1,
 		"/api/v1/auth",
 		"",
-		false,
+		h.secureCookie,
 		true,
 	)
 

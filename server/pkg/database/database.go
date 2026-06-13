@@ -113,6 +113,7 @@ func Migrate(db *gorm.DB) error {
 		&models.MaintenanceBill{},
 		&models.EmergencyContact{},
 		&models.PushSubscription{},
+		&models.MemberDocument{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)
@@ -125,6 +126,11 @@ func Migrate(db *gorm.DB) error {
 // Seed populates initial data
 func Seed(db *gorm.DB) error {
 	log.Println("Seeding database...")
+
+	// Ensure all 7 wings exist (safe to run on already-seeded DBs)
+	if err := ensureWings(db); err != nil {
+		return fmt.Errorf("failed to ensure wings: %w", err)
+	}
 
 	// Check if already seeded
 	var memberCount int64
@@ -139,6 +145,10 @@ func Seed(db *gorm.DB) error {
 		{Name: "A"},
 		{Name: "B"},
 		{Name: "C"},
+		{Name: "D"},
+		{Name: "E"},
+		{Name: "E1"},
+		{Name: "F"},
 	}
 	if err := db.Create(&wings).Error; err != nil {
 		return fmt.Errorf("failed to seed wings: %w", err)
@@ -292,4 +302,20 @@ func createInitialAdminUser(db *gorm.DB, chairman models.Member) error {
 	chairman.IsRegistered = true
 	chairman.UserID = &user.ID
 	return db.Save(&chairman).Error
+}
+
+// ensureWings creates any missing wings so existing databases get D, E, E1, F.
+func ensureWings(db *gorm.DB) error {
+	allWings := []string{"A", "B", "C", "D", "E", "E1", "F"}
+	for _, name := range allWings {
+		var count int64
+		db.Model(&models.Wing{}).Where("name = ?", name).Count(&count)
+		if count == 0 {
+			if err := db.Create(&models.Wing{Name: name}).Error; err != nil {
+				return err
+			}
+			log.Printf("Created missing wing: %s", name)
+		}
+	}
+	return nil
 }

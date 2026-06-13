@@ -75,7 +75,7 @@ func getOrigins() []string {
 	if v := os.Getenv("ALLOWED_ORIGINS"); v != "" {
 		return strings.Split(v, ",")
 	}
-	return []string{"http://localhost:5173", "http://localhost:3000", "*"}
+	return []string{"http://localhost:5173", "http://localhost:3000"}
 }
 
 func getEnv(key, defaultValue string) string {

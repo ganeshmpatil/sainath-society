@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_bloc.dart';
@@ -7,6 +10,7 @@ import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/utils/date_format.dart';
 import '../../shared/widgets/filter_chips_row.dart';
 import '../../shared/widgets/gradient_button.dart';
 import '../../shared/widgets/shimmer_loading.dart';
@@ -87,7 +91,13 @@ class _NoticesViewState extends State<_NoticesView> {
                   }
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (ctx, i) => _NoticeCard(notice: state.items[i], isMr: isMr),
+                      (ctx, i) {
+                        final notice = state.items[i];
+                        return GestureDetector(
+                          onTap: () => context.push('/notices/${notice["id"]}'),
+                          child: _NoticeCard(notice: notice, isMr: isMr),
+                        );
+                      },
                       childCount: state.items.length,
                     ),
                   );
@@ -110,31 +120,79 @@ class _NoticesViewState extends State<_NoticesView> {
     final cubit = parentContext.read<ListCubit>();
     final l = AppLocalizations.of(parentContext);
     String title = '', body = '', category = 'GENERAL';
+    PlatformFile? pickedFile;
 
     showModalBottomSheet(
       context: parentContext, isScrollControlled: true, backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
-          Text(l.t('notices.newNotice'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 20),
-          TextField(onChanged: (v) => title = v, decoration: InputDecoration(labelText: l.t('grievances.subject'))),
-          const SizedBox(height: 14),
-          TextField(onChanged: (v) => body = v, maxLines: 4, decoration: InputDecoration(labelText: l.t('notices.noticeBody'))),
-          const SizedBox(height: 14),
-          DropdownButtonFormField<String>(value: category, dropdownColor: AppColors.surface,
-            items: ['GENERAL', 'MAINTENANCE', 'AGM', 'EMERGENCY', 'FESTIVAL'].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-            onChanged: (v) => category = v!),
-          const SizedBox(height: 20),
-          GradientButton(label: l.t('common.submit'), onPressed: () async {
-            if (title.isEmpty) return;
-            try { await api.post('/notices', data: {'title': title, 'body': body, 'category': category});
-              if (context.mounted) Navigator.pop(context); cubit.load(); } catch (_) {}
-          }),
-        ])),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
+            const SizedBox(height: 20),
+            Text(l.t('notices.newNotice'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            TextField(onChanged: (v) => title = v, decoration: InputDecoration(labelText: l.t('grievances.subject'))),
+            const SizedBox(height: 14),
+            TextField(onChanged: (v) => body = v, maxLines: 4, decoration: InputDecoration(labelText: l.t('notices.noticeBody'))),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<String>(value: category, dropdownColor: AppColors.surface,
+              items: ['GENERAL', 'MAINTENANCE', 'AGM', 'EMERGENCY', 'FESTIVAL'].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+              onChanged: (v) => category = v!),
+            const SizedBox(height: 14),
+            // Attachment picker
+            GestureDetector(
+              onTap: () async {
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'doc', 'docx'],
+                );
+                if (result != null && result.files.isNotEmpty) {
+                  setSheetState(() => pickedFile = result.files.first);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primary.withAlpha(40)),
+                ),
+                child: Row(children: [
+                  Icon(Icons.attach_file_rounded, size: 20, color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(
+                    pickedFile != null ? pickedFile!.name : l.t('notices.attachFile'),
+                    style: TextStyle(fontSize: 13, color: pickedFile != null ? AppColors.textPrimary : AppColors.textTertiary),
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                  )),
+                  if (pickedFile != null)
+                    GestureDetector(
+                      onTap: () => setSheetState(() => pickedFile = null),
+                      child: Icon(Icons.close_rounded, size: 18, color: AppColors.textTertiary),
+                    ),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 20),
+            GradientButton(label: l.t('common.submit'), onPressed: () async {
+              if (title.isEmpty || body.isEmpty) return;
+              try {
+                if (pickedFile != null && pickedFile!.path != null) {
+                  final formData = FormData.fromMap({
+                    'title': title, 'body': body, 'category': category,
+                    'file': await MultipartFile.fromFile(pickedFile!.path!, filename: pickedFile!.name),
+                  });
+                  await api.postMultipart('/notices/with-attachment', data: formData);
+                } else {
+                  await api.post('/notices', data: {'title': title, 'body': body, 'category': category});
+                }
+                if (context.mounted) Navigator.pop(context); cubit.load();
+              } catch (_) {}
+            }),
+          ])),
+        ),
       ),
     );
   }
@@ -172,15 +230,23 @@ class _NoticeCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         if (body.isNotEmpty) ...[const SizedBox(height: 4),
-          Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: AppColors.textSecondary))],
+          Text(body, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: AppColors.textSecondary))],
+        const SizedBox(height: 8),
+        Row(children: [
+          if ((notice['attachmentName'] ?? '').toString().isNotEmpty) ...[
+            Icon(Icons.attach_file_rounded, size: 14, color: AppColors.primary),
+            const SizedBox(width: 4),
+            Text(notice['attachmentName'], style: TextStyle(fontSize: 11, color: AppColors.primary),
+                maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+          const Spacer(),
+          Text(AppLocalizations.of(context).t('notices.tapToRead'), style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
+          const SizedBox(width: 2),
+          Icon(Icons.arrow_forward_ios_rounded, size: 10, color: AppColors.primary),
+        ]),
       ]),
     );
   }
 
-  String _fmtDate(String iso) {
-    try { final dt = DateTime.parse(iso); final d = DateTime.now().difference(dt);
-      if (d.inDays == 0) return 'Today'; if (d.inDays == 1) return 'Yesterday';
-      if (d.inDays < 7) return '${d.inDays}d ago'; return '${dt.day}/${dt.month}/${dt.year}';
-    } catch (_) { return ''; }
-  }
+  String _fmtDate(String iso) => formatTimeAgo(iso);
 }

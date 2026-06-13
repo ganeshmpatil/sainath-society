@@ -4,16 +4,17 @@ import "time"
 
 // UserResponse represents user data in API response
 type UserResponse struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Email       string   `json:"email"`
-	Phone       string   `json:"phone"`
-	Role        string   `json:"role"`
-	Designation string   `json:"designation,omitempty"`
-	FlatID      string   `json:"flatId,omitempty"`
-	FlatNumber  string   `json:"flatNumber,omitempty"`
-	Permissions []string `json:"permissions"`
-	IsActive    bool     `json:"isActive"`
+	ID                 string   `json:"id"`
+	Name               string   `json:"name"`
+	Email              string   `json:"email"`
+	Phone              string   `json:"phone"`
+	Role               string   `json:"role"`
+	Designation        string   `json:"designation,omitempty"`
+	FlatID             string   `json:"flatId,omitempty"`
+	FlatNumber         string   `json:"flatNumber,omitempty"`
+	Permissions        []string `json:"permissions"`
+	IsActive           bool     `json:"isActive"`
+	MustChangePassword bool     `json:"mustChangePassword"`
 }
 
 // LoginResponse represents successful login response

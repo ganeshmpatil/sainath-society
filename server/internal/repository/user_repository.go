@@ -112,6 +112,21 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]models.User, error) {
 	return users, err
 }
 
+// FindByMemberID finds a user by their linked member ID.
+func (r *UserRepository) FindByMemberID(ctx context.Context, memberID uuid.UUID) (*models.User, error) {
+	var user models.User
+	err := r.db.WithContext(ctx).
+		Preload(preloadMember).
+		Preload(preloadMemberFlat).
+		Preload(preloadFlatWing).
+		Where("member_id = ?", memberID).
+		First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Create creates a new user
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 	return r.db.WithContext(ctx).Create(user).Error

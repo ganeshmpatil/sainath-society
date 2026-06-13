@@ -87,6 +87,16 @@ class ApiClient {
   Future<Response> delete(String path) {
     return _dio.delete(path);
   }
+
+  Future<Response> postMultipart(String path, {required FormData data}) {
+    return _dio.post(path, data: data,
+        options: Options(contentType: 'multipart/form-data'));
+  }
+
+  Future<Response<List<int>>> getBytes(String path) {
+    return _dio.get<List<int>>(path,
+        options: Options(responseType: ResponseType.bytes));
+  }
 }
 
 final api = ApiClient.instance;
