@@ -5,14 +5,14 @@ class StatCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color iconBgColor;
+  final Color iconColor;
 
   const StatCard({
     super.key,
     required this.icon,
     required this.label,
     required this.value,
-    required this.iconBgColor,
+    required this.iconColor,
   });
 
   @override
@@ -26,21 +26,22 @@ class StatCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: iconBgColor,
+              color: iconColor.withAlpha(30),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 16, color: Colors.white.withAlpha(200)),
+            child: Icon(icon, size: 16, color: iconColor),
           ),
-          const SizedBox(height: 8),
+          const Spacer(),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),
@@ -48,6 +49,8 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 11,
               color: AppColors.textTertiary,

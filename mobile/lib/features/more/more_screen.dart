@@ -122,7 +122,7 @@ class MoreScreen extends StatelessWidget {
                                 color: m.color,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(m.icon, size: 22, color: Colors.white.withAlpha(200)),
+                              child: Icon(m.icon, size: 22, color: AppColors.textPrimary),
                             ),
                             const SizedBox(height: 8),
                             Text(
