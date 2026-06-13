@@ -56,7 +56,7 @@ func (h *ResidentHandler) List(c *gin.Context) {
 		r := models.Role(s)
 		roleFilter = &r
 	}
-	onlyActive := c.Query("activeOnly") == "true"
+	onlyActive := c.Query("activeOnly") != "false"
 	rows, err := h.repo.List(actor, roleFilter, onlyActive)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "LIST_FAILED"})
