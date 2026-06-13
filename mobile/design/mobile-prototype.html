@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Society Mitra - Mobile UX Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f0f1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  /* === DESIGN SYSTEM HEADER === */
+  .design-header {
+    max-width: 1200px;
+    width: 100%;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .design-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .design-header p { color: #94a3b8; font-size: 14px; }
+  .design-header .meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .design-header .meta span {
+    padding: 4px 12px;
+    background: #1e1b4b33;
+    border: 1px solid #a855f720;
+    border-radius: 20px;
+  }
+
+  /* === SCREEN GALLERY === */
+  .screen-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 1200px;
+    margin-bottom: 30px;
+  }
+  .screen-nav button {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .screen-nav button:hover, .screen-nav button.active {
+    background: linear-gradient(135deg, #7c3aed20, #06b6d420);
+    color: #e2e8f0;
+    border-color: #7c3aed60;
+  }
+
+  /* === PHONE FRAME === */
+  .phone-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1400px;
+  }
+  .phone-wrapper {
+    text-align: center;
+  }
+  .phone-wrapper .screen-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a855f7;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .phone-wrapper .screen-sublabel {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: #0a0a14;
+    border-radius: 44px;
+    border: 3px solid #1e293b;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,58,237,0.1);
+  }
+  .phone .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 30px;
+    background: #0a0a14;
+    border-radius: 0 0 20px 20px;
+    z-index: 50;
+  }
+  .phone .status-bar {
+    height: 50px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+    z-index: 40;
+    position: relative;
+  }
+  .phone .status-bar .time { font-size: 15px; font-weight: 700; }
+  .phone .status-bar .icons { display: flex; gap: 6px; font-size: 11px; }
+
+  .screen-content {
+    height: calc(100% - 50px);
+    overflow-y: auto;
+    padding-bottom: 80px;
+    scrollbar-width: none;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(180deg, #0a0a1400, #0a0a14 20%);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px 16px;
+    z-index: 30;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: #64748b;
+    cursor: pointer;
+  }
+  .nav-item.active { color: #a855f7; }
+  .nav-item .nav-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .nav-item.active .nav-icon {
+    background: linear-gradient(135deg, #7c3aed30, #06b6d430);
+  }
+
+  /* Home indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 4px;
+    background: #475569;
+    border-radius: 4px;
+    z-index: 40;
+  }
+
+  /* === COMPONENT STYLES === */
+
+  /* App Bar */
+  .app-bar {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .app-bar h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .app-bar .subtitle {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  .app-bar-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #a855f7;
+    border: 1px solid #334155;
+  }
+
+  /* Cards */
+  .card {
+    margin: 0 16px 12px;
+    padding: 16px;
+    background: #111827;
+    border-radius: 16px;
+    border: 1px solid #1e293b;
+  }
+  .card-glass {
+    background: linear-gradient(135deg, #1e1b4b15, #0e749010);
+    border: 1px solid #7c3aed20;
+  }
+
+  /* Stat cards */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+  .stat-card-m {
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #1e293b;
+    background: #111827;
+  }
+  .stat-card-m .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+  .stat-card-m .stat-label {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .stat-card-m .stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* Quick actions grid */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+  .quick-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    border-radius: 14px;
+    background: #111827;
+    border: 1px solid #1e293b;
+  }
+  .quick-item .qi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .quick-item .qi-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* List items */
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin: 0 16px 8px;
+    background: #111827;
+    border-radius: 14px;
+    border: 1px solid #1e293b;
+  }
+  .list-item .li-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .list-item .li-content { flex: 1; min-width: 0; }
+  .list-item .li-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .list-item .li-sub {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  .list-item .li-badge {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Badges */
+  .badge-urgent { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
+  .badge-high { background: #f9731620; color: #fb923c; border: 1px solid #f9731640; }
+  .badge-medium { background: #eab30820; color: #fbbf24; border: 1px solid #eab30840; }
+  .badge-open { background: #3b82f620; color: #60a5fa; border: 1px solid #3b82f640; }
+  .badge-resolved { background: #10b98120; color: #34d399; border: 1px solid #10b98140; }
+  .badge-green { background: #10b98120; color: #34d399; border: 1px solid #10b98140; }
+  .badge-purple { background: #a855f720; color: #c084fc; border: 1px solid #a855f740; }
+  .badge-cyan { background: #06b6d420; color: #22d3ee; border: 1px solid #06b6d440; }
+
+  /* Section header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 16px 10px;
+  }
+  .section-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .section-header .see-all {
+    font-size: 12px;
+    color: #a855f7;
+    font-weight: 500;
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 90px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+    z-index: 20;
+  }
+
+  /* Input fields */
+  .input-field {
+    width: 100%;
+    padding: 12px 14px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .input-field::placeholder { color: #475569; }
+  .input-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .btn-outline {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #7c3aed60;
+    border-radius: 10px;
+    color: #a855f7;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Filter chips */
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+  }
+  .chip.active {
+    background: linear-gradient(135deg, #7c3aed20, #06b6d420);
+    color: #e2e8f0;
+    border-color: #7c3aed60;
+  }
+
+  /* Search bar */
+  .search-bar {
+    margin: 0 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 14px;
+  }
+  .search-bar .search-icon { color: #475569; font-size: 16px; }
+  .search-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    font-size: 14px;
+    outline: none;
+  }
+
+  /* Language toggle */
+  .lang-toggle {
+    display: flex;
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #334155;
+  }
+  .lang-toggle span {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+  }
+  .lang-toggle span.active {
+    background: linear-gradient(135deg, #7c3aed30, #06b6d430);
+    color: #e2e8f0;
+  }
+
+  /* Separator */
+  .sep {
+    height: 1px;
+    background: #1e293b;
+    margin: 8px 16px;
+  }
+
+  /* Profile */
+  .profile-header {
+    text-align: center;
+    padding: 20px 16px;
+  }
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+    color: white;
+  }
+
+  /* Annotation / design note overlay */
+  .annotation {
+    max-width: 1200px;
+    width: 100%;
+    margin: 40px 0 20px;
+    padding: 20px 24px;
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-left: 3px solid #a855f7;
+    border-radius: 12px;
+  }
+  .annotation h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #a855f7;
+    margin-bottom: 8px;
+  }
+  .annotation p, .annotation li {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .annotation ul { padding-left: 20px; margin-top: 6px; }
+
+  /* Section title in spec */
+  .spec-section {
+    max-width: 1200px;
+    width: 100%;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .spec-section h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #e2e8f0;
+  }
+  .spec-section p {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .phone { width: 340px; height: 740px; border-radius: 36px; }
+    .phone-row { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<div class="design-header">
+  <h1>Society Mitra / Mobile UX Prototype</h1>
+  <p>Interactive Mobile Design Specification - Reference for Flutter Development</p>
+  <div class="meta">
+    <span>Platform: Android + iOS (Flutter)</span>
+    <span>Language: Bilingual EN + MR</span>
+    <span>Theme: Dark Glassmorphism</span>
+    <span>Version: 1.0</span>
+    <span>Date: June 2026</span>
+  </div>
+</div>
+
+<!-- ===================== DESIGN SYSTEM NOTES ===================== -->
+<div class="annotation">
+  <h3>Design System / Design Tokens</h3>
+  <ul>
+    <li><b>Primary Gradient:</b> #7C3AED (purple-600) -> #06B6D4 (cyan-500)</li>
+    <li><b>Background:</b> #0A0A14 (near-black), Cards: #111827 (gray-900)</li>
+    <li><b>Text:</b> #F8FAFC (primary), #94A3B8 (secondary), #64748B (tertiary)</li>
+    <li><b>Border radius:</b> Cards 16px, Buttons 14px, Chips 20px, Inputs 12px</li>
+    <li><b>Spacing:</b> Screen padding 16px, Card padding 16px, Gap 12px</li>
+    <li><b>Typography:</b> Inter / System - Titles 22px/700, Body 14px/400, Captions 11px/500</li>
+    <li><b>Icons:</b> Material Symbols Rounded, 24px nav, 20px inline</li>
+    <li><b>Bottom Nav:</b> 5 primary tabs: Home, Notices, Grievances, Finance, More</li>
+    <li><b>Language toggle:</b> Always visible in app bar or settings - EN | MR</li>
+  </ul>
+</div>
+
+<!-- ===================== SCREEN 1: LOGIN ===================== -->
+<div class="spec-section">
+  <h2>1. Authentication Screens</h2>
+  <p>Login + Registration (3-step OTP flow)</p>
+</div>
+
+<div class="phone-row">
+  <!-- LOGIN -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Login</div>
+    <div class="screen-sublabel">Email + Password | Demo: chairman@sainath.com</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content" style="display:flex; flex-direction:column; justify-content:center; padding:0 24px;">
+        <div style="text-align:center; margin-bottom:40px;">
+          <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#7c3aed,#06b6d4);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;">&#x1F3E0;</div>
+          <h2 style="font-size:24px;font-weight:800;background:linear-gradient(135deg,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Society Mitra</h2>
+          <p style="font-size:13px;color:#64748b;margin-top:4px;">Sainath Society Management</p>
+        </div>
+
+        <div class="lang-toggle" style="align-self:center;margin-bottom:24px;">
+          <span class="active">English</span>
+          <span>Marathi</span>
+        </div>
+
+        <label class="input-label">Email</label>
+        <div class="input-field" style="color:#475569;">chairman@sainath.com</div>
+
+        <label class="input-label">Password</label>
+        <div class="input-field" style="color:#475569;">............</div>
+
+        <div class="btn-primary" style="margin-top:8px;">Sign In / Log In</div>
+
+        <p style="text-align:center;font-size:12px;color:#64748b;margin-top:20px;">
+          New member? <span style="color:#a855f7;font-weight:600;">Register here</span>
+        </p>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Register - Step 1</div>
+    <div class="screen-sublabel">Flat number verification + OTP</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content" style="padding:0 24px; padding-top:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+          <span style="font-size:20px;color:#94a3b8;">&#8592;</span>
+          <h2 style="font-size:20px;font-weight:700;color:#f8fafc;">Register</h2>
+        </div>
+
+        <!-- Step indicator -->
+        <div style="display:flex;gap:8px;margin-bottom:28px;">
+          <div style="flex:1;height:3px;border-radius:3px;background:linear-gradient(90deg,#7c3aed,#06b6d4);"></div>
+          <div style="flex:1;height:3px;border-radius:3px;background:#1e293b;"></div>
+          <div style="flex:1;height:3px;border-radius:3px;background:#1e293b;"></div>
+        </div>
+
+        <p style="font-size:14px;color:#94a3b8;margin-bottom:20px;">Enter your flat number to verify your membership</p>
+
+        <label class="input-label">Wing / Tower</label>
+        <div class="input-field" style="color:#475569;">Select wing...</div>
+
+        <label class="input-label">Flat Number</label>
+        <div class="input-field" style="color:#475569;">e.g. A-101</div>
+
+        <label class="input-label">Registered Mobile</label>
+        <div class="input-field" style="color:#475569;">+91 XXXXX XXXXX</div>
+
+        <div class="btn-primary" style="margin-top:16px;">Send OTP / OTP Verify</div>
+
+        <div style="margin-top:24px;padding:14px;background:#111827;border-radius:14px;border:1px solid #1e293b;">
+          <p style="font-size:12px;color:#64748b;line-height:1.6;">
+            Your flat must be registered in the society database. Contact the secretary if you're not listed.
+          </p>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 2: DASHBOARD ===================== -->
+<div class="spec-section">
+  <h2>2. Dashboard / Home Screen</h2>
+  <p>Primary landing screen with stats, quick actions, and recent activity</p>
+</div>
+
+<div class="annotation">
+  <h3>Dashboard UX Notes</h3>
+  <ul>
+    <li><b>Hero stats:</b> 4 key metrics in a 2x2 grid - Members, Flats, Grievances, Pending Dues</li>
+    <li><b>Quick Actions:</b> 8-icon grid for most-used modules - one-tap navigation</li>
+    <li><b>Activity feed:</b> Recent notices + grievances as scrollable cards</li>
+    <li><b>Pull-to-refresh:</b> Refresh all dashboard data</li>
+    <li><b>Admin users:</b> See additional admin badge + quick links to Tasks module</li>
+  </ul>
+</div>
+
+<div class="phone-row">
+  <div class="phone-wrapper">
+    <div class="screen-label">Dashboard - Home</div>
+    <div class="screen-sublabel">Primary screen after login</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <!-- App bar -->
+        <div class="app-bar">
+          <div>
+            <p style="font-size:13px;color:#64748b;">Good morning,</p>
+            <h2 style="font-size:20px;">Ganesh Patil</h2>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="lang-toggle">
+              <span class="active">EN</span>
+              <span>MR</span>
+            </div>
+            <div class="app-bar-icon">&#x1F514;</div>
+          </div>
+        </div>
+
+        <!-- Admin badge -->
+        <div style="margin:0 16px 12px;display:inline-flex;padding:4px 12px;background:linear-gradient(135deg,#7c3aed20,#06b6d420);border:1px solid #06b6d440;border-radius:8px;">
+          <span style="font-size:11px;color:#22d3ee;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Admin / A-301</span>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="stat-grid">
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#3b82f620;">&#x1F465;</div>
+            <div class="stat-value">148</div>
+            <div class="stat-label">Members</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#a855f720;">&#x1F3E2;</div>
+            <div class="stat-value">96</div>
+            <div class="stat-label">Flats</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#f9731620;">&#x26A0;</div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Open Issues</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#10b98120;">&#x20B9;</div>
+            <div class="stat-value">42K</div>
+            <div class="stat-label">Pending Dues</div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="section-header">
+          <h3>Quick Actions</h3>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#ef444420;">&#x1F4E2;</div>
+            <span class="qi-label">Notices</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#f9731620;">&#x1F4DD;</div>
+            <span class="qi-label">Grievance</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#10b98120;">&#x20B9;</div>
+            <span class="qi-label">Finance</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#3b82f620;">&#x1F3E0;</div>
+            <span class="qi-label">My Flat</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#a855f720;">&#x1F5F3;</div>
+            <span class="qi-label">Polls</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#06b6d420;">&#x1F697;</div>
+            <span class="qi-label">Vehicles</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#eab30820;">&#x1F4C5;</div>
+            <span class="qi-label">Meetings</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#64748b20;">&#x2022;&#x2022;&#x2022;</div>
+            <span class="qi-label">More</span>
+          </div>
+        </div>
+
+        <!-- Recent Notices -->
+        <div class="section-header">
+          <h3>Recent Notices</h3>
+          <span class="see-all">See all &#8594;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#ef444420;">&#x1F4E2;</div>
+          <div class="li-content">
+            <div class="li-title">Water tank cleaning schedule</div>
+            <div class="li-sub">Today, 10:30 AM</div>
+          </div>
+          <div class="li-badge badge-urgent">New</div>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#3b82f620;">&#x1F4E2;</div>
+          <div class="li-content">
+            <div class="li-title">Monthly maintenance due reminder</div>
+            <div class="li-sub">Yesterday, 5:00 PM</div>
+          </div>
+        </div>
+
+        <!-- Active Grievances -->
+        <div class="section-header" style="margin-top:8px;">
+          <h3>Active Grievances</h3>
+          <span class="see-all">See all &#8594;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#f9731620;">&#x26A0;</div>
+          <div class="li-content">
+            <div class="li-title">Lift not working - B wing</div>
+            <div class="li-sub">GR-2024-089 &bull; Raised by Rahul S.</div>
+          </div>
+          <div class="li-badge badge-urgent">Urgent</div>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#eab30820;">&#x26A0;</div>
+          <div class="li-content">
+            <div class="li-title">Parking dispute - Slot 23</div>
+            <div class="li-sub">GR-2024-087 &bull; Raised by Suresh M.</div>
+          </div>
+          <div class="li-badge badge-medium">Medium</div>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard Marathi variant -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Dashboard - Marathi</div>
+    <div class="screen-sublabel">Same screen in Marathi locale</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div>
+            <p style="font-size:13px;color:#64748b;">सुप्रभात,</p>
+            <h2 style="font-size:20px;">गणेश पाटील</h2>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="lang-toggle">
+              <span>EN</span>
+              <span class="active">MR</span>
+            </div>
+            <div class="app-bar-icon">&#x1F514;</div>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 12px;display:inline-flex;padding:4px 12px;background:linear-gradient(135deg,#7c3aed20,#06b6d420);border:1px solid #06b6d440;border-radius:8px;">
+          <span style="font-size:11px;color:#22d3ee;font-weight:600;">प्रशासक / A-301</span>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#3b82f620;">&#x1F465;</div>
+            <div class="stat-value">148</div>
+            <div class="stat-label">सदस्य</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#a855f720;">&#x1F3E2;</div>
+            <div class="stat-value">96</div>
+            <div class="stat-label">सदनिका</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#f9731620;">&#x26A0;</div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">तक्रारी</div>
+          </div>
+          <div class="stat-card-m">
+            <div class="stat-icon" style="background:#10b98120;">&#x20B9;</div>
+            <div class="stat-value">42K</div>
+            <div class="stat-label">थकबाकी</div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <h3>जलद कृती</h3>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#ef444420;">&#x1F4E2;</div>
+            <span class="qi-label">सूचना</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#f9731620;">&#x1F4DD;</div>
+            <span class="qi-label">तक्रार</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#10b98120;">&#x20B9;</div>
+            <span class="qi-label">वित्त</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#3b82f620;">&#x1F3E0;</div>
+            <span class="qi-label">माझी सदनिका</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#a855f720;">&#x1F5F3;</div>
+            <span class="qi-label">मतदान</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#06b6d420;">&#x1F697;</div>
+            <span class="qi-label">वाहने</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#eab30820;">&#x1F4C5;</div>
+            <span class="qi-label">सभा</span>
+          </div>
+          <div class="quick-item">
+            <div class="qi-icon" style="background:#64748b20;">&#x2022;&#x2022;&#x2022;</div>
+            <span class="qi-label">अधिक</span>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <h3>अलीकडील सूचना</h3>
+          <span class="see-all">सर्व पहा &#8594;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#ef444420;">&#x1F4E2;</div>
+          <div class="li-content">
+            <div class="li-title">पाण्याच्या टाकीची सफाई वेळापत्रक</div>
+            <div class="li-sub">आज, सकाळी 10:30</div>
+          </div>
+          <div class="li-badge badge-urgent">नवीन</div>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#3b82f620;">&#x1F4E2;</div>
+          <div class="li-content">
+            <div class="li-title">मासिक देखभाल शुल्क स्मरणपत्र</div>
+            <div class="li-sub">काल, संध्याकाळी 5:00</div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-top:8px;">
+          <h3>सक्रिय तक्रारी</h3>
+          <span class="see-all">सर्व पहा &#8594;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:#f9731620;">&#x26A0;</div>
+          <div class="li-content">
+            <div class="li-title">लिफ्ट बंद - B विंग</div>
+            <div class="li-sub">GR-2024-089 &bull; राहुल एस.</div>
+          </div>
+          <div class="li-badge badge-urgent">तातडी</div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>मुख्यपृष्ठ</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>सूचना</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>तक्रार</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>वित्त</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>अधिक</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 3: GRIEVANCES ===================== -->
+<div class="spec-section">
+  <h2>3. Grievances Module</h2>
+  <p>List view with filters + Create form (bottom sheet) + Detail view</p>
+</div>
+
+<div class="annotation">
+  <h3>Grievance UX Notes</h3>
+  <ul>
+    <li><b>List:</b> Scrollable cards with priority color-coded left border</li>
+    <li><b>Filters:</b> Horizontal chip row (All, Open, In Progress, Resolved, Closed)</li>
+    <li><b>Create:</b> FAB triggers bottom sheet with form fields</li>
+    <li><b>Detail:</b> Full-screen view with status timeline + admin actions</li>
+    <li><b>Admin:</b> Can update status (Mark In Progress / Mark Resolved) inline</li>
+    <li><b>Search:</b> Search bar filters by title/ticket number</li>
+  </ul>
+</div>
+
+<div class="phone-row">
+  <!-- Grievance List -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Grievance List</div>
+    <div class="screen-sublabel">Filter + search + card list</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div>
+            <h2>Grievances</h2>
+            <span class="subtitle">Manage complaints</span>
+          </div>
+          <div class="app-bar-icon">&#x1F50D;</div>
+        </div>
+
+        <!-- Filter chips -->
+        <div class="chip-row">
+          <div class="chip active">All (24)</div>
+          <div class="chip">Open (12)</div>
+          <div class="chip">In Progress (5)</div>
+          <div class="chip">Resolved (4)</div>
+          <div class="chip">Closed (3)</div>
+        </div>
+
+        <!-- Grievance cards -->
+        <div style="margin:0 16px 10px; padding:16px; background:#111827; border-radius:16px; border:1px solid #1e293b; border-left:3px solid #ef4444;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:11px;color:#64748b;font-family:monospace;">GR-2024-089</span>
+            <span class="li-badge badge-urgent" style="font-size:9px;">URGENT</span>
+            <span class="li-badge badge-open" style="font-size:9px;">OPEN</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Lift not working - B wing</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            The elevator in B wing has been non-functional since yesterday. Elderly residents are facing difficulty.
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <span style="font-size:11px;color:#64748b;">Rahul S. &bull; 2 hours ago</span>
+            <span style="font-size:11px;color:#a855f7;">&#8594; Details</span>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 10px; padding:16px; background:#111827; border-radius:16px; border:1px solid #1e293b; border-left:3px solid #f97316;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:11px;color:#64748b;font-family:monospace;">GR-2024-087</span>
+            <span class="li-badge badge-high" style="font-size:9px;">HIGH</span>
+            <span class="li-badge badge-cyan" style="font-size:9px;">IN PROGRESS</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Water leakage in parking</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Continuous water leakage near parking slot 15-20 causing damage to vehicles.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <span style="font-size:11px;color:#64748b;">Priya K. &bull; 1 day ago</span>
+            <span style="font-size:11px;color:#a855f7;">&#8594; Details</span>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 10px; padding:16px; background:#111827; border-radius:16px; border:1px solid #1e293b; border-left:3px solid #eab308;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:11px;color:#64748b;font-family:monospace;">GR-2024-085</span>
+            <span class="li-badge badge-medium" style="font-size:9px;">MEDIUM</span>
+            <span class="li-badge badge-open" style="font-size:9px;">OPEN</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Noisy construction work after 10 PM</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Flat C-402 doing renovation work late at night causing disturbance.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <span style="font-size:11px;color:#64748b;">Amit P. &bull; 3 days ago</span>
+            <span style="font-size:11px;color:#a855f7;">&#8594; Details</span>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 10px; padding:16px; background:#111827; border-radius:16px; border:1px solid #1e293b; border-left:3px solid #10b981;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:11px;color:#64748b;font-family:monospace;">GR-2024-082</span>
+            <span class="li-badge badge-medium" style="font-size:9px;">MEDIUM</span>
+            <span class="li-badge badge-resolved" style="font-size:9px;">RESOLVED</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Garden lights not working</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Multiple garden area lights were out near the children's play area.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <span style="font-size:11px;color:#64748b;">Meera J. &bull; 1 week ago</span>
+            <span style="font-size:11px;color:#a855f7;">&#8594; Details</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <div class="fab">+</div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Create Grievance (Bottom Sheet) -->
+  <div class="phone-wrapper">
+    <div class="screen-label">New Grievance</div>
+    <div class="screen-sublabel">Bottom sheet form</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content" style="position:relative;">
+        <!-- Dimmed background -->
+        <div style="opacity:0.3; pointer-events:none;">
+          <div class="app-bar">
+            <div><h2>Grievances</h2></div>
+          </div>
+          <div class="chip-row">
+            <div class="chip active">All</div>
+            <div class="chip">Open</div>
+          </div>
+        </div>
+
+        <!-- Bottom sheet -->
+        <div style="position:absolute;bottom:0;left:0;right:0;background:#111827;border-radius:24px 24px 0 0;border:1px solid #334155;border-bottom:none;padding:20px 20px 40px;">
+          <div style="width:40px;height:4px;background:#475569;border-radius:4px;margin:0 auto 20px;"></div>
+          <h3 style="font-size:18px;font-weight:700;color:#f8fafc;margin-bottom:20px;">New Grievance</h3>
+
+          <label class="input-label">Subject / Title</label>
+          <div class="input-field" style="color:#475569;">Enter complaint title...</div>
+
+          <label class="input-label">Description</label>
+          <div class="input-field" style="height:80px;color:#475569;">Describe your issue in detail...</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label class="input-label">Category</label>
+              <div class="input-field" style="color:#94a3b8;font-size:13px;">Maintenance &#x25BE;</div>
+            </div>
+            <div>
+              <label class="input-label">Priority</label>
+              <div class="input-field" style="color:#fbbf24;font-size:13px;">Medium &#x25BE;</div>
+            </div>
+          </div>
+
+          <label class="input-label">Attach Photo (optional)</label>
+          <div style="padding:20px;border:2px dashed #334155;border-radius:12px;text-align:center;margin-bottom:16px;">
+            <span style="font-size:24px;">&#x1F4F7;</span>
+            <p style="font-size:12px;color:#64748b;margin-top:6px;">Tap to add photo</p>
+          </div>
+
+          <div class="btn-primary">Submit Grievance</div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Grievance Detail -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Grievance Detail</div>
+    <div class="screen-sublabel">Status timeline + Admin actions</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;color:#94a3b8;">&#8592;</span>
+            <div>
+              <h2 style="font-size:18px;">GR-2024-089</h2>
+              <span class="subtitle">Grievance Details</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 12px;">
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <span class="li-badge badge-urgent">URGENT</span>
+            <span class="li-badge badge-open">OPEN</span>
+            <span class="li-badge badge-purple">MAINTENANCE</span>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;color:#f8fafc;">Lift not working - B wing</h3>
+          <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6;">
+            The elevator in B wing has been non-functional since yesterday morning. Elderly residents and families with small children are facing significant difficulty climbing stairs.
+          </p>
+        </div>
+
+        <!-- Raised by -->
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);font-size:16px;">RS</div>
+          <div class="li-content">
+            <div class="li-title">Rahul Sharma</div>
+            <div class="li-sub">B-205 &bull; Raised 2 hours ago</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- Status Timeline -->
+        <div style="padding:12px 16px;">
+          <h4 style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:14px;">Status Timeline</h4>
+          <div style="display:flex;gap:12px;margin-bottom:16px;">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div style="width:10px;height:10px;border-radius:50%;background:#3b82f6;"></div>
+              <div style="width:2px;flex:1;background:#1e293b;"></div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f1f5f9;">Created</div>
+              <div style="font-size:11px;color:#64748b;">12 Jun 2026, 7:30 AM by Rahul S.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div style="width:10px;height:10px;border-radius:50%;background:#334155;border:2px solid #475569;"></div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:#64748b;">Awaiting action...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- Admin actions -->
+        <div style="padding:12px 16px;">
+          <h4 style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:12px;">Admin Actions</h4>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;padding:12px;text-align:center;background:#06b6d420;border:1px solid #06b6d440;border-radius:12px;">
+              <span style="font-size:13px;font-weight:600;color:#22d3ee;">Mark In Progress</span>
+            </div>
+            <div style="flex:1;padding:12px;text-align:center;background:#10b98120;border:1px solid #10b98140;border-radius:12px;">
+              <span style="font-size:13px;font-weight:600;color:#34d399;">Mark Resolved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add comment -->
+        <div style="padding:0 16px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="input-field" style="flex:1;margin-bottom:0;font-size:13px;color:#475569;">Add a comment...</div>
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;">&#x27A4;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 4: NOTICES ===================== -->
+<div class="spec-section">
+  <h2>4. Notices & Announcements</h2>
+  <p>Notice board with priority tags + detail view</p>
+</div>
+
+<div class="phone-row">
+  <div class="phone-wrapper">
+    <div class="screen-label">Notices List</div>
+    <div class="screen-sublabel">Bilingual notice cards</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div>
+            <h2>Notices</h2>
+            <span class="subtitle">Society announcements</span>
+          </div>
+          <div class="app-bar-icon">&#x1F50D;</div>
+        </div>
+
+        <div class="chip-row">
+          <div class="chip active">All</div>
+          <div class="chip">Important</div>
+          <div class="chip">General</div>
+          <div class="chip">Maintenance</div>
+        </div>
+
+        <div style="margin:0 16px 10px;padding:16px;background:linear-gradient(135deg,#7c3aed10,#06b6d410);border-radius:16px;border:1px solid #7c3aed30;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="li-badge badge-urgent" style="font-size:9px;">IMPORTANT</span>
+            <span style="font-size:11px;color:#64748b;">Today</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Annual General Meeting - July 15</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">All members are requested to attend the AGM scheduled for July 15th at 6 PM in the community hall.</div>
+          <div style="font-size:11px;color:#a855f7;margin-top:8px;">Published by: Secretary</div>
+        </div>
+
+        <div style="margin:0 16px 10px;padding:16px;background:#111827;border-radius:16px;border:1px solid #1e293b;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="li-badge badge-cyan" style="font-size:9px;">GENERAL</span>
+            <span style="font-size:11px;color:#64748b;">Yesterday</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Water tank cleaning - June 14</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Water supply will be disrupted from 9 AM to 2 PM on June 14th for tank cleaning.</div>
+        </div>
+
+        <div style="margin:0 16px 10px;padding:16px;background:#111827;border-radius:16px;border:1px solid #1e293b;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="li-badge badge-medium" style="font-size:9px;">MAINTENANCE</span>
+            <span style="font-size:11px;color:#64748b;">3 days ago</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Monthly maintenance due - June 2026</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Kindly pay your monthly maintenance of Rs. 3,500 before June 15th to avoid late fee.</div>
+        </div>
+
+        <div style="margin:0 16px 10px;padding:16px;background:#111827;border-radius:16px;border:1px solid #1e293b;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="li-badge badge-green" style="font-size:9px;">EVENT</span>
+            <span style="font-size:11px;color:#64748b;">5 days ago</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;">Ganesh Chaturthi celebration</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Society-wide Ganesh Chaturthi celebration from Aug 22-31. Contribution: Rs. 500 per flat.</div>
+        </div>
+      </div>
+
+      <div class="fab">+</div>
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Finance & Bills</div>
+    <div class="screen-sublabel">Dues overview + payment list</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div>
+            <h2>Finance</h2>
+            <span class="subtitle">Bills & payments</span>
+          </div>
+        </div>
+
+        <!-- Summary card -->
+        <div style="margin:0 16px 16px;padding:20px;background:linear-gradient(135deg,#7c3aed20,#06b6d420);border-radius:20px;border:1px solid #7c3aed30;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <p style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">My Pending Dues</p>
+              <p style="font-size:32px;font-weight:800;color:#f8fafc;margin-top:4px;">&#x20B9;7,000</p>
+              <p style="font-size:11px;color:#f87171;margin-top:4px;">2 bills overdue</p>
+            </div>
+            <div style="padding:14px;background:linear-gradient(135deg,#7c3aed,#06b6d4);border-radius:16px;">
+              <span style="font-size:13px;font-weight:600;color:white;">Pay Now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chip-row">
+          <div class="chip active">All Bills</div>
+          <div class="chip">Pending</div>
+          <div class="chip">Paid</div>
+          <div class="chip">Overdue</div>
+        </div>
+
+        <div class="list-item">
+          <div class="li-avatar" style="background:#ef444420;">&#x20B9;</div>
+          <div class="li-content">
+            <div class="li-title">Monthly Maintenance - June</div>
+            <div class="li-sub">Due: 15 Jun 2026 &bull; &#x20B9;3,500</div>
+          </div>
+          <div class="li-badge badge-urgent">Overdue</div>
+        </div>
+
+        <div class="list-item">
+          <div class="li-avatar" style="background:#eab30820;">&#x20B9;</div>
+          <div class="li-content">
+            <div class="li-title">Monthly Maintenance - May</div>
+            <div class="li-sub">Due: 15 May 2026 &bull; &#x20B9;3,500</div>
+          </div>
+          <div class="li-badge badge-medium">Pending</div>
+        </div>
+
+        <div class="list-item">
+          <div class="li-avatar" style="background:#10b98120;">&#x20B9;</div>
+          <div class="li-content">
+            <div class="li-title">Monthly Maintenance - April</div>
+            <div class="li-sub">Paid: 12 Apr 2026 &bull; &#x20B9;3,500</div>
+          </div>
+          <div class="li-badge badge-green">Paid</div>
+        </div>
+
+        <div class="list-item">
+          <div class="li-avatar" style="background:#10b98120;">&#x20B9;</div>
+          <div class="li-content">
+            <div class="li-title">Sinking Fund - Q1 2026</div>
+            <div class="li-sub">Paid: 01 Apr 2026 &bull; &#x20B9;2,000</div>
+          </div>
+          <div class="li-badge badge-green">Paid</div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 5: MORE MODULES ===================== -->
+<div class="spec-section">
+  <h2>5. More Modules Grid + Key Screens</h2>
+  <p>The "More" tab shows all remaining modules in a grid layout</p>
+</div>
+
+<div class="phone-row">
+  <!-- More Menu -->
+  <div class="phone-wrapper">
+    <div class="screen-label">More Modules</div>
+    <div class="screen-sublabel">Grid access to all 16 modules</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div>
+            <h2>All Modules</h2>
+            <span class="subtitle">Society management</span>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <span class="search-icon">&#x1F50D;</span>
+          <input type="text" placeholder="Search modules..." disabled>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;">
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#3b82f620;width:44px;height:44px;font-size:22px;">&#x1F465;</div>
+            <span class="qi-label" style="font-size:11px;">Residents</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#a855f720;width:44px;height:44px;font-size:22px;">&#x1F3E2;</div>
+            <span class="qi-label" style="font-size:11px;">Flats</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#06b6d420;width:44px;height:44px;font-size:22px;">&#x1F697;</div>
+            <span class="qi-label" style="font-size:11px;">Vehicles</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#eab30820;width:44px;height:44px;font-size:22px;">&#x1F5F3;</div>
+            <span class="qi-label" style="font-size:11px;">Polls</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#10b98120;width:44px;height:44px;font-size:22px;">&#x1F4C5;</div>
+            <span class="qi-label" style="font-size:11px;">Meetings</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#f9731620;width:44px;height:44px;font-size:22px;">&#x2611;</div>
+            <span class="qi-label" style="font-size:11px;">Tasks</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#64748b20;width:44px;height:44px;font-size:22px;">&#x1F4E6;</div>
+            <span class="qi-label" style="font-size:11px;">Inventory</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#ef444420;width:44px;height:44px;font-size:22px;">&#x1F3E0;</div>
+            <span class="qi-label" style="font-size:11px;">Hall Booking</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#8b5cf620;width:44px;height:44px;font-size:22px;">&#x1F4D6;</div>
+            <span class="qi-label" style="font-size:11px;">Bylaws</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#06b6d420;width:44px;height:44px;font-size:22px;">&#x1F4DD;</div>
+            <span class="qi-label" style="font-size:11px;">Decisions</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#eab30820;width:44px;height:44px;font-size:22px;">&#x1F4A1;</div>
+            <span class="qi-label" style="font-size:11px;">Suggestions</span>
+          </div>
+          <div class="quick-item" style="padding:16px 8px;">
+            <div class="qi-icon" style="background:#10b98120;width:44px;height:44px;font-size:22px;">&#x1F6AA;</div>
+            <span class="qi-label" style="font-size:11px;">Move In/Out</span>
+          </div>
+        </div>
+
+        <div class="sep" style="margin-top:16px;"></div>
+
+        <!-- Profile section -->
+        <div class="list-item" style="margin-top:8px;">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);">GP</div>
+          <div class="li-content">
+            <div class="li-title">Ganesh Patil</div>
+            <div class="li-sub">A-301 &bull; Admin</div>
+          </div>
+          <span style="font-size:16px;color:#64748b;">&#x2699;</span>
+        </div>
+
+        <div class="list-item" style="border:1px solid #ef444430;">
+          <div class="li-avatar" style="background:#ef444420;">&#x23FB;</div>
+          <div class="li-content">
+            <div class="li-title" style="color:#f87171;">Logout</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Residents Directory -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Residents Directory</div>
+    <div class="screen-sublabel">Searchable member list</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;color:#94a3b8;">&#8592;</span>
+            <div>
+              <h2 style="font-size:18px;">Residents</h2>
+              <span class="subtitle">148 members</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <span class="search-icon">&#x1F50D;</span>
+          <input type="text" placeholder="Search by name or flat..." disabled>
+        </div>
+
+        <div class="chip-row">
+          <div class="chip active">All</div>
+          <div class="chip">A Wing</div>
+          <div class="chip">B Wing</div>
+          <div class="chip">C Wing</div>
+        </div>
+
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);">GP</div>
+          <div class="li-content">
+            <div class="li-title">Ganesh Patil</div>
+            <div class="li-sub">A-301 &bull; Owner &bull; Chairman</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);">RS</div>
+          <div class="li-content">
+            <div class="li-title">Rahul Sharma</div>
+            <div class="li-sub">B-205 &bull; Owner</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#06b6d4,#10b981);">PK</div>
+          <div class="li-content">
+            <div class="li-title">Priya Kulkarni</div>
+            <div class="li-sub">A-102 &bull; Owner &bull; Secretary</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#f97316,#eab308);">SM</div>
+          <div class="li-content">
+            <div class="li-title">Suresh Mane</div>
+            <div class="li-sub">C-401 &bull; Tenant</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#ef4444,#f97316);">MJ</div>
+          <div class="li-content">
+            <div class="li-title">Meera Joshi</div>
+            <div class="li-sub">B-103 &bull; Owner &bull; Treasurer</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+        <div class="list-item">
+          <div class="li-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);">AK</div>
+          <div class="li-content">
+            <div class="li-title">Amit Kale</div>
+            <div class="li-sub">A-202 &bull; Owner</div>
+          </div>
+          <span style="font-size:14px;color:#64748b;">&#x260E;</span>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Polls / Voting -->
+  <div class="phone-wrapper">
+    <div class="screen-label">Polls & Voting</div>
+    <div class="screen-sublabel">Active poll with vote options</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">LTE &nbsp; 100%</span>
+      </div>
+      <div class="screen-content">
+        <div class="app-bar">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;color:#94a3b8;">&#8592;</span>
+            <div>
+              <h2 style="font-size:18px;">Polls</h2>
+              <span class="subtitle">Society voting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chip-row">
+          <div class="chip active">Active (2)</div>
+          <div class="chip">Completed (5)</div>
+        </div>
+
+        <!-- Active poll card -->
+        <div style="margin:0 16px 12px;padding:20px;background:linear-gradient(135deg,#7c3aed10,#06b6d410);border-radius:20px;border:1px solid #7c3aed30;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span class="li-badge badge-green">ACTIVE</span>
+            <span style="font-size:11px;color:#64748b;">Ends: 20 Jun 2026</span>
+          </div>
+          <h3 style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">CCTV Camera Upgrade</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">Should the society invest Rs. 2.5L in upgrading CCTV cameras to HD?</p>
+
+          <!-- Options -->
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:13px;color:#e2e8f0;font-weight:500;">Yes, upgrade</span>
+              <span style="font-size:12px;color:#a855f7;font-weight:600;">68%</span>
+            </div>
+            <div style="height:6px;background:#1e293b;border-radius:6px;overflow:hidden;">
+              <div style="width:68%;height:100%;background:linear-gradient(90deg,#7c3aed,#06b6d4);border-radius:6px;"></div>
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:13px;color:#e2e8f0;font-weight:500;">No, not needed</span>
+              <span style="font-size:12px;color:#94a3b8;">22%</span>
+            </div>
+            <div style="height:6px;background:#1e293b;border-radius:6px;overflow:hidden;">
+              <div style="width:22%;height:100%;background:#475569;border-radius:6px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:13px;color:#e2e8f0;font-weight:500;">Defer to next quarter</span>
+              <span style="font-size:12px;color:#94a3b8;">10%</span>
+            </div>
+            <div style="height:6px;background:#1e293b;border-radius:6px;overflow:hidden;">
+              <div style="width:10%;height:100%;background:#475569;border-radius:6px;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid #334155;">
+            <span style="font-size:11px;color:#64748b;">72 of 96 members voted</span>
+            <div class="btn-outline">Cast Vote</div>
+          </div>
+        </div>
+
+        <!-- Completed poll -->
+        <div style="margin:0 16px 12px;padding:16px;background:#111827;border-radius:16px;border:1px solid #1e293b;opacity:0.7;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="li-badge badge-purple" style="font-size:9px;">COMPLETED</span>
+            <span style="font-size:11px;color:#64748b;">Ended: 1 Jun 2026</span>
+          </div>
+          <h3 style="font-size:15px;font-weight:600;color:#f1f5f9;">Garden renovation proposal</h3>
+          <p style="font-size:12px;color:#64748b;margin-top:4px;">Result: Approved (82% Yes)</p>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F3E0;</div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4E2;</div>
+          <span>Notices</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x1F4DD;</div>
+          <span>Grievance</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">&#x20B9;</div>
+          <span>Finance</span>
+        </div>
+        <div class="nav-item active">
+          <div class="nav-icon">&#x2630;</div>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NAVIGATION ARCHITECTURE ===================== -->
+<div class="spec-section">
+  <h2>6. Navigation Architecture</h2>
+  <p>Information architecture and screen flow</p>
+</div>
+
+<div class="annotation">
+  <h3>Navigation Pattern: Bottom Tabs + Drill-down</h3>
+  <ul>
+    <li><b>Bottom Nav (5 tabs):</b> Home | Notices | Grievances | Finance | More</li>
+    <li><b>Home tab:</b> Dashboard with stats + quick action grid (8 shortcuts)</li>
+    <li><b>More tab:</b> Grid of all 12 remaining modules + Profile + Settings + Logout</li>
+    <li><b>Each module:</b> List View -> Detail View -> Edit/Action (push navigation)</li>
+    <li><b>Create actions:</b> FAB (Floating Action Button) on list screens -> Bottom Sheet form</li>
+    <li><b>Back navigation:</b> System back + left arrow in app bar</li>
+    <li><b>Language toggle:</b> Available in Home app bar + Settings screen</li>
+  </ul>
+</div>
+
+<div class="annotation">
+  <h3>Screen Flow Map</h3>
+  <ul>
+    <li><b>Login</b> -> Register (3-step) OR -> Dashboard</li>
+    <li><b>Dashboard</b> -> Any module via Quick Actions or Bottom Nav</li>
+    <li><b>Grievances:</b> List (filter/search) -> Detail (timeline + actions) -> Create (bottom sheet)</li>
+    <li><b>Notices:</b> List (filter) -> Detail (full notice) -> Create (admin only)</li>
+    <li><b>Finance:</b> Summary card -> Bill list (filter) -> Bill detail -> Pay</li>
+    <li><b>Residents:</b> Search/filter -> Profile card -> Call/Message</li>
+    <li><b>Polls:</b> Active/Completed toggle -> Poll detail -> Cast vote</li>
+    <li><b>Vehicles:</b> My vehicles list -> Add vehicle form</li>
+    <li><b>Meetings:</b> Calendar view -> Meeting detail -> RSVP</li>
+    <li><b>Hall Booking:</b> Calendar -> Time slot picker -> Booking form</li>
+    <li><b>Flats:</b> Wing/floor grid -> Flat detail (ownership + history)</li>
+    <li><b>Inventory:</b> Category list -> Item list -> Item detail</li>
+    <li><b>Bylaws:</b> Document list -> PDF viewer</li>
+    <li><b>Tasks (Admin):</b> Kanban or list -> Task detail -> Assign/Update</li>
+  </ul>
+</div>
+
+<div class="annotation">
+  <h3>Design Principles Applied</h3>
+  <ul>
+    <li><b>Progressive disclosure:</b> Most common actions on Home, rest in More tab</li>
+    <li><b>Thumb-friendly:</b> Bottom nav, FAB for create actions, large touch targets (44px min)</li>
+    <li><b>Scannable:</b> Color-coded badges for status/priority, card-based layouts</li>
+    <li><b>Bilingual-first:</b> Language toggle always accessible, all content supports EN + MR</li>
+    <li><b>Dark theme:</b> Matches web app aesthetic - glassmorphism with purple/cyan accents</li>
+    <li><b>Minimal cognitive load:</b> One primary action per screen, clear hierarchy</li>
+    <li><b>Consistent patterns:</b> Every module follows List -> Detail -> Create pattern</li>
+    <li><b>Accessibility:</b> High contrast text, large fonts for elderly users, clear iconography</li>
+  </ul>
+</div>
+
+<!-- ===================== COMPONENT LIBRARY ===================== -->
+<div class="spec-section">
+  <h2>7. Component Library Reference</h2>
+  <p>Reusable Flutter widget patterns</p>
+</div>
+
+<div class="annotation">
+  <h3>Flutter Widget Mapping</h3>
+  <ul>
+    <li><b>Bottom Nav:</b> <code>NavigationBar</code> (Material 3) with 5 destinations</li>
+    <li><b>App Bar:</b> <code>SliverAppBar</code> with custom title + actions (language toggle, notification bell)</li>
+    <li><b>Stat Cards:</b> Custom <code>StatCard</code> widget - Container with gradient icon + value + label</li>
+    <li><b>Quick Actions Grid:</b> <code>GridView.count(crossAxisCount: 4)</code> with InkWell items</li>
+    <li><b>List Items:</b> Custom <code>ModuleListTile</code> - leading avatar, title, subtitle, trailing badge</li>
+    <li><b>Filter Chips:</b> <code>ChoiceChip</code> in horizontal <code>SingleChildScrollView</code></li>
+    <li><b>FAB:</b> <code>FloatingActionButton.extended</code> with gradient decoration</li>
+    <li><b>Bottom Sheet:</b> <code>showModalBottomSheet</code> with <code>DraggableScrollableSheet</code></li>
+    <li><b>Cards:</b> <code>Container</code> with BoxDecoration (borderRadius: 16, border: 1px solid #1e293b)</li>
+    <li><b>Inputs:</b> <code>TextField</code> with custom <code>InputDecoration</code> matching dark theme</li>
+    <li><b>Badges:</b> <code>Container</code> with color-coded background/text per status enum</li>
+    <li><b>Search Bar:</b> <code>SearchBar</code> (Material 3) or custom with <code>TextField</code></li>
+    <li><b>Language Toggle:</b> <code>SegmentedButton</code> (EN | MR) connected to <code>LocaleController</code></li>
+  </ul>
+</div>
+
+<div class="annotation">
+  <h3>Color Tokens (for Flutter ThemeData)</h3>
+  <ul>
+    <li><b>primary:</b> Color(0xFF7C3AED) — Purple 600</li>
+    <li><b>secondary:</b> Color(0xFF06B6D4) — Cyan 500</li>
+    <li><b>surface:</b> Color(0xFF111827) — Card background</li>
+    <li><b>background:</b> Color(0xFF0A0A14) — Screen background</li>
+    <li><b>onSurface:</b> Color(0xFFF8FAFC) — Primary text</li>
+    <li><b>onSurfaceVariant:</b> Color(0xFF94A3B8) — Secondary text</li>
+    <li><b>outline:</b> Color(0xFF1E293B) — Border color</li>
+    <li><b>error:</b> Color(0xFFEF4444) — Urgent/Overdue</li>
+    <li><b>tertiary:</b> Color(0xFF10B981) — Resolved/Paid/Success</li>
+    <li><b>Gradients:</b> LinearGradient(colors: [primary, secondary]) for CTAs and accents</li>
+  </ul>
+</div>
+
+<div class="annotation">
+  <h3>Typography Scale</h3>
+  <ul>
+    <li><b>displaySmall:</b> 28px/800 — Screen titles (Dashboard)</li>
+    <li><b>headlineMedium:</b> 22px/700 — App bar titles</li>
+    <li><b>titleLarge:</b> 18px/700 — Card titles</li>
+    <li><b>titleMedium:</b> 15px/600 — List item titles</li>
+    <li><b>bodyMedium:</b> 14px/400 — Body text</li>
+    <li><b>bodySmall:</b> 12px/400 — Descriptions</li>
+    <li><b>labelLarge:</b> 13px/600 — Button text</li>
+    <li><b>labelSmall:</b> 11px/500 — Badges, timestamps, captions</li>
+    <li><b>Marathi note:</b> Devanagari renders ~10% wider; test all strings in MR locale for overflow</li>
+  </ul>
+</div>
+
+<!-- Footer -->
+<div style="max-width:1200px;width:100%;text-align:center;padding:40px 0;border-top:1px solid #1e293b;margin-top:40px;">
+  <p style="font-size:13px;color:#64748b;">
+    Society Mitra Mobile UX Prototype v1.0 | Design Reference for Flutter Development<br>
+    Open this file in any browser | Print to PDF for sharing | Use as direct implementation reference
+  </p>
+</div>
+
+</body>
+</html>

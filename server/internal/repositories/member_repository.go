@@ -71,7 +71,22 @@ func (r *MemberRepository) Update(actor *ActorContext, id uuid.UUID, patch map[s
 		delete(patch, "flat_id")
 		delete(patch, "is_active")
 	}
-	return r.db.Model(&models.Member{}).Where("id = ?", id).Updates(patch).Error
+	if err := r.db.Model(&models.Member{}).Where("id = ?", id).Updates(patch).Error; err != nil {
+		return err
+	}
+
+	// Sync email/mobile to users table so login credentials stay current
+	userPatch := map[string]interface{}{}
+	if v, ok := patch["email"]; ok {
+		userPatch["email"] = v
+	}
+	if v, ok := patch["mobile"]; ok {
+		userPatch["mobile"] = v
+	}
+	if len(userPatch) > 0 {
+		r.db.Model(&models.User{}).Where("member_id = ?", id).Updates(userPatch)
+	}
+	return nil
 }
 
 // ListActiveWithEmail returns all active members who have an email address set.
