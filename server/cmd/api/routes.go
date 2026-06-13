@@ -89,7 +89,6 @@ func SetupRoutes(
 		authProtected.POST("/logout", authHandler.Logout)
 		authProtected.PUT("/password", authHandler.ChangePassword)
 		authProtected.POST("/admin-reset-password", authHandler.AdminResetPassword)
-		authProtected.PUT("/admin-update-email", authHandler.AdminUpdateLoginEmail)
 	}
 
 	// Protected soc_mitra_* routes — every route below passes through both
