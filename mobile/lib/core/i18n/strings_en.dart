@@ -43,6 +43,9 @@ const Map<String, String> stringsEn = {
   'common.profile': 'Profile',
   'common.settings': 'Settings',
   'common.more': 'More',
+  'common.theme': 'Theme',
+  'common.light': 'Light',
+  'common.dark': 'Dark',
 
   // Profile
   'profile.name': 'Full Name',

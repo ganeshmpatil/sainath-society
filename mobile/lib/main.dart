@@ -6,6 +6,7 @@ import 'core/api/api_client.dart';
 import 'core/auth/auth_bloc.dart';
 import 'core/auth/auth_event.dart';
 import 'core/i18n/locale_cubit.dart';
+import 'core/theme/theme_cubit.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ void main() {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => LocaleCubit()),
+        BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => AuthBloc()..add(const AuthCheckRequested())),
       ],
       child: const SainathSocietyApp(),

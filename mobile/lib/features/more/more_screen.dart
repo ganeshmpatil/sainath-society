@@ -8,6 +8,7 @@ import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_cubit.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/language_toggle.dart';
 
@@ -179,6 +180,52 @@ class MoreScreen extends StatelessWidget {
                       ),
                     ),
                     const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textTertiary),
+                  ],
+                ),
+              ),
+            ),
+
+            // Theme toggle
+            SliverToBoxAdapter(
+              child: GlassCard(
+                onTap: () => context.read<ThemeCubit>().toggle(),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBg,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        context.watch<ThemeCubit>().state == ThemeMode.dark
+                            ? Icons.dark_mode_rounded
+                            : Icons.light_mode_rounded,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l.t('common.theme'),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        context.watch<ThemeCubit>().state == ThemeMode.dark
+                            ? l.t('common.dark')
+                            : l.t('common.light'),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
+                      ),
+                    ),
                   ],
                 ),
               ),

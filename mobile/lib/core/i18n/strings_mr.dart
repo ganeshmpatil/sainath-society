@@ -43,6 +43,9 @@ const Map<String, String> stringsMr = {
   'common.profile': 'प्रोफाइल',
   'common.settings': 'सेटिंग्ज',
   'common.more': 'अधिक',
+  'common.theme': 'थीम',
+  'common.light': 'लाइट',
+  'common.dark': 'डार्क',
 
   // Profile
   'profile.name': 'पूर्ण नाव',
