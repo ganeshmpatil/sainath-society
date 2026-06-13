@@ -6,7 +6,6 @@ import '../core/auth/auth_bloc.dart';
 import '../core/auth/auth_state.dart';
 import '../features/auth/change_password_screen.dart';
 import '../features/auth/login_screen.dart';
-import '../features/auth/register_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/bylaws/bylaws_screen.dart';
 import '../features/finance/finance_screen.dart';
@@ -41,8 +40,7 @@ GoRouter buildRouter(AuthBloc authBloc) {
     redirect: (context, state) {
       final authState = authBloc.state;
       final isLoggedIn = authState is Authenticated;
-      final goingToAuth = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register';
+      final goingToAuth = state.matchedLocation == '/login';
       final goingToChangePassword = state.matchedLocation == '/change-password';
 
       if (!isLoggedIn && !goingToAuth) return '/login';
@@ -57,7 +55,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
     },
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
         path: '/change-password',
         builder: (_, state) => ChangePasswordScreen(
