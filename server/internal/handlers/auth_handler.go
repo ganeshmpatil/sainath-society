@@ -254,6 +254,39 @@ func (h *AuthHandler) AdminResetPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset. User must change on next login."})
 }
 
+// AdminUpdateLoginEmail lets an admin change a member's login email.
+func (h *AuthHandler) AdminUpdateLoginEmail(c *gin.Context) {
+	role, _ := c.Get("userRole")
+	if role != "ADMIN" {
+		c.JSON(http.StatusForbidden, response.ErrorResponse{Error: "Admin access required", Code: "FORBIDDEN"})
+		return
+	}
+	var req struct {
+		MemberID string `json:"memberId" binding:"required"`
+		NewEmail string `json:"newEmail" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	memberID, err := uuid.Parse(req.MemberID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid memberId", Code: "INVALID_ID"})
+		return
+	}
+	targetUser, err := h.authService.FindUserByMemberID(c.Request.Context(), memberID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, response.ErrorResponse{Error: "No user account for this member", Code: "NOT_FOUND"})
+		return
+	}
+	targetUser.Email = req.NewEmail
+	if err := h.authService.UpdateUser(c.Request.Context(), targetUser); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "UPDATE_FAILED"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Login email updated"})
+}
+
 // Logout handles user logout
 // @Summary Logout
 // @Description Invalidate refresh token
