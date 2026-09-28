@@ -5,6 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/auth/auth_bloc.dart';
+import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
@@ -12,6 +14,8 @@ import '../../shared/widgets/filter_chips_row.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/status_badge.dart';
+import 'bill_generate_screen.dart';
+import 'billing_structure_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -79,6 +83,11 @@ class _FVS extends State<_FV> {
     super.dispose();
   }
 
+  bool get _isAdmin {
+    final authState = context.read<AuthBloc>().state;
+    return authState is Authenticated && authState.user.role == 'ADMIN';
+  }
+
   void _onPaymentSuccess(PaymentSuccessResponse response) async {
     try {
       await api.post('/payments/verify', data: {
@@ -122,9 +131,8 @@ class _FVS extends State<_FV> {
       ));
       return;
     }
-    final billId = bill['id'];
     try {
-      final res = await api.post('/payments/create-order', data: {'billId': billId});
+      final res = await api.post('/payments/create-order', data: {'billId': bill['id']});
       final data = res.data;
       _razorpay.open({
         'key': data['razorpayKeyId'],
@@ -174,9 +182,139 @@ class _FVS extends State<_FV> {
     ]),
   );
 
+  void _showBillDetail(Map<String, dynamic> bill) {
+    final l = AppLocalizations.of(context);
+    final isMr = context.read<LocaleCubit>().state == 'mr';
+    final lineItems = (bill['lineItems'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final status = bill['status'] ?? 'ISSUED';
+    final total = (bill['totalAmount'] ?? 0).toDouble();
+    final paid = (bill['amountPaid'] ?? 0).toDouble();
+    final arrear = (bill['arrearAmount'] ?? 0).toDouble();
+    final interest = (bill['interestAmount'] ?? 0).toDouble();
+    final period = bill['billingPeriod'] ?? '';
+    final flat = bill['flat'];
+    final flatNumber = flat?['flatNumber'] ?? '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.85,
+        builder: (_, scrollCtrl) => ListView(
+          controller: scrollCtrl,
+          padding: const EdgeInsets.all(20),
+          children: [
+            // Header
+            Row(children: [
+              Expanded(child: Text('${l.t('finance.maintenanceLabel')} - $period',
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
+              StatusBadge.status(status),
+            ]),
+            if (flatNumber.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text('${l.t('billing.flat')}: $flatNumber', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              ),
+            const Divider(height: 24),
+
+            // Line items
+            if (lineItems.isNotEmpty) ...[
+              Text(l.t('billing.breakdown'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              ...lineItems.map((item) {
+                final label = isMr ? (item['labelMr'] ?? item['label']) : item['label'];
+                final amount = (item['amount'] ?? 0).toDouble();
+                final isArr = item['isArrear'] == true;
+                final isInt = item['isInterest'] == true;
+                final method = item['calcMethod'] ?? '';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(children: [
+                    Container(
+                      width: 6, height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isArr ? Colors.orange : isInt ? Colors.red : (method == 'PER_SQFT' ? Colors.blue : Colors.green),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(label, style: TextStyle(
+                      fontSize: 13,
+                      color: isArr || isInt ? Colors.red.shade700 : null,
+                    ))),
+                    if (method == 'PER_SQFT')
+                      Text('\u20B9${item['rate']} \u00D7 ${(item['quantity'] as num?)?.toStringAsFixed(0) ?? ''}  ',
+                          style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                    Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w600,
+                      color: isArr || isInt ? Colors.red.shade700 : null,
+                    )),
+                  ]),
+                );
+              }),
+              const Divider(height: 20),
+            ] else ...[
+              // Legacy breakdown (no line items)
+              _detailRow(l.t('finance.monthlyMaintenance'), bill['maintenanceCharge']),
+              _detailRow(l.t('finance.sinkingFund'), bill['sinkingFund']),
+              _detailRow('Repair Fund', bill['repairFund']),
+              _detailRow('Water Charge', bill['waterCharge']),
+              if ((bill['otherCharges'] ?? 0) > 0)
+                _detailRow('Other', bill['otherCharges']),
+              if (arrear > 0) _detailRow('Arrears', arrear, color: Colors.orange),
+              if (interest > 0) _detailRow('Interest', interest, color: Colors.red),
+              const Divider(height: 20),
+            ],
+
+            // Totals
+            Row(children: [
+              Expanded(child: Text(l.t('finance.totalAmount'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+              Text('\u20B9${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            ]),
+            if (paid > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(children: [
+                  Expanded(child: Text('Paid', style: TextStyle(fontSize: 12, color: Colors.green.shade700))),
+                  Text('-\u20B9${paid.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+                ]),
+              ),
+            if (status != 'PAID' && (total - paid) > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(children: [
+                  Expanded(child: Text('Balance Due', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.urgent))),
+                  Text('\u20B9${(total - paid).toStringAsFixed(0)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.urgent)),
+                ]),
+              ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, dynamic value, {Color? color}) {
+    final amt = (value ?? 0).toDouble();
+    if (amt <= 0) return const SizedBox();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(children: [
+        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: color))),
+        Text('\u20B9${amt.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context); context.watch<LocaleCubit>();
+    final authState = context.watch<AuthBloc>().state;
+    final isAdmin = authState is Authenticated && authState.user.role == 'ADMIN';
+
     return Scaffold(body: SafeArea(child: RefreshIndicator(
       onRefresh: () => context.read<_FC>().load(), color: AppColors.primary,
       child: BlocBuilder<_FC, _FD>(builder: (context, state) {
@@ -186,6 +324,8 @@ class _FVS extends State<_FV> {
             Text(l.t('finance.title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             Text(l.t('finance.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           ]))),
+
+          // Pending dues card
           SliverToBoxAdapter(child: Container(
             margin: const EdgeInsets.all(16), padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -212,7 +352,31 @@ class _FVS extends State<_FV> {
               ]),
             ]),
           )),
-          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(bottom: 12), child: FilterChipsRow(
+
+          // Admin quick actions
+          if (isAdmin)
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.tune,
+                  label: l.t('billing.structure'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillingStructureScreen())),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.receipt_long,
+                  label: l.t('billing.generateBills'),
+                  onTap: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const BillGenerateScreen()));
+                    if (mounted) context.read<_FC>().load();
+                  },
+                )),
+              ]),
+            )),
+
+          // Filter chips
+          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 12, bottom: 12), child: FilterChipsRow(
             labels: _fl.map((k) => l.t(k)).toList(), selectedIndex: _fi,
             onSelected: (i) { setState(() => _fi = i); context.read<_FC>().load(_fv[i]); },
           ))),
@@ -222,6 +386,7 @@ class _FVS extends State<_FV> {
             bill: state.bills[i],
             rzpEnabled: state.rzpEnabled,
             onPay: () => _startPayment(state.bills[i]),
+            onTap: () => _showBillDetail(state.bills[i]),
           ), childCount: state.bills.length)),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ]);
@@ -230,50 +395,92 @@ class _FVS extends State<_FV> {
   }
 }
 
+// ─── Admin Action Chip ──────────────────────────────────────────
+
+class _AdminActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _AdminActionChip({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary.withAlpha(15),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(icon, size: 16, color: AppColors.primary),
+            const SizedBox(width: 6),
+            Flexible(child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary), overflow: TextOverflow.ellipsis)),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Bill Card ──────────────────────────────────────────────────
+
 class _BC extends StatelessWidget {
   final Map<String, dynamic> bill;
   final bool rzpEnabled;
   final VoidCallback onPay;
-  const _BC({required this.bill, required this.rzpEnabled, required this.onPay});
+  final VoidCallback onTap;
+  const _BC({required this.bill, required this.rzpEnabled, required this.onPay, required this.onTap});
   @override Widget build(BuildContext context) {
     final status = bill['status'] ?? 'ISSUED';
     final amount = (bill['totalAmount'] ?? 0).toDouble();
     final paid = (bill['amountPaid'] ?? 0).toDouble();
+    final arrear = (bill['arrearAmount'] ?? 0).toDouble();
     final period = bill['billingPeriod'] ?? '';
     final sc = AppColors.statusColor(status);
     final isPaid = status == 'PAID';
     final due = amount - paid;
-    return GlassCard(child: Column(children: [
-      Row(children: [
-        Container(width: 44, height: 44, decoration: BoxDecoration(color: sc.withAlpha(30), borderRadius: BorderRadius.circular(12)),
-          child: Icon(Icons.currency_rupee_rounded, size: 20, color: sc)),
-        const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${AppLocalizations.of(context).t('finance.maintenanceLabel')} - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 2),
-          Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
-        ])),
-        StatusBadge.status(status),
-      ]),
-      if (!isPaid && due > 0) ...[
-        const SizedBox(height: 10),
+    final hasArrear = arrear > 0;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(child: Column(children: [
         Row(children: [
-          Text('Due: \u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.urgent)),
-          const Spacer(),
-          if (rzpEnabled)
-            SizedBox(height: 32, child: ElevatedButton.icon(
-              onPressed: onPay,
-              icon: const Icon(Icons.payment, size: 14),
-              label: Text(AppLocalizations.of(context).t('payment.payNow'), style: const TextStyle(fontSize: 12)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            )),
+          Container(width: 44, height: 44, decoration: BoxDecoration(color: sc.withAlpha(30), borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.currency_rupee_rounded, size: 20, color: sc)),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('${AppLocalizations.of(context).t('finance.maintenanceLabel')} - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Row(children: [
+              Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+              if (hasArrear)
+                Text('  (incl. arrears)', style: TextStyle(fontSize: 10, color: Colors.orange.shade700)),
+            ]),
+          ])),
+          StatusBadge.status(status),
         ]),
-      ],
-    ]));
+        if (!isPaid && due > 0) ...[
+          const SizedBox(height: 10),
+          Row(children: [
+            Text('Due: \u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.urgent)),
+            const Spacer(),
+            if (rzpEnabled)
+              SizedBox(height: 32, child: ElevatedButton.icon(
+                onPressed: onPay,
+                icon: const Icon(Icons.payment, size: 14),
+                label: Text(AppLocalizations.of(context).t('payment.payNow'), style: const TextStyle(fontSize: 12)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              )),
+          ]),
+        ],
+      ])),
+    );
   }
 }

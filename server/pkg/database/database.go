@@ -124,6 +124,9 @@ func Migrate(db *gorm.DB) error {
 		&models.WorkflowAuditLog{},
 		&models.PaymentOrder{},
 		&models.SocietyBankConfig{},
+		&models.BillingStructure{},
+		&models.ChargeHead{},
+		&models.BillLineItem{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)
@@ -144,6 +147,9 @@ func Seed(db *gorm.DB) error {
 
 	// Ensure society bank config exists (safe to run repeatedly)
 	ensureSocietyBankConfig(db)
+
+	// Ensure default billing structure exists
+	ensureDefaultBillingStructure(db)
 
 	// Check if already seeded
 	var memberCount int64
@@ -353,5 +359,47 @@ func ensureSocietyBankConfig(db *gorm.DB) {
 		log.Printf("Failed to seed society bank config: %v", err)
 	} else {
 		log.Println("Seeded society bank config (dummy)")
+	}
+}
+
+// ensureDefaultBillingStructure seeds the standard billing structure for Sainath Society.
+func ensureDefaultBillingStructure(db *gorm.DB) {
+	var count int64
+	db.Model(&models.BillingStructure{}).Where("is_active = ?", true).Count(&count)
+	if count > 0 {
+		return
+	}
+
+	// Find chairman member to use as creator
+	var chairman models.Member
+	if err := db.Where("role = ? AND is_active = ?", "ADMIN", true).First(&chairman).Error; err != nil {
+		log.Printf("Skipping billing structure seed: no admin member found")
+		return
+	}
+
+	bs := &models.BillingStructure{
+		Name:         "Standard Monthly",
+		NameMr:       "मासिक मानक",
+		InterestRate: 18.0, // 18% per annum
+		IsActive:     true,
+		CreatedByID:  chairman.ID,
+	}
+	if err := db.Create(bs).Error; err != nil {
+		log.Printf("Failed to seed billing structure: %v", err)
+		return
+	}
+
+	heads := []models.ChargeHead{
+		{BillingStructureID: bs.ID, Name: "Maintenance", NameMr: "देखभाल", CalcMethod: models.CalcPerSqft, Rate: 3.50, SortOrder: 1, IsActive: true},
+		{BillingStructureID: bs.ID, Name: "Sinking Fund", NameMr: "बुडीत निधी", CalcMethod: models.CalcFixed, Rate: 500, SortOrder: 2, IsActive: true},
+		{BillingStructureID: bs.ID, Name: "Repair Fund", NameMr: "दुरुस्ती निधी", CalcMethod: models.CalcFixed, Rate: 300, SortOrder: 3, IsActive: true},
+		{BillingStructureID: bs.ID, Name: "Water Charge", NameMr: "पाणी शुल्क", CalcMethod: models.CalcFixed, Rate: 200, SortOrder: 4, IsActive: true},
+		{BillingStructureID: bs.ID, Name: "Common Electricity", NameMr: "सामायिक वीज", CalcMethod: models.CalcFixed, Rate: 150, SortOrder: 5, IsActive: true},
+		{BillingStructureID: bs.ID, Name: "Lift Maintenance", NameMr: "लिफ्ट देखभाल", CalcMethod: models.CalcFixed, Rate: 100, SortOrder: 6, IsActive: true},
+	}
+	if err := db.Create(&heads).Error; err != nil {
+		log.Printf("Failed to seed charge heads: %v", err)
+	} else {
+		log.Printf("Seeded billing structure '%s' with %d charge heads", bs.Name, len(heads))
 	}
 }

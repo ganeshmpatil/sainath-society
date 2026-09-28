@@ -57,6 +57,7 @@ func SetupRoutes(
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
 	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
 	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow)
+	billingStructureHandler := handlers.NewBillingStructureHandler(domain.BillingStructure)
 	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
 
 	// API v1 group
@@ -333,6 +334,17 @@ func SetupRoutes(
 		fn.GET("/bills/pending-dues", billHandler.PendingDues)
 		fn.GET("/bills/:id", billHandler.GetByID)
 		fn.POST("/bills/:id/mark-paid", billHandler.MarkPaid)
+
+		// Billing structure: charge heads + rate configuration.
+		bs := fn.Group("/billing-structure")
+		bs.GET("/active", billingStructureHandler.GetActive)
+		bs.GET("/preview", billingStructureHandler.Preview)
+		bs.GET("", billingStructureHandler.List)
+		bs.POST("", billingStructureHandler.Create)
+		bs.PATCH("/:id", billingStructureHandler.Update)
+		bs.POST("/:id/charge-heads", billingStructureHandler.AddChargeHead)
+		bs.PATCH("/:id/charge-heads/:chId", billingStructureHandler.UpdateChargeHead)
+		bs.DELETE("/:id/charge-heads/:chId", billingStructureHandler.DeleteChargeHead)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

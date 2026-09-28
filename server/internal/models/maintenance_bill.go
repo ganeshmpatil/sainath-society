@@ -37,6 +37,8 @@ type MaintenanceBill struct {
 	WaterCharge       float64 `gorm:"type:decimal(10,2);default:0" json:"waterCharge"`
 	OtherCharges      float64 `gorm:"type:decimal(10,2);default:0" json:"otherCharges"`
 	PenaltyAmount     float64 `gorm:"type:decimal(10,2);default:0" json:"penaltyAmount"`
+	ArrearAmount      float64 `gorm:"type:decimal(10,2);default:0" json:"arrearAmount"`
+	InterestAmount    float64 `gorm:"type:decimal(10,2);default:0" json:"interestAmount"`
 	TotalAmount       float64 `gorm:"type:decimal(12,2);not null" json:"totalAmount"`
 
 	AmountPaid   float64    `gorm:"type:decimal(12,2);default:0" json:"amountPaid"`
@@ -49,8 +51,11 @@ type MaintenanceBill struct {
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt     time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 
-	Flat   *Flat   `gorm:"foreignKey:FlatID" json:"flat,omitempty"`
-	Member *Member `gorm:"foreignKey:MemberID" json:"member,omitempty"`
+	BillingStructureID *uuid.UUID `gorm:"type:uuid" json:"billingStructureId,omitempty"`
+
+	Flat      *Flat          `gorm:"foreignKey:FlatID" json:"flat,omitempty"`
+	Member    *Member        `gorm:"foreignKey:MemberID" json:"member,omitempty"`
+	LineItems []BillLineItem `gorm:"foreignKey:BillID" json:"lineItems,omitempty"`
 }
 
 func (b *MaintenanceBill) BeforeCreate(tx *gorm.DB) error {
