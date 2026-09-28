@@ -38,6 +38,10 @@ type Config struct {
 	// FCM (Firebase Cloud Messaging)
 	FCMServiceAccountJSON string // raw JSON content of Firebase service account
 
+	// Razorpay Payment Gateway
+	RazorpayKeyID     string
+	RazorpayKeySecret string
+
 	// CORS
 	AllowedOrigins []string
 }
@@ -72,6 +76,10 @@ func Load() *Config {
 
 		// FCM
 		FCMServiceAccountJSON: getEnv("FCM_SERVICE_ACCOUNT_JSON", ""),
+
+		// Razorpay
+		RazorpayKeyID:     getEnv("RAZORPAY_KEY_ID", ""),
+		RazorpayKeySecret: getEnv("RAZORPAY_KEY_SECRET", ""),
 
 		// CORS
 		AllowedOrigins: getOrigins(),

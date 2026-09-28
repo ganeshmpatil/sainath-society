@@ -81,6 +81,7 @@ func main() {
 		Watchman:         repositories.NewWatchmanRepository(db),
 		CommitteeTodo:    repositories.NewCommitteeTodoRepository(db),
 		Workflow:         repositories.NewWorkflowRepository(db),
+		Payment:          repositories.NewPaymentRepository(db),
 	}
 
 	// Create Gin router
@@ -120,7 +121,7 @@ func main() {
 	}
 
 	// Setup routes
-	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db, cfg.VAPIDPublicKey)
+	SetupRoutes(r, jwtManager, userRepo, domainRepos, notifier, db, cfg.VAPIDPublicKey, cfg.RazorpayKeyID, cfg.RazorpayKeySecret)
 
 	// Build email sender: use Resend if API key is configured, else mock.
 	var emailSender services.EmailSender
@@ -186,4 +187,5 @@ type DomainRepositories struct {
 	Watchman         *repositories.WatchmanRepository
 	CommitteeTodo    *repositories.CommitteeTodoRepository
 	Workflow         *repositories.WorkflowRepository
+	Payment          *repositories.PaymentRepository
 }

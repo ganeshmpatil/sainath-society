@@ -21,6 +21,7 @@ func SetupRoutes(
 	notifier *services.Notifier,
 	db *gorm.DB,
 	vapidPublicKey string,
+	rzpKeyID, rzpKeySecret string,
 ) {
 	// Services
 	authService := services.NewAuthService(userRepo, jwtManager)
@@ -56,6 +57,7 @@ func SetupRoutes(
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
 	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
 	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow)
+	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -331,5 +333,13 @@ func SetupRoutes(
 		fn.GET("/bills/pending-dues", billHandler.PendingDues)
 		fn.GET("/bills/:id", billHandler.GetByID)
 		fn.POST("/bills/:id/mark-paid", billHandler.MarkPaid)
+
+		// Payments: Razorpay gateway + bank details.
+		pay := protected.Group("/payments")
+		pay.GET("/config", paymentHandler.GetConfig)
+		pay.GET("/bank-details", paymentHandler.GetBankDetails)
+		pay.POST("/create-order", paymentHandler.CreateOrder)
+		pay.POST("/verify", paymentHandler.VerifyPayment)
+		pay.GET("", paymentHandler.ListPayments)
 	}
 }

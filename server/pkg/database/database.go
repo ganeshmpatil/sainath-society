@@ -122,6 +122,8 @@ func Migrate(db *gorm.DB) error {
 		&models.WorkflowActivityComment{},
 		&models.WorkflowActivityAttachment{},
 		&models.WorkflowAuditLog{},
+		&models.PaymentOrder{},
+		&models.SocietyBankConfig{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)
@@ -139,6 +141,9 @@ func Seed(db *gorm.DB) error {
 	if err := ensureWings(db); err != nil {
 		return fmt.Errorf("failed to ensure wings: %w", err)
 	}
+
+	// Ensure society bank config exists (safe to run repeatedly)
+	ensureSocietyBankConfig(db)
 
 	// Check if already seeded
 	var memberCount int64
@@ -326,4 +331,27 @@ func ensureWings(db *gorm.DB) error {
 		}
 	}
 	return nil
+}
+
+// ensureSocietyBankConfig seeds dummy society bank details if none exist.
+func ensureSocietyBankConfig(db *gorm.DB) {
+	var count int64
+	db.Model(&models.SocietyBankConfig{}).Where("is_active = ?", true).Count(&count)
+	if count > 0 {
+		return
+	}
+	cfg := &models.SocietyBankConfig{
+		AccountName:   "New Sainath Apartment CHS Ltd",
+		AccountNumber: "920020043210987",
+		BankName:      "State Bank of India",
+		BranchName:    "Bhandup West, Mumbai",
+		IFSC:          "SBIN0001234",
+		UpiID:         "sainathsociety@sbi",
+		IsActive:      true,
+	}
+	if err := db.Create(cfg).Error; err != nil {
+		log.Printf("Failed to seed society bank config: %v", err)
+	} else {
+		log.Println("Seeded society bank config (dummy)")
+	}
 }
