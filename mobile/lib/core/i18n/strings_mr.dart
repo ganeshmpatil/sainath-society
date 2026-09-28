@@ -88,6 +88,8 @@ const Map<String, String> stringsMr = {
   'nav.residents': 'रहिवासी',
   'nav.moveInOut': 'स्थलांतर नोंद',
   'nav.flatDetails': 'फ्लॅट तपशील',
+  'nav.watchmen': 'वॉचमन',
+  'nav.calendar': 'दिनदर्शिका',
 
   // Dashboard
   'dashboard.title': 'डॅशबोर्ड',
@@ -333,6 +335,37 @@ const Map<String, String> stringsMr = {
   'changePassword.sameAsOld': 'नवीन पासवर्ड सध्याच्या पासवर्डपेक्षा वेगळा असावा',
   'changePassword.allFieldsRequired': 'सर्व फील्ड आवश्यक आहेत',
   'changePassword.forcedMessage': 'तुम्ही तात्पुरता पासवर्ड वापरत आहात. पुढे जाण्यासाठी नवीन पासवर्ड सेट करा.',
+
+  // Calendar
+  'calendar.title': 'दिनदर्शिका',
+  'calendar.subtitle': 'समिती कार्ये आणि मुदती',
+  'calendar.addTodo': 'समिती कार्य जोडा',
+  'calendar.todoTitle': 'शीर्षक',
+  'calendar.todoTitleMr': 'शीर्षक (मराठी)',
+  'calendar.category': 'प्रवर्ग',
+  'calendar.priority': 'प्राधान्य',
+  'calendar.selectDueDate': 'अंतिम तारीख निवडा',
+  'calendar.description': 'वर्णन',
+  'calendar.notes': 'टिपा / टिप्पणी',
+  'calendar.noTodosForDay': 'या दिवसासाठी कार्ये नाहीत',
+  'calendar.overdueItems': 'थकीत बाबींवर लक्ष द्या',
+  'calendar.overdue': 'थकीत',
+  'calendar.daysAgo': 'दिवसांपूर्वी',
+  'calendar.dueToday': 'आज देय',
+  'calendar.dueTomorrow': 'उद्या देय',
+  'calendar.dueIn': 'मुदत',
+  'calendar.days': 'दिवस',
+  'calendar.completed': 'पूर्ण',
+
+  // Watchmen
+  'watchmen.title': 'वॉचमन',
+  'watchmen.subtitle': 'सुरक्षा रक्षक',
+  'watchmen.addWatchman': 'वॉचमन जोडा',
+  'watchmen.name': 'नाव',
+  'watchmen.nameMr': 'नाव (मराठी)',
+  'watchmen.mobile': 'मोबाईल क्रमांक',
+  'watchmen.dutyStartTime': 'ड्युटी सुरू',
+  'watchmen.dutyEndTime': 'ड्युटी संपेल',
 
   // Flat Details
   'flatDetails.title': 'फ्लॅट तपशील',

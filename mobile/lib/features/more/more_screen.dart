@@ -32,6 +32,8 @@ const _modules = [
   _Module(Icons.lightbulb_rounded, 'nav.suggestions', '/suggestions', Color(0x30EAB308)),
   _Module(Icons.swap_horiz_rounded, 'nav.moveInOut', '/move-in-out', Color(0x3010B981)),
   _Module(Icons.folder_shared_rounded, 'nav.memberDocs', '/member-documents', Color(0x30EF4444)),
+  _Module(Icons.calendar_month_rounded, 'nav.calendar', '/calendar', Color(0x303B82F6)),
+  _Module(Icons.shield_rounded, 'nav.watchmen', '/watchmen', Color(0x3064748B)),
 ];
 
 class MoreScreen extends StatelessWidget {

@@ -53,6 +53,8 @@ func SetupRoutes(
 	notificationHandler := handlers.NewNotificationHandler(domain.Notification, domain.Member)
 	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact)
 	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
+	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
+	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -278,6 +280,23 @@ func SetupRoutes(
 		push.POST("/unsubscribe", pushHandler.Unsubscribe)
 		push.POST("/register-device", pushHandler.RegisterDevice)
 		push.POST("/unregister-device", pushHandler.UnregisterDevice)
+
+		// Watchmen — everyone reads, admin manages.
+		wm := protected.Group("/watchmen")
+		wm.POST("", watchmanHandler.Create)
+		wm.GET("", watchmanHandler.List)
+		wm.GET("/:id", watchmanHandler.GetByID)
+		wm.PATCH("/:id", watchmanHandler.Update)
+		wm.DELETE("/:id", watchmanHandler.Delete)
+
+		// Committee calendar todos — everyone reads, admin manages.
+		ct := protected.Group("/committee-calendar")
+		ct.POST("", committeeTodoHandler.Create)
+		ct.GET("", committeeTodoHandler.List)
+		ct.GET("/:id", committeeTodoHandler.GetByID)
+		ct.PATCH("/:id", committeeTodoHandler.Update)
+		ct.PATCH("/:id/status", committeeTodoHandler.UpdateStatus)
+		ct.DELETE("/:id", committeeTodoHandler.Delete)
 
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")

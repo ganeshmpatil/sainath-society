@@ -27,6 +27,8 @@ import '../features/residents/residents_screen.dart';
 import '../features/suggestions/suggestions_screen.dart';
 import '../features/tasks/tasks_screen.dart';
 import '../features/vehicles/vehicles_screen.dart';
+import '../features/calendar/calendar_screen.dart';
+import '../features/watchmen/watchmen_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -138,6 +140,8 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/suggestions', builder: (_, __) => const SuggestionsScreen()),
       GoRoute(path: '/move-in-out', builder: (_, __) => const MoveInOutScreen()),
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),
+      GoRoute(path: '/calendar', builder: (_, __) => const CalendarScreen()),
+      GoRoute(path: '/watchmen', builder: (_, __) => const WatchmenScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],

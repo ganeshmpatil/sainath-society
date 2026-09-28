@@ -222,7 +222,7 @@ class _QuickActionsGrid extends StatelessWidget {
         childAspectRatio: 0.85,
         children: _actions.map((a) {
           return GestureDetector(
-            onTap: () => context.go(a.route),
+            onTap: () => context.push(a.route),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -327,7 +327,7 @@ class _GrievanceItem extends StatelessWidget {
     return GlassCard(
       onTap: () {
         final id = grievance['id'];
-        if (id != null) context.go('/grievances/$id');
+        if (id != null) context.push('/grievances/$id');
       },
       child: Row(
         children: [

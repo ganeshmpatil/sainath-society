@@ -88,6 +88,8 @@ const Map<String, String> stringsEn = {
   'nav.residents': 'Residents',
   'nav.moveInOut': 'Move In/Out',
   'nav.flatDetails': 'Flat Details',
+  'nav.watchmen': 'Watchmen',
+  'nav.calendar': 'Calendar',
 
   // Dashboard
   'dashboard.title': 'Dashboard',
@@ -333,6 +335,37 @@ const Map<String, String> stringsEn = {
   'changePassword.sameAsOld': 'New password must be different from current',
   'changePassword.allFieldsRequired': 'All fields are required',
   'changePassword.forcedMessage': 'You are using a temporary password. Please set a new password to continue.',
+
+  // Calendar
+  'calendar.title': 'Calendar',
+  'calendar.subtitle': 'Committee todos & deadlines',
+  'calendar.addTodo': 'Add Committee Todo',
+  'calendar.todoTitle': 'Title',
+  'calendar.todoTitleMr': 'Title (Marathi)',
+  'calendar.category': 'Category',
+  'calendar.priority': 'Priority',
+  'calendar.selectDueDate': 'Select due date',
+  'calendar.description': 'Description',
+  'calendar.notes': 'Notes / Comments',
+  'calendar.noTodosForDay': 'No tasks for this day',
+  'calendar.overdueItems': 'overdue items need attention',
+  'calendar.overdue': 'Overdue',
+  'calendar.daysAgo': 'days ago',
+  'calendar.dueToday': 'Due today',
+  'calendar.dueTomorrow': 'Due tomorrow',
+  'calendar.dueIn': 'Due in',
+  'calendar.days': 'days',
+  'calendar.completed': 'Completed',
+
+  // Watchmen
+  'watchmen.title': 'Watchmen',
+  'watchmen.subtitle': 'Security guards',
+  'watchmen.addWatchman': 'Add Watchman',
+  'watchmen.name': 'Name',
+  'watchmen.nameMr': 'Name (Marathi)',
+  'watchmen.mobile': 'Mobile Number',
+  'watchmen.dutyStartTime': 'Duty Start',
+  'watchmen.dutyEndTime': 'Duty End',
 
   // Flat Details
   'flatDetails.title': 'Flat Details',
