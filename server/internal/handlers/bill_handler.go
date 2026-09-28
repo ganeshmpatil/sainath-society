@@ -25,11 +25,11 @@ func NewBillHandler(repo *repositories.BillRepository, notifier *services.Notifi
 type generateBillsReq struct {
 	BillingPeriod     string    `json:"billingPeriod" binding:"required"` // e.g. "2026-04"
 	DueDate           time.Time `json:"dueDate" binding:"required"`
-	MaintenanceCharge float64   `json:"maintenanceCharge" binding:"required,gt=0"`
-	SinkingFund       float64   `json:"sinkingFund,omitempty"`
-	RepairFund        float64   `json:"repairFund,omitempty"`
-	WaterCharge       float64   `json:"waterCharge,omitempty"`
-	OtherCharges      float64   `json:"otherCharges,omitempty"`
+	MaintenanceCharge float64   `json:"maintenanceCharge"` // optional when billing structure is active
+	SinkingFund       float64   `json:"sinkingFund"`
+	RepairFund        float64   `json:"repairFund"`
+	WaterCharge       float64   `json:"waterCharge"`
+	OtherCharges      float64   `json:"otherCharges"`
 }
 
 // Generate creates maintenance bills for every active flat in one batch.
