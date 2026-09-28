@@ -55,6 +55,7 @@ func SetupRoutes(
 	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
 	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
+	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -300,6 +301,26 @@ func SetupRoutes(
 		ct.PATCH("/:id", committeeTodoHandler.Update)
 		ct.PATCH("/:id/status", committeeTodoHandler.UpdateStatus)
 		ct.DELETE("/:id", committeeTodoHandler.Delete)
+
+		// Workflows — admin creates/manages, members view.
+		wf := protected.Group("/workflows")
+		wf.POST("", workflowHandler.Create)
+		wf.GET("", workflowHandler.List)
+		wf.GET("/templates", workflowHandler.ListTemplates)
+		wf.GET("/:id", workflowHandler.GetByID)
+		wf.PATCH("/:id", workflowHandler.Update)
+		wf.PATCH("/:id/status", workflowHandler.UpdateStatus)
+		wf.DELETE("/:id", workflowHandler.Delete)
+		wf.POST("/:id/instantiate", workflowHandler.Instantiate)
+		wf.POST("/:id/activities", workflowHandler.AddActivity)
+		wf.PATCH("/:id/activities/:actId", workflowHandler.UpdateActivity)
+		wf.PATCH("/:id/activities/:actId/status", workflowHandler.UpdateActivityStatus)
+		wf.POST("/:id/activities/reorder", workflowHandler.ReorderActivities)
+		wf.DELETE("/:id/activities/:actId", workflowHandler.DeleteActivity)
+		wf.POST("/:id/activities/:actId/comments", workflowHandler.AddComment)
+		wf.POST("/:id/activities/:actId/attachments", workflowHandler.UploadAttachment)
+		wf.GET("/:id/activities/:actId/attachments/:attId/download", workflowHandler.DownloadAttachment)
+		wf.GET("/:id/audit-log", workflowHandler.AuditLog)
 
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")

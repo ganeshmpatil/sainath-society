@@ -29,6 +29,8 @@ import '../features/tasks/tasks_screen.dart';
 import '../features/vehicles/vehicles_screen.dart';
 import '../features/calendar/calendar_screen.dart';
 import '../features/watchmen/watchmen_screen.dart';
+import '../features/workflows/workflow_list_screen.dart';
+import '../features/workflows/workflow_detail_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -142,6 +144,16 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),
       GoRoute(path: '/calendar', builder: (_, __) => const CalendarScreen()),
       GoRoute(path: '/watchmen', builder: (_, __) => const WatchmenScreen()),
+      GoRoute(
+        path: '/workflows',
+        builder: (_, __) => const WorkflowListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => WorkflowDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
+      ),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],

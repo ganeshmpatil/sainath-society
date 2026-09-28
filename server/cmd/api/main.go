@@ -80,6 +80,7 @@ func main() {
 		MemberDocument:   repositories.NewMemberDocumentRepository(db),
 		Watchman:         repositories.NewWatchmanRepository(db),
 		CommitteeTodo:    repositories.NewCommitteeTodoRepository(db),
+		Workflow:         repositories.NewWorkflowRepository(db),
 	}
 
 	// Create Gin router
@@ -184,4 +185,5 @@ type DomainRepositories struct {
 	MemberDocument   *repositories.MemberDocumentRepository
 	Watchman         *repositories.WatchmanRepository
 	CommitteeTodo    *repositories.CommitteeTodoRepository
+	Workflow         *repositories.WorkflowRepository
 }
