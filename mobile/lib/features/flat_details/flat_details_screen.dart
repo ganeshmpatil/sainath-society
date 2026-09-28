@@ -31,7 +31,7 @@ class _FVS extends State<_FV> {
       onRefresh: () => context.read<ListCubit>().load(), color: AppColors.primary,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Row(children: [
-          GestureDetector(onTap: () => context.pop(),
+          GestureDetector(onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
               child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

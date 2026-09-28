@@ -55,7 +55,7 @@ class _TVS extends State<_TV> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                   child: Row(children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
                       child: Icon(Icons.arrow_back_ios_rounded,
                           size: 20, color: AppColors.textSecondary),
                     ),

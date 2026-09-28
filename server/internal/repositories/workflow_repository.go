@@ -18,6 +18,19 @@ func NewWorkflowRepository(db *gorm.DB) *WorkflowRepository {
 	return &WorkflowRepository{db: db}
 }
 
+// DB returns the underlying db for seed operations.
+func (r *WorkflowRepository) DB() *gorm.DB { return r.db }
+
+// CreateRaw creates a workflow without actor/audit (for seeding).
+func (r *WorkflowRepository) CreateRaw(wf *models.Workflow) error {
+	return r.db.Create(wf).Error
+}
+
+// CreateActivityRaw creates an activity without audit (for seeding).
+func (r *WorkflowRepository) CreateActivityRaw(act *models.WorkflowActivity) error {
+	return r.db.Create(act).Error
+}
+
 // ─── Workflow CRUD ───────────────────────────────────────────────
 
 func (r *WorkflowRepository) Create(actor *ActorContext, wf *models.Workflow) error {
@@ -150,13 +163,15 @@ func (r *WorkflowRepository) Instantiate(actor *ActorContext, templateID uuid.UU
 		}
 		for _, a := range tmpl.Activities {
 			act := models.WorkflowActivity{
-				WorkflowID:    wf.ID,
-				Title:         a.Title,
-				TitleMr:       a.TitleMr,
-				Description:   a.Description,
-				DescriptionMr: a.DescriptionMr,
-				Position:      a.Position,
-				Status:        models.ActivityPending,
+				WorkflowID:      wf.ID,
+				Title:           a.Title,
+				TitleMr:         a.TitleMr,
+				Description:     a.Description,
+				DescriptionMr:   a.DescriptionMr,
+				Position:        a.Position,
+				Status:          models.ActivityPending,
+				ComponentType:   a.ComponentType,
+				ComponentConfig: a.ComponentConfig,
 			}
 			if err := tx.Create(&act).Error; err != nil {
 				return err

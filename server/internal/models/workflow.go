@@ -76,6 +76,20 @@ const (
 	ActivitySkipped    ActivityStatus = "SKIPPED"
 )
 
+// ComponentType identifies a pre-built workflow component.
+type ComponentType string
+
+const (
+	CompScheduleMeeting ComponentType = "SCHEDULE_MEETING"
+	CompShareMinutes    ComponentType = "SHARE_MINUTES"
+	CompUploadDocument  ComponentType = "UPLOAD_DOCUMENT"
+	CompIssueCheque     ComponentType = "ISSUE_CHEQUE"
+	CompUploadInvoice   ComponentType = "UPLOAD_INVOICE"
+	CompSendNotice      ComponentType = "SEND_NOTICE"
+	CompCollectApproval ComponentType = "COLLECT_APPROVAL"
+	CompCustom          ComponentType = "CUSTOM"
+)
+
 // WorkflowActivity is a single step within a workflow.
 type WorkflowActivity struct {
 	ID            uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
@@ -86,6 +100,9 @@ type WorkflowActivity struct {
 	DescriptionMr string         `gorm:"type:text" json:"descriptionMr,omitempty"`
 	Position      int            `gorm:"not null;default:0" json:"position"`
 	Status        ActivityStatus `gorm:"type:varchar(20);not null;default:'PENDING'" json:"status"`
+
+	ComponentType   ComponentType `gorm:"type:varchar(30);not null;default:'CUSTOM'" json:"componentType"`
+	ComponentConfig string        `gorm:"type:text" json:"componentConfig,omitempty"` // JSON config for the component
 
 	AssignedToMemberID *uuid.UUID `gorm:"type:uuid;index" json:"assignedToMemberId,omitempty"`
 	DueDate            *time.Time `json:"dueDate,omitempty"`

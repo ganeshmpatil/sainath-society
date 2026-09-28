@@ -211,6 +211,8 @@ type addActivityReq struct {
 	DescriptionMr      string  `json:"descriptionMr,omitempty"`
 	DueDate            string  `json:"dueDate,omitempty"`
 	AssignedToMemberID *string `json:"assignedToMemberId,omitempty"`
+	ComponentType      string  `json:"componentType,omitempty"`
+	ComponentConfig    string  `json:"componentConfig,omitempty"`
 }
 
 func (h *WorkflowHandler) AddActivity(c *gin.Context) {
@@ -225,11 +227,17 @@ func (h *WorkflowHandler) AddActivity(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	compType := models.CompCustom
+	if req.ComponentType != "" {
+		compType = models.ComponentType(req.ComponentType)
+	}
 	act := &models.WorkflowActivity{
-		Title:         req.Title,
-		TitleMr:       req.TitleMr,
-		Description:   req.Description,
-		DescriptionMr: req.DescriptionMr,
+		Title:           req.Title,
+		TitleMr:         req.TitleMr,
+		Description:     req.Description,
+		DescriptionMr:   req.DescriptionMr,
+		ComponentType:   compType,
+		ComponentConfig: req.ComponentConfig,
 	}
 	if req.DueDate != "" {
 		if t, err := parseDate(req.DueDate); err == nil {
@@ -475,6 +483,231 @@ func (h *WorkflowHandler) AuditLog(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"logs": logs, "count": len(logs)})
+}
+
+// ─── Component catalogue ─────────────────────────────────────────
+
+func (h *WorkflowHandler) ListComponents(c *gin.Context) {
+	components := []gin.H{
+		{"type": "SCHEDULE_MEETING", "label": "Schedule Meeting", "labelMr": "सभा नियोजन", "icon": "event", "color": "#3B82F6"},
+		{"type": "SHARE_MINUTES", "label": "Share Minutes", "labelMr": "इतिवृत्त शेअर करा", "icon": "description", "color": "#8B5CF6"},
+		{"type": "UPLOAD_DOCUMENT", "label": "Upload Document", "labelMr": "कागदपत्र अपलोड", "icon": "upload_file", "color": "#10B981"},
+		{"type": "ISSUE_CHEQUE", "label": "Issue Cheque / Payment", "labelMr": "चेक / देयक", "icon": "payments", "color": "#F59E0B"},
+		{"type": "UPLOAD_INVOICE", "label": "Upload Invoice", "labelMr": "बीजक अपलोड", "icon": "receipt_long", "color": "#EF4444"},
+		{"type": "SEND_NOTICE", "label": "Send Notice", "labelMr": "सूचना पाठवा", "icon": "campaign", "color": "#EC4899"},
+		{"type": "COLLECT_APPROVAL", "label": "Collect Approval", "labelMr": "मंजुरी घ्या", "icon": "how_to_vote", "color": "#06B6D4"},
+		{"type": "CUSTOM", "label": "Custom Task", "labelMr": "सानुकूल कार्य", "icon": "task_alt", "color": "#64748B"},
+	}
+	c.JSON(http.StatusOK, gin.H{"components": components})
+}
+
+// ─── Seed factory templates ──────────────────────────────────────
+
+func (h *WorkflowHandler) SeedTemplates(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	if !actor.IsAdmin() {
+		c.JSON(http.StatusForbidden, response.ErrorResponse{Error: "Admin only", Code: "FORBIDDEN"})
+		return
+	}
+
+	templates := []struct {
+		Title       string
+		TitleMr     string
+		Description string
+		DescMr      string
+		Category    models.WorkflowCategory
+		Activities  []struct {
+			Title     string
+			TitleMr   string
+			CompType  models.ComponentType
+			Desc      string
+			DescMr    string
+		}
+	}{
+		{
+			Title: "Conduct AGM", TitleMr: "वार्षिक सभा आयोजन",
+			Description: "Complete checklist for conducting Annual General Meeting", DescMr: "वार्षिक सर्वसाधारण सभा आयोजनासाठी संपूर्ण चेकलिस्ट",
+			Category: models.WFCatAGM,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Schedule meeting date & venue", "सभेची तारीख व ठिकाण ठरवा", models.CompScheduleMeeting, "Fix date, time and venue for AGM", "सभेची तारीख, वेळ आणि ठिकाण निश्चित करा"},
+				{"Publish agenda notice to members", "सदस्यांना अजेंडा सूचना पाठवा", models.CompSendNotice, "Send 14-day advance notice with agenda", "अजेंडासह 14 दिवस अगोदर सूचना पाठवा"},
+				{"Arrange refreshments & logistics", "जेवणाची आणि व्यवस्थेची तयारी", models.CompCustom, "Arrange chairs, projector, refreshments", "खुर्च्या, प्रोजेक्टर, नाश्ता व्यवस्था"},
+				{"Conduct the meeting", "सभा आयोजित करा", models.CompScheduleMeeting, "Take attendance and conduct meeting as per agenda", "उपस्थिती घ्या आणि अजेंडानुसार सभा चालवा"},
+				{"Record minutes of meeting", "सभेचे इतिवृत्त नोंदवा", models.CompShareMinutes, "Document all discussions, decisions and action items", "सर्व चर्चा, निर्णय आणि कृती बाबी नोंदवा"},
+				{"Share minutes with members", "सदस्यांना इतिवृत्त पाठवा", models.CompSendNotice, "Circulate approved minutes to all members", "मंजूर इतिवृत्त सर्व सदस्यांना पाठवा"},
+				{"Collect approval on resolutions", "ठरावांवर मंजुरी घ्या", models.CompCollectApproval, "Get member signatures on passed resolutions", "मंजूर ठरावांवर सदस्यांच्या स्वाक्षऱ्या घ्या"},
+			},
+		},
+		{
+			Title: "Festival Celebration", TitleMr: "सण उत्सव आयोजन",
+			Description: "Plan and execute society festival celebration", DescMr: "सोसायटी सण उत्सवाचे नियोजन आणि आयोजन",
+			Category: models.WFCatFestival,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Form festival sub-committee", "उत्सव उपसमिती स्थापन करा", models.CompCustom, "Identify volunteers and assign responsibilities", "स्वयंसेवक ओळखा आणि जबाबदाऱ्या नेमा"},
+				{"Collect contributions from members", "सदस्यांकडून वर्गणी गोळा करा", models.CompIssueCheque, "Decide per-flat contribution and collect", "प्रति फ्लॅट वर्गणी ठरवा आणि गोळा करा"},
+				{"Book vendor / supplies", "विक्रेता / साहित्य बुक करा", models.CompUploadInvoice, "Finalize vendors for idol, decorations, food", "मूर्ती, सजावट, जेवणासाठी विक्रेते निश्चित करा"},
+				{"Arrange decoration", "सजावट व्यवस्था करा", models.CompCustom, "Setup pandal, lighting and decoration", "मंडप, रोषणाई आणि सजावट तयार करा"},
+				{"Conduct celebration event", "उत्सव कार्यक्रम आयोजित करा", models.CompScheduleMeeting, "Execute the festival program", "सण कार्यक्रम पार पाडा"},
+				{"Upload photos & documentation", "फोटो आणि कागदपत्रे अपलोड करा", models.CompUploadDocument, "Archive event photos and receipts", "कार्यक्रमाचे फोटो आणि पावत्या जतन करा"},
+				{"Share expense report", "खर्चाचा अहवाल शेअर करा", models.CompUploadInvoice, "Prepare and share final expense statement", "अंतिम खर्च विवरणपत्र तयार करा आणि शेअर करा"},
+			},
+		},
+		{
+			Title: "Major Repair Work", TitleMr: "मोठी दुरुस्ती कामे",
+			Description: "End-to-end tracking for society repair and maintenance projects", DescMr: "सोसायटी दुरुस्ती आणि देखभाल प्रकल्पांचे संपूर्ण ट्रॅकिंग",
+			Category: models.WFCatRepair,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Identify scope & get quotations", "कामाची व्याप्ती ठरवा आणि कोटेशन मिळवा", models.CompUploadDocument, "Get 3 vendor quotations for the work", "कामासाठी 3 विक्रेत्यांचे कोटेशन मिळवा"},
+				{"Get committee approval", "समिती मंजुरी घ्या", models.CompCollectApproval, "Present quotations and get approval in committee meeting", "कोटेशन सादर करा आणि समिती सभेत मंजुरी घ्या"},
+				{"Issue work order to vendor", "विक्रेत्याला वर्क ऑर्डर द्या", models.CompUploadDocument, "Finalize vendor and issue formal work order", "विक्रेता निश्चित करा आणि अधिकृत वर्क ऑर्डर द्या"},
+				{"Make advance payment", "आगाऊ रक्कम द्या", models.CompIssueCheque, "Release advance as per work order terms", "वर्क ऑर्डर अटींनुसार आगाऊ रक्कम द्या"},
+				{"Monitor work progress", "कामाची प्रगती तपासा", models.CompCustom, "Regular site visits and progress tracking", "नियमित साइट भेटी आणि प्रगती ट्रॅकिंग"},
+				{"Verify completion & quality", "काम पूर्ण आणि गुणवत्ता तपासा", models.CompCustom, "Inspect completed work for quality", "पूर्ण झालेल्या कामाची गुणवत्ता तपासा"},
+				{"Process final payment", "अंतिम देयक प्रक्रिया", models.CompIssueCheque, "Release balance payment after satisfactory completion", "समाधानकारक पूर्ततेनंतर उर्वरित रक्कम द्या"},
+				{"Upload completion certificate", "पूर्णत्व प्रमाणपत्र अपलोड करा", models.CompUploadDocument, "Archive work completion certificate and warranty docs", "काम पूर्ण प्रमाणपत्र आणि वॉरंटी कागदपत्रे जतन करा"},
+			},
+		},
+		{
+			Title: "Committee Election", TitleMr: "समिती निवडणूक",
+			Description: "Process for conducting society committee election", DescMr: "सोसायटी समिती निवडणूक प्रक्रिया",
+			Category: models.WFCatElection,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Announce election schedule", "निवडणूक वेळापत्रक जाहीर करा", models.CompSendNotice, "Notify members about upcoming election dates", "सदस्यांना आगामी निवडणुकीच्या तारखा कळवा"},
+				{"Invite nominations", "नामांकने मागवा", models.CompSendNotice, "Open nomination period with deadline", "मुदतीसह नामांकन कालावधी उघडा"},
+				{"Verify nominations", "नामांकनांची पडताळणी करा", models.CompCustom, "Check eligibility of all nominees", "सर्व उमेदवारांची पात्रता तपासा"},
+				{"Publish final candidate list", "अंतिम उमेदवार यादी प्रकाशित करा", models.CompSendNotice, "Share verified candidate list with members", "पडताळलेली उमेदवार यादी सदस्यांसोबत शेअर करा"},
+				{"Conduct election / voting", "निवडणूक / मतदान घ्या", models.CompCollectApproval, "Arrange voting and collect ballots", "मतदानाची व्यवस्था करा आणि मतपत्रिका गोळा करा"},
+				{"Declare results", "निकाल जाहीर करा", models.CompSendNotice, "Count votes and announce winners", "मतमोजणी करा आणि विजेते जाहीर करा"},
+				{"Handover documentation", "कागदपत्रे हस्तांतरित करा", models.CompUploadDocument, "Transfer all society records to new committee", "सर्व सोसायटी रेकॉर्ड नवीन समितीकडे हस्तांतरित करा"},
+			},
+		},
+		{
+			Title: "Compliance & Audit", TitleMr: "लेखापरीक्षण व अनुपालन",
+			Description: "Annual audit and regulatory compliance checklist", DescMr: "वार्षिक लेखापरीक्षण आणि नियामक अनुपालन चेकलिस्ट",
+			Category: models.WFCatCompliance,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Appoint auditor", "लेखापरीक्षक नियुक्त करा", models.CompCustom, "Select and appoint chartered accountant", "चार्टर्ड अकाउंटंट निवडा आणि नियुक्त करा"},
+				{"Gather financial records", "आर्थिक नोंदी गोळा करा", models.CompUploadDocument, "Compile all receipts, bank statements, invoices", "सर्व पावत्या, बँक स्टेटमेंट, बीजके संकलित करा"},
+				{"Conduct audit review meeting", "लेखापरीक्षण आढावा सभा घ्या", models.CompScheduleMeeting, "Review findings with auditor", "लेखापरीक्षकासोबत निष्कर्षांचा आढावा घ्या"},
+				{"Address audit observations", "लेखापरीक्षण निरीक्षणांवर कार्यवाही", models.CompCustom, "Resolve any issues raised by auditor", "लेखापरीक्षकाने उपस्थित केलेल्या समस्या सोडवा"},
+				{"Upload audit report", "लेखापरीक्षण अहवाल अपलोड करा", models.CompUploadDocument, "Upload signed audit report", "स्वाक्षरीत लेखापरीक्षण अहवाल अपलोड करा"},
+				{"Share report with members", "सदस्यांना अहवाल शेअर करा", models.CompSendNotice, "Circulate audit report to all members", "सर्व सदस्यांना लेखापरीक्षण अहवाल पाठवा"},
+				{"File compliance documents", "अनुपालन कागदपत्रे दाखल करा", models.CompUploadDocument, "Submit to registrar and relevant authorities", "निबंधक आणि संबंधित प्राधिकरणांना सादर करा"},
+			},
+		},
+		{
+			Title: "Society Event / Function", TitleMr: "सामाजिक कार्यक्रम",
+			Description: "Organize any society gathering or cultural event", DescMr: "कोणत्याही सोसायटी सभा किंवा सांस्कृतिक कार्यक्रमाचे आयोजन",
+			Category: models.WFCatGeneral,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Plan event & set date", "कार्यक्रम नियोजन आणि तारीख ठरवा", models.CompScheduleMeeting, "Decide event type, date and budget", "कार्यक्रम प्रकार, तारीख आणि बजेट ठरवा"},
+				{"Send invitation notice", "निमंत्रण सूचना पाठवा", models.CompSendNotice, "Notify all residents about the event", "सर्व रहिवाशांना कार्यक्रमाबद्दल कळवा"},
+				{"Arrange venue & logistics", "ठिकाण आणि व्यवस्था तयार करा", models.CompCustom, "Book hall, arrange seating, sound system", "हॉल बुक करा, बसण्याची व्यवस्था, ध्वनी यंत्रणा"},
+				{"Collect RSVP / registrations", "प्रतिसाद / नोंदणी गोळा करा", models.CompCollectApproval, "Track who is attending", "कोण येणार आहे याचा मागोवा ठेवा"},
+				{"Conduct event", "कार्यक्रम पार पाडा", models.CompCustom, "Execute the event as planned", "नियोजनानुसार कार्यक्रम पार पाडा"},
+				{"Upload event photos", "कार्यक्रमाचे फोटो अपलोड करा", models.CompUploadDocument, "Share memories with residents", "रहिवाशांसोबत आठवणी शेअर करा"},
+				{"Share expense summary", "खर्चाचा सारांश शेअर करा", models.CompUploadInvoice, "Publish final income/expense statement", "अंतिम उत्पन्न/खर्च विवरणपत्र प्रकाशित करा"},
+			},
+		},
+		{
+			Title: "Emergency Response", TitleMr: "आपत्कालीन प्रतिसाद",
+			Description: "Rapid response checklist for emergencies (fire, flood, structural)", DescMr: "आपत्कालीन परिस्थितीसाठी (आग, पूर, संरचनात्मक) जलद प्रतिसाद चेकलिस्ट",
+			Category: models.WFCatGeneral,
+			Activities: []struct {
+				Title    string
+				TitleMr  string
+				CompType models.ComponentType
+				Desc     string
+				DescMr   string
+			}{
+				{"Assess situation & alert committee", "परिस्थितीचे मूल्यांकन करा आणि समितीला सूचित करा", models.CompSendNotice, "Evaluate severity and inform committee members", "तीव्रता तपासा आणि समिती सदस्यांना कळवा"},
+				{"Contact emergency services", "आपत्कालीन सेवांशी संपर्क साधा", models.CompCustom, "Call fire brigade, ambulance, police as needed", "आवश्यकतेनुसार अग्निशमन, रुग्णवाहिका, पोलिसांना बोलवा"},
+				{"Notify all residents", "सर्व रहिवाशांना सूचित करा", models.CompSendNotice, "Send emergency alert to all members", "सर्व सदस्यांना आपत्कालीन सूचना पाठवा"},
+				{"Arrange immediate resources", "तात्काळ साधनसामग्री जमवा", models.CompCustom, "Water, first aid, temporary shelter arrangements", "पाणी, प्रथमोपचार, तात्पुरत्या निवाऱ्याची व्यवस्था"},
+				{"Document damage / incident", "नुकसान / घटना नोंदवा", models.CompUploadDocument, "Take photos and document all damage", "फोटो काढा आणि सर्व नुकसान नोंदवा"},
+				{"File insurance claim", "विमा दावा दाखल करा", models.CompUploadDocument, "Submit claim with damage documentation", "नुकसान कागदपत्रांसह दावा सादर करा"},
+				{"Share status update with residents", "रहिवाशांना स्थिती अपडेट पाठवा", models.CompSendNotice, "Keep members informed of recovery progress", "पुनर्प्राप्तीच्या प्रगतीबद्दल सदस्यांना माहिती द्या"},
+			},
+		},
+	}
+
+	created := 0
+	for _, tmpl := range templates {
+		// Skip if template with same title already exists
+		var count int64
+		h.repo.DB().Model(&models.Workflow{}).Where("title = ? AND is_template = ?", tmpl.Title, true).Count(&count)
+		if count > 0 {
+			continue
+		}
+
+		wf := &models.Workflow{
+			Title:             tmpl.Title,
+			TitleMr:           tmpl.TitleMr,
+			Description:       tmpl.Description,
+			DescriptionMr:     tmpl.DescMr,
+			Category:          tmpl.Category,
+			Status:            models.WorkflowDraft,
+			IsTemplate:        true,
+			CreatedByMemberID: actor.MemberID,
+			IsActive:          true,
+		}
+		if err := h.repo.CreateRaw(wf); err != nil {
+			continue
+		}
+
+		for i, a := range tmpl.Activities {
+			act := &models.WorkflowActivity{
+				WorkflowID:    wf.ID,
+				Title:         a.Title,
+				TitleMr:       a.TitleMr,
+				Description:   a.Desc,
+				DescriptionMr: a.DescMr,
+				Position:      i,
+				Status:        models.ActivityPending,
+				ComponentType: a.CompType,
+			}
+			h.repo.CreateActivityRaw(act)
+		}
+		created++
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Templates seeded", "created": created})
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
