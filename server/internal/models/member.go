@@ -23,6 +23,9 @@ type Member struct {
 	RegisteredAt *time.Time `json:"registeredAt,omitempty"`
 	UserID       *uuid.UUID `gorm:"type:uuid" json:"userId,omitempty"` // Link to User after registration (no FK to avoid circular dependency)
 
+	// Photo flag (actual photo stored in member_photos table)
+	HasPhoto bool `gorm:"default:false" json:"hasPhoto"`
+
 	// Admin who added this member
 	AddedBy   *uuid.UUID `gorm:"type:uuid" json:"addedBy,omitempty"`
 	IsActive  bool       `gorm:"default:true" json:"isActive"`

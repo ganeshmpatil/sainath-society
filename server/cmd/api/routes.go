@@ -48,7 +48,7 @@ func SetupRoutes(
 	suggestionHandler := handlers.NewSuggestionHandler(domain.Suggestion)
 	parkingHandler := handlers.NewParkingHandler(domain.Parking)
 	billHandler := handlers.NewBillHandler(domain.Bill, notifier)
-	residentHandler := handlers.NewResidentHandler(domain.Member)
+	residentHandler := handlers.NewResidentHandler(domain.Member, db)
 	flatHandler := handlers.NewFlatHandler(domain.Flat)
 	notificationHandler := handlers.NewNotificationHandler(domain.Notification, domain.Member)
 	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact)
@@ -206,6 +206,9 @@ func SetupRoutes(
 		res.GET("/:id", residentHandler.GetByID)
 		res.PUT("/:id", residentHandler.Update)
 		res.DELETE("/:id", residentHandler.Deactivate)
+		res.PUT("/:id/photo", residentHandler.UploadPhoto)
+		res.GET("/:id/photo", residentHandler.GetPhoto)
+		res.DELETE("/:id/photo", residentHandler.DeletePhoto)
 
 		// Flats
 		fl := protected.Group("/flats")

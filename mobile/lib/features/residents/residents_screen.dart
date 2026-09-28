@@ -1,8 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
@@ -10,6 +12,28 @@ import '../../shared/widgets/filter_chips_row.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/module_screen.dart';
+
+// ─── Photo cache ──────────────────────────────────────────────────
+// Simple in-memory cache so photos aren't re-fetched on every scroll/rebuild.
+final Map<String, Uint8List?> _photoCache = {};
+final Set<String> _photoLoading = {};
+
+Future<Uint8List?> _loadPhoto(String memberId) async {
+  if (_photoCache.containsKey(memberId)) return _photoCache[memberId];
+  if (_photoLoading.contains(memberId)) return null;
+  _photoLoading.add(memberId);
+  try {
+    final res = await api.getBytes('/residents/$memberId/photo');
+    final bytes = Uint8List.fromList(res.data ?? []);
+    _photoCache[memberId] = bytes.isNotEmpty ? bytes : null;
+  } catch (_) {
+    _photoCache[memberId] = null;
+  }
+  _photoLoading.remove(memberId);
+  return _photoCache[memberId];
+}
+
+// ─── Screen ───────────────────────────────────────────────────────
 
 class ResidentsScreen extends StatelessWidget {
   const ResidentsScreen({super.key});
@@ -30,7 +54,8 @@ class _RVS extends State<_RV> {
   @override Widget build(BuildContext context) {
     final l = AppLocalizations.of(context); context.watch<LocaleCubit>();
     return Scaffold(body: SafeArea(child: RefreshIndicator(
-      onRefresh: () => context.read<ListCubit>().load(), color: AppColors.primary,
+      onRefresh: () { _photoCache.clear(); return context.read<ListCubit>().load(); },
+      color: AppColors.primary,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Row(children: [
           GestureDetector(onTap: () => context.pop(),
@@ -79,19 +104,19 @@ class _RVS extends State<_RV> {
   }
 }
 
+// ─── Resident Card ────────────────────────────────────────────────
+
 class _RC extends StatelessWidget {
   final Map<String, dynamic> r;
   const _RC({required this.r});
   @override Widget build(BuildContext context) {
     final name = r['name'] ?? ''; final flat = r['flat']?['flatNumber'] ?? '';
     final role = r['role'] ?? 'MEMBER'; final desg = r['designation'] ?? '';
-    final i = _init(name);
-    final cs = [[AppColors.primary, AppColors.secondary], [AppColors.open, AppColors.primary],
-      [AppColors.secondary, AppColors.resolved], [AppColors.high, AppColors.medium]];
-    final cp = cs[name.hashCode.abs() % cs.length];
+    final hasPhoto = r['hasPhoto'] == true;
+    final memberId = r['id'] ?? '';
+
     return GlassCard(child: Row(children: [
-      Container(width: 44, height: 44, decoration: BoxDecoration(gradient: LinearGradient(colors: cp), borderRadius: BorderRadius.circular(12)),
-        child: Center(child: Text(i, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)))),
+      _PhotoAvatar(name: name, memberId: memberId, hasPhoto: hasPhoto),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
@@ -102,9 +127,7 @@ class _RC extends StatelessWidget {
       GestureDetector(
         onTap: () {
           final phone = r['mobile'] ?? '';
-          if (phone.isNotEmpty) {
-            launchUrl(Uri.parse('tel:$phone'));
-          }
+          if (phone.isNotEmpty) launchUrl(Uri.parse('tel:$phone'));
         },
         child: Container(
           padding: const EdgeInsets.all(8),
@@ -117,7 +140,87 @@ class _RC extends StatelessWidget {
       ),
     ]));
   }
-  String _init(String n) { final p = n.trim().split(' ');
+}
+
+// ─── Instagram-style Photo Avatar ─────────────────────────────────
+
+class _PhotoAvatar extends StatefulWidget {
+  final String name;
+  final String memberId;
+  final bool hasPhoto;
+  const _PhotoAvatar({required this.name, required this.memberId, required this.hasPhoto});
+  @override State<_PhotoAvatar> createState() => _PhotoAvatarState();
+}
+
+class _PhotoAvatarState extends State<_PhotoAvatar> {
+  Uint8List? _photo;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.hasPhoto) _fetchPhoto();
+  }
+
+  void _fetchPhoto() async {
+    final bytes = await _loadPhoto(widget.memberId);
+    if (mounted) setState(() => _photo = bytes);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = _initials(widget.name);
+    final gradientColors = _gradientFor(widget.name);
+
+    // If has photo and loaded, show Instagram-style ring
+    if (widget.hasPhoto && _photo != null) {
+      return Container(
+        width: 48, height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+        ),
+        padding: const EdgeInsets.all(2),
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.surface, width: 1.5),
+          ),
+          child: ClipOval(
+            child: Image.memory(_photo!, fit: BoxFit.cover, width: 42, height: 42),
+          ),
+        ),
+      );
+    }
+
+    // Fallback: gradient initials (existing style, now circular)
+    return Container(
+      width: 44, height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: gradientColors),
+        shape: BoxShape.circle,
+      ),
+      child: Center(child: Text(initials,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white))),
+    );
+  }
+
+  List<Color> _gradientFor(String name) {
+    final sets = [
+      [AppColors.primary, AppColors.secondary],
+      [AppColors.open, AppColors.primary],
+      [AppColors.secondary, AppColors.resolved],
+      [AppColors.high, AppColors.medium],
+    ];
+    return sets[name.hashCode.abs() % sets.length];
+  }
+
+  String _initials(String n) {
+    final p = n.trim().split(' ');
     if (p.length >= 2) return '${p[0][0]}${p[1][0]}'.toUpperCase();
-    if (p.isNotEmpty && p[0].isNotEmpty) return p[0][0].toUpperCase(); return '?'; }
+    if (p.isNotEmpty && p[0].isNotEmpty) return p[0][0].toUpperCase();
+    return '?';
+  }
 }
