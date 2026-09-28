@@ -79,6 +79,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Set refresh token in httpOnly cookie
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"refreshToken",
 		refreshToken,
@@ -127,6 +128,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Update refresh token cookie
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"refreshToken",
 		newRefreshToken,
@@ -204,7 +206,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 		case errors.Is(err, services.ErrPasswordMismatch):
 			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Current password is incorrect", Code: "WRONG_PASSWORD"})
 		default:
-			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "UPDATE_FAILED"})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to update password", Code: "UPDATE_FAILED"})
 		}
 		return
 	}
@@ -221,8 +223,13 @@ type resetPasswordReq struct {
 // The target user must change it after their next login.
 func (h *AuthHandler) AdminResetPassword(c *gin.Context) {
 	// Check caller is admin (from JWT claims)
-	role, _ := c.Get("userRole")
-	if role != "ADMIN" {
+	roleVal, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusForbidden, response.ErrorResponse{Error: "Admin access required", Code: "FORBIDDEN"})
+		return
+	}
+	role, ok := roleVal.(string)
+	if !ok || role != "ADMIN" {
 		c.JSON(http.StatusForbidden, response.ErrorResponse{Error: "Admin access required", Code: "FORBIDDEN"})
 		return
 	}
@@ -247,7 +254,7 @@ func (h *AuthHandler) AdminResetPassword(c *gin.Context) {
 	}
 
 	if err := h.authService.ResetPasswordByAdmin(c.Request.Context(), targetUser.ID, req.NewPassword); err != nil {
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "RESET_FAILED"})
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to reset password", Code: "RESET_FAILED"})
 		return
 	}
 
@@ -290,6 +297,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	// Clear refresh token cookie
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"refreshToken",
 		"",

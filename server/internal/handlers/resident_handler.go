@@ -180,7 +180,10 @@ func (h *ResidentHandler) UploadPhoto(c *gin.Context) {
 	}
 
 	// Set has_photo flag on member
-	h.db.Model(&models.Member{}).Where("id = ?", id).Update("has_photo", true)
+	if err := h.db.Model(&models.Member{}).Where("id = ?", id).Update("has_photo", true).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "failed to update photo flag", Code: "UPDATE_ERROR"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Photo uploaded"})
 }
@@ -220,7 +223,10 @@ func (h *ResidentHandler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	h.db.Where("member_id = ?", id).Delete(&models.MemberPhoto{})
+	if err := h.db.Where("member_id = ?", id).Delete(&models.MemberPhoto{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "failed to delete photo", Code: "DELETE_ERROR"})
+		return
+	}
 	h.db.Model(&models.Member{}).Where("id = ?", id).Update("has_photo", false)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Photo deleted"})

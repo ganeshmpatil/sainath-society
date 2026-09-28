@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -56,7 +57,7 @@ func Load() *Config {
 		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
 
 		// JWT
-		JWTSecret:        getEnv("JWT_SECRET", "your-super-secret-key-change-in-production"),
+		JWTSecret:        requireEnvInProd("JWT_SECRET", "your-super-secret-key-change-in-production"),
 		JWTAccessExpiry:  getDurationEnv("JWT_ACCESS_EXPIRY", 15*time.Minute),
 		JWTRefreshExpiry: getDurationEnv("JWT_REFRESH_EXPIRY", 7*24*time.Hour),
 
@@ -82,6 +83,17 @@ func getOrigins() []string {
 		return strings.Split(v, ",")
 	}
 	return []string{"http://localhost:5173", "http://localhost:3000"}
+}
+
+// requireEnvInProd logs a fatal error if the env var is not set in production.
+func requireEnvInProd(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	if os.Getenv("ENV") == "production" {
+		log.Fatalf("FATAL: environment variable %s must be set in production", key)
+	}
+	return defaultValue
 }
 
 func getEnv(key, defaultValue string) string {

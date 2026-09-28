@@ -8,6 +8,7 @@ class ApiClient {
 
   late final Dio _dio;
   String? _accessToken;
+  Future<bool>? _refreshFuture;
 
   void init() {
     _dio = Dio(BaseOptions(
@@ -26,9 +27,9 @@ class ApiClient {
       },
       onError: (error, handler) async {
         if (error.response?.statusCode == 401 && _accessToken != null) {
-          // Try refresh
+          // Try refresh — use shared future to avoid concurrent refresh calls
           try {
-            final refreshed = await _refreshToken();
+            final refreshed = await _doRefresh();
             if (refreshed) {
               error.requestOptions.headers['Authorization'] = 'Bearer $_accessToken';
               final response = await _dio.fetch(error.requestOptions);
@@ -39,6 +40,12 @@ class ApiClient {
         handler.next(error);
       },
     ));
+  }
+
+  /// Ensures only one refresh request runs at a time.
+  Future<bool> _doRefresh() {
+    _refreshFuture ??= _refreshToken().whenComplete(() => _refreshFuture = null);
+    return _refreshFuture!;
   }
 
   Future<bool> _refreshToken() async {
@@ -55,6 +62,10 @@ class ApiClient {
       _accessToken = response.data['accessToken'];
       if (_accessToken != null) {
         await prefs.setString('access_token', _accessToken!);
+      }
+      final newRefresh = response.data['refreshToken'];
+      if (newRefresh != null) {
+        await prefs.setString('refresh_token', newRefresh);
       }
       return true;
     } catch (_) {

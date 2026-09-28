@@ -42,11 +42,13 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     setState(() => _loading = true);
     try {
       final res = await api.get('/grievances/${widget.id}');
+      if (!mounted) return;
       setState(() {
         _data = res.data is Map<String, dynamic> ? res.data : null;
         _loading = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }

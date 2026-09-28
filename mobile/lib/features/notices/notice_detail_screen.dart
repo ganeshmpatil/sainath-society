@@ -38,8 +38,10 @@ class _NoticeDetailScreenState extends State<NoticeDetailScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       final res = await api.get('/notices/${widget.id}');
+      if (!mounted) return;
       setState(() { _notice = res.data; _loading = false; });
     } catch (e) {
+      if (!mounted) return;
       setState(() { _error = e.toString(); _loading = false; });
     }
   }

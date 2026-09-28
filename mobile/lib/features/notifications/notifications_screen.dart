@@ -31,11 +31,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       final res = await api.get('/notifications/inbox');
       final list = (res.data as List?)?.cast<Map<String, dynamic>>() ?? [];
+      if (!mounted) return;
       setState(() {
         _notifications = list;
         _loading = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
@@ -43,6 +45,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _markRead(String id, int index) async {
     try {
       await api.post('/notifications/$id/read');
+      if (!mounted) return;
       setState(() {
         _notifications[index]['status'] = 'READ';
         _notifications[index]['readAt'] = DateTime.now().toIso8601String();

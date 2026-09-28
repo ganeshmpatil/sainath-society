@@ -50,12 +50,14 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
     });
     try {
       final res = await api.get('/meetings/${widget.id}');
+      if (!mounted) return;
       setState(() {
         _meeting = res.data;
         _minutesCtrl.text = _meeting?['minutesOfMeeting'] ?? '';
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -68,6 +70,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
       final res = await api.get('/residents');
       final list =
           (res.data['residents'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      if (!mounted) return;
       setState(() => _members = list);
     } catch (_) {}
   }
