@@ -497,4 +497,10 @@ const Map<String, String> stringsEn = {
   'billing.skipped': 'Skipped (already exist)',
   'billing.generating': 'Generating...',
   'billing.breakdown': 'Bill Breakdown',
+
+  // Role-based finance
+  'finance.societyPendingDues': 'Society Pending Dues',
+  'finance.billsUnpaid': 'bills unpaid',
+  'finance.markPaidConfirm': 'Mark this bill as fully paid?',
+  'finance.markedPaid': 'Bill marked as paid',
 };

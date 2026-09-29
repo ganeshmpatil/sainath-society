@@ -275,6 +275,46 @@ func (n *Notifier) HallBookingDecided(bookerID uuid.UUID, purpose string, approv
 	)
 }
 
+// ─── Workflow notifications ──────────────────────────────────────
+
+func (n *Notifier) WorkflowActivated(assigneeIDs []uuid.UUID, wfTitle string, wfID uuid.UUID) {
+	for _, mid := range assigneeIDs {
+		n.NotifyOne(mid,
+			"Workflow Started: "+wfTitle,
+			fmt.Sprintf("The workflow \"%s\" has been activated. Please check your assigned activities.", wfTitle),
+			fmt.Sprintf("कार्यप्रवाह \"%s\" सुरू झाला आहे. कृपया तुमची नेमून दिलेली कामे तपासा.", wfTitle),
+			"WORKFLOW_ACTIVATED", "workflow", &wfID,
+		)
+	}
+}
+
+func (n *Notifier) WorkflowCompleted(creatorID uuid.UUID, wfTitle string, wfID uuid.UUID) {
+	n.NotifyOne(creatorID,
+		"Workflow Completed: "+wfTitle,
+		fmt.Sprintf("All activities in workflow \"%s\" have been completed.", wfTitle),
+		fmt.Sprintf("कार्यप्रवाह \"%s\" मधील सर्व कामे पूर्ण झाली आहेत.", wfTitle),
+		"WORKFLOW_COMPLETED", "workflow", &wfID,
+	)
+}
+
+func (n *Notifier) ActivityAssigned(assigneeID uuid.UUID, actTitle, wfTitle string, wfID uuid.UUID) {
+	n.NotifyOne(assigneeID,
+		"Activity Assigned: "+actTitle,
+		fmt.Sprintf("You have been assigned the activity \"%s\" in workflow \"%s\".", actTitle, wfTitle),
+		fmt.Sprintf("तुम्हाला कार्यप्रवाह \"%s\" मधील \"%s\" हे काम नेमून दिले आहे.", wfTitle, actTitle),
+		"ACTIVITY_ASSIGNED", "workflow", &wfID,
+	)
+}
+
+func (n *Notifier) NextActivityReady(assigneeID uuid.UUID, actTitle, wfTitle string, wfID uuid.UUID) {
+	n.NotifyOne(assigneeID,
+		"Your Turn: "+actTitle,
+		fmt.Sprintf("The previous step is done. Activity \"%s\" in workflow \"%s\" is now ready for you.", actTitle, wfTitle),
+		fmt.Sprintf("मागील टप्पा पूर्ण झाला. कार्यप्रवाह \"%s\" मधील \"%s\" हे काम आता तुमच्यासाठी तयार आहे.", wfTitle, actTitle),
+		"ACTIVITY_NEXT_READY", "workflow", &wfID,
+	)
+}
+
 func (n *Notifier) TenantApproved(landlordID uuid.UUID, tenantName string, tenantID uuid.UUID) {
 	n.NotifyOne(landlordID,
 		"Tenant Approved: "+tenantName,

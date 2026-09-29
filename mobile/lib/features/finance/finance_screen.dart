@@ -193,7 +193,9 @@ class _FVS extends State<_FV> {
     final interest = (bill['interestAmount'] ?? 0).toDouble();
     final period = bill['billingPeriod'] ?? '';
     final flat = bill['flat'];
+    final member = bill['member'];
     final flatNumber = flat?['flatNumber'] ?? '';
+    final memberName = member?['name'] ?? '';
 
     showModalBottomSheet(
       context: context,
@@ -201,95 +203,220 @@ class _FVS extends State<_FV> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.6,
-        maxChildSize: 0.85,
+        initialChildSize: 0.65,
+        maxChildSize: 0.9,
         builder: (_, scrollCtrl) => ListView(
           controller: scrollCtrl,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
           children: [
-            // Header
-            Row(children: [
-              Expanded(child: Text('${l.t('finance.maintenanceLabel')} - $period',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
-              StatusBadge.status(status),
-            ]),
-            if (flatNumber.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text('${l.t('billing.flat')}: $flatNumber', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              ),
-            const Divider(height: 24),
+            // Drag handle
+            Center(child: Container(
+              width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+            )),
 
-            // Line items
-            if (lineItems.isNotEmpty) ...[
-              Text(l.t('billing.breakdown'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              ...lineItems.map((item) {
-                final label = isMr ? (item['labelMr'] ?? item['label']) : item['label'];
-                final amount = (item['amount'] ?? 0).toDouble();
-                final isArr = item['isArrear'] == true;
-                final isInt = item['isInterest'] == true;
-                final method = item['calcMethod'] ?? '';
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Row(children: [
-                    Container(
-                      width: 6, height: 6,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isArr ? Colors.orange : isInt ? Colors.red : (method == 'PER_SQFT' ? Colors.blue : Colors.green),
-                      ),
+            // Header card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: status == 'PAID'
+                      ? [Colors.green.shade50, Colors.green.shade50]
+                      : [AppColors.primary.withAlpha(20), AppColors.secondary.withAlpha(15)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: (status == 'PAID' ? Colors.green : AppColors.primary).withAlpha(40)),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusColor(status).withAlpha(25),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(label, style: TextStyle(
-                      fontSize: 13,
-                      color: isArr || isInt ? Colors.red.shade700 : null,
-                    ))),
-                    if (method == 'PER_SQFT')
-                      Text('\u20B9${item['rate']} \u00D7 ${(item['quantity'] as num?)?.toStringAsFixed(0) ?? ''}  ',
-                          style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
-                    Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w600,
-                      color: isArr || isInt ? Colors.red.shade700 : null,
-                    )),
+                    child: Icon(Icons.receipt_long_rounded, size: 22, color: AppColors.statusColor(status)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${l.t('finance.maintenanceLabel')} - $period',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    if (flatNumber.isNotEmpty || (_isAdmin && memberName.isNotEmpty))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          [if (flatNumber.isNotEmpty) '${l.t('billing.flat')}: $flatNumber', if (_isAdmin && memberName.isNotEmpty) memberName].join(' \u2022 '),
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ),
+                  ])),
+                  StatusBadge.status(status),
+                ]),
+                if (bill['dueDate'] != null) ...[
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Icon(Icons.calendar_today_rounded, size: 13, color: AppColors.textTertiary),
+                    const SizedBox(width: 6),
+                    Text('${l.t('finance.dueDate')}: ${_formatDate(bill['dueDate'])}',
+                        style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
                   ]),
-                );
-              }),
-              const Divider(height: 20),
-            ] else ...[
-              // Legacy breakdown (no line items)
-              _detailRow(l.t('finance.monthlyMaintenance'), bill['maintenanceCharge']),
-              _detailRow(l.t('finance.sinkingFund'), bill['sinkingFund']),
-              _detailRow('Repair Fund', bill['repairFund']),
-              _detailRow('Water Charge', bill['waterCharge']),
-              if ((bill['otherCharges'] ?? 0) > 0)
-                _detailRow('Other', bill['otherCharges']),
-              if (arrear > 0) _detailRow('Arrears', arrear, color: Colors.orange),
-              if (interest > 0) _detailRow('Interest', interest, color: Colors.red),
-              const Divider(height: 20),
-            ],
+                ],
+              ]),
+            ),
+            const SizedBox(height: 16),
 
-            // Totals
-            Row(children: [
-              Expanded(child: Text(l.t('finance.totalAmount'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
-              Text('\u20B9${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-            ]),
-            if (paid > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(children: [
-                  Expanded(child: Text('Paid', style: TextStyle(fontSize: 12, color: Colors.green.shade700))),
-                  Text('-\u20B9${paid.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+            // Charges table
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(children: [
+                // Table header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  color: Colors.grey.shade50,
+                  child: Row(children: [
+                    const SizedBox(width: 28),
+                    Expanded(child: Text(l.t('billing.breakdown'),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5))),
+                    Text(l.t('payment.amount'),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                  ]),
+                ),
+
+                if (lineItems.isNotEmpty)
+                  ...lineItems.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final item = entry.value;
+                    final label = isMr ? (item['labelMr'] ?? item['label']) : item['label'];
+                    final amount = (item['amount'] ?? 0).toDouble();
+                    final isArr = item['isArrear'] == true;
+                    final isInt = item['isInterest'] == true;
+                    final method = item['calcMethod'] ?? '';
+                    final rowColor = isArr ? Colors.orange.shade50 : isInt ? Colors.red.shade50 : (i.isEven ? Colors.white : Colors.grey.shade50);
+                    final textColor = isArr ? Colors.orange.shade800 : isInt ? Colors.red.shade700 : null;
+                    final icon = isArr ? Icons.history_rounded : isInt ? Icons.percent_rounded : (method == 'PER_SQFT' ? Icons.square_foot_rounded : Icons.tag_rounded);
+                    final iconColor = isArr ? Colors.orange : isInt ? Colors.red : (method == 'PER_SQFT' ? Colors.blue : Colors.green);
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: rowColor,
+                        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+                      ),
+                      child: Row(children: [
+                        Container(
+                          width: 24, height: 24,
+                          decoration: BoxDecoration(color: iconColor.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+                          child: Icon(icon, size: 13, color: iconColor),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textColor)),
+                          if (method == 'PER_SQFT')
+                            Text('\u20B9${item['rate']} \u00D7 ${(item['quantity'] as num?)?.toStringAsFixed(0) ?? ''} sqft',
+                                style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                        ])),
+                        Text('\u20B9${amount.toStringAsFixed(0)}',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+                      ]),
+                    );
+                  })
+                else ...[
+                  // Legacy rows
+                  ..._legacyRows(l, bill, arrear, interest),
+                ],
+
+                // Total row
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withAlpha(15),
+                    border: Border(top: BorderSide(color: AppColors.primary.withAlpha(40), width: 1.5)),
+                  ),
+                  child: Row(children: [
+                    const SizedBox(width: 34),
+                    Expanded(child: Text(l.t('finance.totalAmount'),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+                    Text('\u20B9${total.toStringAsFixed(0)}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  ]),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 12),
+
+            // Payment summary
+            if (paid > 0 || (status != 'PAID' && (total - paid) > 0))
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(children: [
+                  if (paid > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(children: [
+                        Container(
+                          width: 24, height: 24,
+                          decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)),
+                          child: Icon(Icons.check_circle_rounded, size: 14, color: Colors.green.shade600),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text('Paid', style: TextStyle(fontSize: 13, color: Colors.green.shade700))),
+                        Text('-\u20B9${paid.toStringAsFixed(0)}',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+                      ]),
+                    ),
+                  if (status != 'PAID' && (total - paid) > 0)
+                    Row(children: [
+                      Container(
+                        width: 24, height: 24,
+                        decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6)),
+                        child: Icon(Icons.pending_rounded, size: 14, color: AppColors.urgent),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('Balance Due',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.urgent))),
+                      Text('\u20B9${(total - paid).toStringAsFixed(0)}',
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.urgent)),
+                    ]),
                 ]),
               ),
-            if (status != 'PAID' && (total - paid) > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(children: [
-                  Expanded(child: Text('Balance Due', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.urgent))),
-                  Text('\u20B9${(total - paid).toStringAsFixed(0)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.urgent)),
-                ]),
-              ),
+
+            // Action buttons based on role
+            if (status != 'PAID' && (total - paid) > 0) ...[
+              const SizedBox(height: 16),
+              if (_isAdmin)
+                SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                  onPressed: () => _markBillPaid(bill),
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  label: Text(l.t('finance.markPaid')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ))
+              else if (context.read<_FC>().state.rzpEnabled)
+                SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                  onPressed: () { Navigator.pop(context); _startPayment(bill); },
+                  icon: const Icon(Icons.payment, size: 18),
+                  label: Text(l.t('payment.payNow')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                )),
+            ],
             const SizedBox(height: 16),
           ],
         ),
@@ -297,17 +424,97 @@ class _FVS extends State<_FV> {
     );
   }
 
-  Widget _detailRow(String label, dynamic value, {Color? color}) {
-    final amt = (value ?? 0).toDouble();
-    if (amt <= 0) return const SizedBox();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(children: [
-        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: color))),
-        Text('\u20B9${amt.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
-      ]),
+  Future<void> _markBillPaid(Map<String, dynamic> bill) async {
+    final l = AppLocalizations.of(context);
+    final total = (bill['totalAmount'] ?? 0).toDouble();
+    final paid = (bill['amountPaid'] ?? 0).toDouble();
+    final due = total - paid;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.t('finance.markPaid')),
+        content: Text('${l.t('finance.markPaidConfirm')}\n\n\u20B9${due.toStringAsFixed(0)}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.t('common.cancel'))),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+            child: Text(l.t('finance.markPaid')),
+          ),
+        ],
+      ),
     );
+    if (confirmed != true || !mounted) return;
+    try {
+      await api.post('/finance/bills/${bill['id']}/mark-paid', data: {'amount': due});
+      if (mounted) {
+        Navigator.pop(context); // close detail sheet
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l.t('finance.markedPaid')),
+          backgroundColor: Colors.green,
+        ));
+        context.read<_FC>().load();
+      }
+    } catch (e) {
+      if (mounted) {
+        final msg = (e is DioException) ? (e.response?.data?['error'] ?? 'Error') : 'Error';
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$msg'), backgroundColor: Colors.red));
+      }
+    }
   }
+
+  List<Widget> _legacyRows(AppLocalizations l, Map<String, dynamic> bill, double arrear, double interest) {
+    final entries = <MapEntry<String, double>>[];
+    final mc = ((bill['maintenanceCharge'] ?? 0) as num).toDouble();
+    final sf = ((bill['sinkingFund'] ?? 0) as num).toDouble();
+    final rf = ((bill['repairFund'] ?? 0) as num).toDouble();
+    final wc = ((bill['waterCharge'] ?? 0) as num).toDouble();
+    final oc = ((bill['otherCharges'] ?? 0) as num).toDouble();
+    if (mc > 0) entries.add(MapEntry(l.t('finance.monthlyMaintenance'), mc));
+    if (sf > 0) entries.add(MapEntry(l.t('finance.sinkingFund'), sf));
+    if (rf > 0) entries.add(MapEntry('Repair Fund', rf));
+    if (wc > 0) entries.add(MapEntry('Water Charge', wc));
+    if (oc > 0) entries.add(MapEntry('Other', oc));
+    if (arrear > 0) entries.add(MapEntry('Arrears', arrear));
+    if (interest > 0) entries.add(MapEntry('Interest', interest));
+
+    return entries.asMap().entries.map((e) {
+      final i = e.key;
+      final label = e.value.key;
+      final amount = e.value.value;
+      final isSpecial = label == 'Arrears' || label == 'Interest';
+      final color = label == 'Arrears' ? Colors.orange : label == 'Interest' ? Colors.red : Colors.green;
+      final icon = label == 'Arrears' ? Icons.history_rounded : label == 'Interest' ? Icons.percent_rounded : Icons.tag_rounded;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: isSpecial ? color.shade50 : (i.isEven ? Colors.white : Colors.grey.shade50),
+          border: Border(top: BorderSide(color: Colors.grey.shade100)),
+        ),
+        child: Row(children: [
+          Container(
+            width: 24, height: 24,
+            decoration: BoxDecoration(color: color.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+            child: Icon(icon, size: 13, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+              color: isSpecial ? color.shade800 : null))),
+          Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+              color: isSpecial ? color.shade800 : null)),
+        ]),
+      );
+    }).toList();
+  }
+
+  String _formatDate(dynamic d) {
+    if (d == null) return '';
+    try {
+      final dt = DateTime.parse(d.toString());
+      return '${dt.day.toString().padLeft(2, '0')} ${_months[dt.month - 1]} ${dt.year}';
+    } catch (_) { return d.toString(); }
+  }
+  static const _months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +541,7 @@ class _FVS extends State<_FV> {
             child: Column(children: [
               Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(l.t('finance.myPendingDues'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary, letterSpacing: 1)),
+                  Text(l.t(isAdmin ? 'finance.societyPendingDues' : 'finance.myPendingDues'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary, letterSpacing: 1)),
                   const SizedBox(height: 4),
                   Text('\u20B9${state.pendingAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
@@ -385,6 +592,7 @@ class _FVS extends State<_FV> {
           SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => _BC(
             bill: state.bills[i],
             rzpEnabled: state.rzpEnabled,
+            isAdmin: isAdmin,
             onPay: () => _startPayment(state.bills[i]),
             onTap: () => _showBillDetail(state.bills[i]),
           ), childCount: state.bills.length)),
@@ -429,9 +637,10 @@ class _AdminActionChip extends StatelessWidget {
 class _BC extends StatelessWidget {
   final Map<String, dynamic> bill;
   final bool rzpEnabled;
+  final bool isAdmin;
   final VoidCallback onPay;
   final VoidCallback onTap;
-  const _BC({required this.bill, required this.rzpEnabled, required this.onPay, required this.onTap});
+  const _BC({required this.bill, required this.rzpEnabled, this.isAdmin = false, required this.onPay, required this.onTap});
   @override Widget build(BuildContext context) {
     final status = bill['status'] ?? 'ISSUED';
     final amount = (bill['totalAmount'] ?? 0).toDouble();
@@ -442,6 +651,10 @@ class _BC extends StatelessWidget {
     final isPaid = status == 'PAID';
     final due = amount - paid;
     final hasArrear = arrear > 0;
+    final flat = bill['flat'];
+    final member = bill['member'];
+    final flatNumber = flat?['flatNumber'] ?? '';
+    final memberName = member?['name'] ?? '';
 
     return GestureDetector(
       onTap: onTap,
@@ -453,6 +666,15 @@ class _BC extends StatelessWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('${AppLocalizations.of(context).t('finance.maintenanceLabel')} - $period', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 2),
+            if (isAdmin && (flatNumber.isNotEmpty || memberName.isNotEmpty))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  [if (flatNumber.isNotEmpty) flatNumber, if (memberName.isNotEmpty) memberName].join(' \u2022 '),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.primary),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             Row(children: [
               Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               if (hasArrear)
@@ -466,7 +688,7 @@ class _BC extends StatelessWidget {
           Row(children: [
             Text('Due: \u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.urgent)),
             const Spacer(),
-            if (rzpEnabled)
+            if (rzpEnabled && !isAdmin)
               SizedBox(height: 32, child: ElevatedButton.icon(
                 onPressed: onPay,
                 icon: const Icon(Icons.payment, size: 14),

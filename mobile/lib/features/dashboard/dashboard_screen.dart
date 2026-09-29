@@ -200,7 +200,6 @@ class _QuickActionsGrid extends StatelessWidget {
     _QA(Icons.campaign_rounded, 'nav.notices', '/notices', Color(0x30EF4444)),
     _QA(Icons.report_problem_rounded, 'nav.grievances', '/grievances', Color(0x30F97316)),
     _QA(Icons.account_balance_wallet_rounded, 'nav.finance', '/finance', Color(0x3010B981)),
-    _QA(Icons.home_rounded, 'nav.flatDetails', '/flat-details', Color(0x303B82F6)),
     _QA(Icons.how_to_vote_rounded, 'nav.polls', '/polls', Color(0x30A855F7)),
     _QA(Icons.directions_car_rounded, 'nav.vehicles', '/vehicles', Color(0x3006B6D4)),
     _QA(Icons.people_rounded, 'nav.residents', '/residents', Color(0x30EC4899)),

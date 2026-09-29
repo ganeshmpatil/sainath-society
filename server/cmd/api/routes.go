@@ -56,7 +56,7 @@ func SetupRoutes(
 	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
 	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
-	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow)
+	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow, notifier)
 	billingStructureHandler := handlers.NewBillingStructureHandler(domain.BillingStructure)
 	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
 

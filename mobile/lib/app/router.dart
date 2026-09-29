@@ -7,9 +7,7 @@ import '../core/auth/auth_state.dart';
 import '../features/auth/change_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
-import '../features/bylaws/bylaws_screen.dart';
 import '../features/finance/finance_screen.dart';
-import '../features/flat_details/flat_details_screen.dart';
 import '../features/grievances/grievances_screen.dart';
 import '../features/grievances/grievance_detail_screen.dart';
 import '../features/hall_booking/hall_booking_screen.dart';
@@ -121,7 +119,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
 
       // Module screens accessed from "More" tab
       GoRoute(path: '/residents', builder: (_, __) => const ResidentsScreen()),
-      GoRoute(path: '/flat-details', builder: (_, __) => const FlatDetailsScreen()),
       GoRoute(path: '/vehicles', builder: (_, __) => const VehiclesScreen()),
       GoRoute(path: '/polls', builder: (_, __) => const PollsScreen()),
       GoRoute(
@@ -138,7 +135,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
       ),
       GoRoute(path: '/tasks', builder: (_, __) => const TasksScreen()),
       GoRoute(path: '/hall-booking', builder: (_, __) => const HallBookingScreen()),
-      GoRoute(path: '/bylaws', builder: (_, __) => const BylawsScreen()),
       GoRoute(path: '/suggestions', builder: (_, __) => const SuggestionsScreen()),
       GoRoute(path: '/move-in-out', builder: (_, __) => const MoveInOutScreen()),
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),

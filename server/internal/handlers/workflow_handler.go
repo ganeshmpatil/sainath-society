@@ -14,14 +14,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type WorkflowHandler struct {
-	repo *repositories.WorkflowRepository
+	repo     *repositories.WorkflowRepository
+	notifier *services.Notifier
 }
 
-func NewWorkflowHandler(repo *repositories.WorkflowRepository) *WorkflowHandler {
-	return &WorkflowHandler{repo: repo}
+func NewWorkflowHandler(repo *repositories.WorkflowRepository, notifier *services.Notifier) *WorkflowHandler {
+	return &WorkflowHandler{repo: repo, notifier: notifier}
 }
 
 // ─── Workflow endpoints ──────────────────────────────────────────
@@ -149,10 +151,30 @@ func (h *WorkflowHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	// Fetch workflow before update to get metadata for notifications
+	wf, _ := h.repo.GetByID(id)
 	if err := h.repo.UpdateStatus(actor, id, req.Status); err != nil {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify on activation: tell all assignees their activities are live
+	if req.Status == models.WorkflowActive && wf != nil {
+		go func() {
+			var assigneeIDs []uuid.UUID
+			seen := map[uuid.UUID]bool{}
+			for _, a := range wf.Activities {
+				if a.AssignedToMemberID != nil && !seen[*a.AssignedToMemberID] {
+					assigneeIDs = append(assigneeIDs, *a.AssignedToMemberID)
+					seen[*a.AssignedToMemberID] = true
+				}
+			}
+			if len(assigneeIDs) > 0 {
+				h.notifier.WorkflowActivated(assigneeIDs, wf.Title, wf.ID)
+			}
+		}()
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated"})
 }
 
@@ -253,6 +275,17 @@ func (h *WorkflowHandler) AddActivity(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify assignee
+	if act.AssignedToMemberID != nil {
+		go func() {
+			wf, _ := h.repo.GetByID(wfID)
+			if wf != nil {
+				h.notifier.ActivityAssigned(*act.AssignedToMemberID, act.Title, wf.Title, wf.ID)
+			}
+		}()
+	}
+
 	c.JSON(http.StatusCreated, act)
 }
 
@@ -277,6 +310,28 @@ func (h *WorkflowHandler) UpdateActivity(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify if assignee changed
+	if assignee, ok := patch["assignedToMemberId"]; ok && assignee != nil {
+		go func() {
+			if uidStr, ok := assignee.(string); ok {
+				if uid, err := uuid.Parse(uidStr); err == nil {
+					wf, _ := h.repo.GetByID(wfID)
+					actTitle := ""
+					if wf != nil {
+						for _, a := range wf.Activities {
+							if a.ID == actID {
+								actTitle = a.Title
+								break
+							}
+						}
+						h.notifier.ActivityAssigned(uid, actTitle, wf.Title, wf.ID)
+					}
+				}
+			}
+		}()
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Activity updated"})
 }
 
@@ -301,10 +356,42 @@ func (h *WorkflowHandler) UpdateActivityStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	// Fetch workflow before update for notification context
+	wfBefore, _ := h.repo.GetByID(wfID)
+
 	if err := h.repo.UpdateActivityStatus(actor, wfID, actID, req.Status); err != nil {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notifications after activity completion
+	if (req.Status == models.ActivityCompleted || req.Status == models.ActivitySkipped) && wfBefore != nil {
+		go func() {
+			// Find the completed activity's position and the next activity
+			var completedPos int = -1
+			for _, a := range wfBefore.Activities {
+				if a.ID == actID {
+					completedPos = a.Position
+					break
+				}
+			}
+			// Notify next activity's assignee
+			if completedPos >= 0 {
+				for _, a := range wfBefore.Activities {
+					if a.Position == completedPos+1 && a.AssignedToMemberID != nil && a.Status == models.ActivityPending {
+						h.notifier.NextActivityReady(*a.AssignedToMemberID, a.Title, wfBefore.Title, wfBefore.ID)
+						break
+					}
+				}
+			}
+			// Check if workflow auto-completed → notify creator
+			wfAfter, _ := h.repo.GetByID(wfID)
+			if wfAfter != nil && wfAfter.Status == models.WorkflowCompleted && wfBefore.Status != models.WorkflowCompleted {
+				h.notifier.WorkflowCompleted(wfAfter.CreatedByMemberID, wfAfter.Title, wfAfter.ID)
+			}
+		}()
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Activity status updated"})
 }
 

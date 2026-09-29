@@ -497,4 +497,10 @@ const Map<String, String> stringsMr = {
   'billing.skipped': 'वगळली (आधीच अस्तित्वात)',
   'billing.generating': 'तयार करत आहे...',
   'billing.breakdown': 'बिल तपशील',
+
+  // Role-based finance
+  'finance.societyPendingDues': 'सोसायटी थकबाकी',
+  'finance.billsUnpaid': 'बिले थकीत',
+  'finance.markPaidConfirm': 'हे बिल भरले म्हणून चिन्हांकित करायचे?',
+  'finance.markedPaid': 'बिल भरले म्हणून चिन्हांकित केले',
 };
