@@ -315,6 +315,17 @@ func (n *Notifier) NextActivityReady(assigneeID uuid.UUID, actTitle, wfTitle str
 	)
 }
 
+func (n *Notifier) NotifyFlatMembers(flatID uuid.UUID, subject, body, bodyMr, eventType string, resourceType string, resourceID *uuid.UUID) {
+	members, err := n.memberRepo.ListByFlatID(flatID)
+	if err != nil {
+		log.Printf("notifier: failed to list flat members for %s: %v", flatID, err)
+		return
+	}
+	for _, m := range members {
+		n.NotifyOne(m.ID, subject, body, bodyMr, eventType, resourceType, resourceID)
+	}
+}
+
 func (n *Notifier) TenantApproved(landlordID uuid.UUID, tenantName string, tenantID uuid.UUID) {
 	n.NotifyOne(landlordID,
 		"Tenant Approved: "+tenantName,

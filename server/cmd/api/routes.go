@@ -66,6 +66,7 @@ func SetupRoutes(
 	financialReportHandler := handlers.NewFinancialReportHandler(domain.FinancialReport)
 	vendorHandler := handlers.NewVendorHandler(domain.Vendor)
 	vendorPaymentHandler := handlers.NewVendorPaymentHandler(domain.VendorPayment)
+	visitorHandler := handlers.NewVisitorHandler(domain.Visitor, notifier)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -480,5 +481,22 @@ func SetupRoutes(
 		amc.DELETE("/:id", amcHandler.Delete)
 		amc.POST("/:id/service-log", amcHandler.LogService)
 		amc.GET("/:id/service-logs", amcHandler.ListServiceLogs)
+	}
+
+	// ─── Visitors ─────────────────────────────────────────────
+	{
+		vis := protected.Group("/visitors")
+		vis.GET("", visitorHandler.List)
+		vis.GET("/today-summary", visitorHandler.TodaySummary)
+		vis.POST("", visitorHandler.Create)
+		vis.POST("/:id/approve", visitorHandler.Approve)
+		vis.POST("/:id/checkout", visitorHandler.CheckOut)
+		vis.POST("/:id/reject", visitorHandler.Reject)
+
+		fv := protected.Group("/frequent-visitors")
+		fv.GET("", visitorHandler.ListFrequent)
+		fv.POST("", visitorHandler.CreateFrequent)
+		fv.DELETE("/:id", visitorHandler.DeleteFrequent)
+		fv.POST("/:id/blacklist", visitorHandler.BlacklistFrequent)
 	}
 }

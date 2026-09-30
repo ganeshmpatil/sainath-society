@@ -103,6 +103,12 @@ func (r *MemberRepository) ListByRole(role *models.Role) ([]models.Member, error
 	return rows, err
 }
 
+func (r *MemberRepository) ListByFlatID(flatID uuid.UUID) ([]models.Member, error) {
+	var rows []models.Member
+	err := r.db.Where("flat_id = ? AND is_active = ?", flatID, true).Find(&rows).Error
+	return rows, err
+}
+
 // Deactivate — admin only.
 func (r *MemberRepository) Deactivate(actor *ActorContext, id uuid.UUID) error {
 	if !actor.IsAdmin() {

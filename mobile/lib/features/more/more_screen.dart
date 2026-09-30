@@ -21,6 +21,7 @@ class _Module {
 }
 
 const _modules = [
+  _Module(Icons.door_front_door_rounded, 'nav.visitors', '/visitors', Color(0x30EF4444)),
   _Module(Icons.people_rounded, 'nav.residents', '/residents', Color(0x303B82F6)),
   _Module(Icons.directions_car_rounded, 'nav.vehicles', '/vehicles', Color(0x3006B6D4)),
   _Module(Icons.groups_rounded, 'nav.meetings', '/meetings', Color(0x3010B981)),
