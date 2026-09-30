@@ -7,6 +7,7 @@ import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/shimmer_loading.dart';
+import 'package:go_router/go_router.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // State
@@ -301,7 +302,15 @@ class _AccountGroupTile extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(16.0 + level * 20, 2, 16, 2),
-          child: Container(
+          child: InkWell(
+            onTap: isGroup ? null : () {
+              final id = account['id']?.toString() ?? '';
+              final n = isMr && (account['nameMr'] ?? '').isNotEmpty
+                  ? account['nameMr'] : account['name'];
+              context.push('/ledger/$id?name=${Uri.encodeComponent(n)}');
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isGroup ? color.withAlpha(8) : AppColors.surface,
@@ -341,8 +350,15 @@ class _AccountGroupTile extends StatelessWidget {
                     child: Icon(Icons.lock_outline,
                         size: 12, color: AppColors.textTertiary),
                   ),
+                if (!isGroup)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Icon(Icons.chevron_right,
+                        size: 16, color: AppColors.textTertiary),
+                  ),
               ],
             ),
+          ),
           ),
         ),
         if (children.isNotEmpty)

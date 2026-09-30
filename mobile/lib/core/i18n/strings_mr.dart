@@ -543,6 +543,39 @@ const Map<String, String> stringsMr = {
   'ie.expenses': 'खर्च',
   'ie.noJournalEntries': 'या कालावधीसाठी रोजनामा नोंदी सापडल्या नाहीत. I&E विवरण पाहण्यासाठी रोजनामा नोंदी तयार करा.',
 
+  // Ledger
+  'ledger.noEntries': 'या खात्यासाठी खातेवही नोंदी नाहीत',
+
+  // Balance Sheet
+  'bs.title': 'ताळेबंद',
+  'bs.asOf': 'दिनांकापर्यंत',
+  'bs.assets': 'मालमत्ता',
+  'bs.liabilities': 'देणी',
+  'bs.funds': 'निधी व राखीव',
+  'bs.surplus': 'अधिशेष',
+  'bs.deficit': 'तूट',
+  'bs.balanced': 'ताळेबंद समतोल आहे',
+  'bs.imbalanced': 'ताळेबंद जुळत नाही',
+
+  // Receipts & Payments
+  'rp.title': 'जमा व खर्च',
+  'rp.openingBalance': 'प्रारंभिक शिल्लक',
+  'rp.closingBalance': 'अंतिम शिल्लक',
+  'rp.receipts': 'जमा',
+  'rp.payments': 'खर्च',
+
+  // Vendor Master
+  'vendor.title': 'विक्रेता नोंदणी',
+  'vendor.noVendors': 'अजून विक्रेते जोडलेले नाहीत',
+  'vendor.addVendor': 'विक्रेता जोडा',
+  'vendor.name': 'विक्रेत्याचे नाव',
+  'vendor.nameMr': 'विक्रेत्याचे नाव (मराठी)',
+  'vendor.type': 'विक्रेता प्रकार',
+  'vendor.pan': 'पॅन क्रमांक',
+  'vendor.phone': 'फोन',
+  'vendor.email': 'ईमेल',
+  'vendor.address': 'पत्ता',
+
   // App Update
   'update.updateAvailable': 'अपडेट उपलब्ध',
   'update.newVersion': 'नवीन आवृत्ती',

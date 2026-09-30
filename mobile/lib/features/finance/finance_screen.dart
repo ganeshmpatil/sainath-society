@@ -21,6 +21,9 @@ import 'journal_entries_screen.dart';
 import 'defaulter_register_screen.dart';
 import 'member_statement_screen.dart';
 import 'income_expenditure_screen.dart';
+import 'balance_sheet_screen.dart';
+import 'receipts_payments_screen.dart';
+import 'vendor_master_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -810,6 +813,36 @@ class _FVS extends State<_FV> {
                   label: l.t('ie.title'),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IncomeExpenditureScreen())),
                 )),
+              ]),
+            )),
+            // Row 4: Balance Sheet, Receipts & Payments
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.balance,
+                  label: l.t('bs.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BalanceSheetScreen())),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.swap_vert,
+                  label: l.t('rp.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReceiptsPaymentsScreen())),
+                )),
+              ]),
+            )),
+            // Row 5: Vendor Master
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.store,
+                  label: l.t('vendor.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VendorMasterScreen())),
+                )),
+                const SizedBox(width: 8),
+                const Expanded(child: SizedBox()),
               ]),
             )),
 

@@ -33,6 +33,10 @@ import '../features/finance/journal_entries_screen.dart';
 import '../features/finance/defaulter_register_screen.dart';
 import '../features/finance/member_statement_screen.dart';
 import '../features/finance/income_expenditure_screen.dart';
+import '../features/finance/ledger_screen.dart';
+import '../features/finance/balance_sheet_screen.dart';
+import '../features/finance/receipts_payments_screen.dart';
+import '../features/finance/vendor_master_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -157,6 +161,16 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/defaulter-register', builder: (_, __) => const DefaulterRegisterScreen()),
       GoRoute(path: '/my-statement', builder: (_, __) => const MemberStatementScreen()),
       GoRoute(path: '/income-expenditure', builder: (_, __) => const IncomeExpenditureScreen()),
+      GoRoute(
+        path: '/ledger/:accountId',
+        builder: (_, state) => LedgerScreen(
+          accountId: state.pathParameters['accountId']!,
+          accountName: state.uri.queryParameters['name'] ?? 'Ledger',
+        ),
+      ),
+      GoRoute(path: '/balance-sheet', builder: (_, __) => const BalanceSheetScreen()),
+      GoRoute(path: '/receipts-payments', builder: (_, __) => const ReceiptsPaymentsScreen()),
+      GoRoute(path: '/vendor-master', builder: (_, __) => const VendorMasterScreen()),
       GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),

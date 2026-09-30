@@ -543,6 +543,39 @@ const Map<String, String> stringsEn = {
   'ie.expenses': 'Expenses',
   'ie.noJournalEntries': 'No journal entries found for this period. Create journal entries to see the I&E statement.',
 
+  // Ledger
+  'ledger.noEntries': 'No ledger entries for this account',
+
+  // Balance Sheet
+  'bs.title': 'Balance Sheet',
+  'bs.asOf': 'As of',
+  'bs.assets': 'Assets',
+  'bs.liabilities': 'Liabilities',
+  'bs.funds': 'Funds & Reserves',
+  'bs.surplus': 'Surplus',
+  'bs.deficit': 'Deficit',
+  'bs.balanced': 'Balance Sheet is balanced',
+  'bs.imbalanced': 'Balance Sheet mismatch',
+
+  // Receipts & Payments
+  'rp.title': 'Receipts & Payments',
+  'rp.openingBalance': 'Opening Balance',
+  'rp.closingBalance': 'Closing Balance',
+  'rp.receipts': 'Receipts',
+  'rp.payments': 'Payments',
+
+  // Vendor Master
+  'vendor.title': 'Vendor Master',
+  'vendor.noVendors': 'No vendors added yet',
+  'vendor.addVendor': 'Add Vendor',
+  'vendor.name': 'Vendor Name',
+  'vendor.nameMr': 'Vendor Name (Marathi)',
+  'vendor.type': 'Vendor Type',
+  'vendor.pan': 'PAN Number',
+  'vendor.phone': 'Phone',
+  'vendor.email': 'Email',
+  'vendor.address': 'Address',
+
   // App Update
   'update.updateAvailable': 'Update Available',
   'update.newVersion': 'New version',
