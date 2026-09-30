@@ -1,7 +1,7 @@
 name: sainath_society
 description: "Sainath Society / सोसायटी मित्र — society management mobile app"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.4

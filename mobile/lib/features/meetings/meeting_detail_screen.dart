@@ -85,6 +85,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
         'minutesMr': '',
         'lock': lock,
       });
+      if (!mounted) return;
       setState(() => _editingMinutes = false);
       _load();
       if (mounted) {

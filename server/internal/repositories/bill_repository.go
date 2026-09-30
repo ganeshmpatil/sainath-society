@@ -334,6 +334,101 @@ func (r *BillRepository) MarkPaid(actor *ActorContext, id uuid.UUID, amount floa
 	}).Error
 }
 
+// RecordPayment creates a BillPayment record and updates the bill's AmountPaid.
+// This is the primary way to record multi-mode payments (FIN-008) and partial payments (FIN-010).
+func (r *BillRepository) RecordPayment(actor *ActorContext, payment *models.BillPayment) error {
+	if !actor.IsAdmin() {
+		return ErrForbidden
+	}
+
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// Fetch bill
+		var bill models.MaintenanceBill
+		if err := tx.First(&bill, "id = ?", payment.BillID).Error; err != nil {
+			return err
+		}
+
+		if bill.Status == models.BillPaid {
+			return errors.New("bill is already fully paid")
+		}
+
+		balanceDue := bill.TotalAmount - bill.AmountPaid
+		if payment.Amount > balanceDue {
+			// Allow overpayment (advance) but cap bill to TotalAmount
+			// Excess becomes credit balance (handled in future)
+		}
+
+		// Generate receipt number
+		var count int64
+		tx.Model(&models.BillPayment{}).Count(&count)
+		payment.ReceiptNo = fmt.Sprintf("RCT-%d-%04d", time.Now().Year(), count+1)
+		payment.RecordedByID = actor.UserID
+
+		// Create payment record
+		if err := tx.Create(payment).Error; err != nil {
+			return err
+		}
+
+		// Update bill
+		newPaid := bill.AmountPaid + payment.Amount
+		status := bill.Status
+		var paidAt *time.Time
+		if newPaid >= bill.TotalAmount {
+			status = models.BillPaid
+			now := time.Now()
+			paidAt = &now
+			newPaid = bill.TotalAmount // cap at total
+		}
+
+		return tx.Model(&bill).Updates(map[string]interface{}{
+			"amount_paid": newPaid,
+			"status":      status,
+			"paid_at":     paidAt,
+		}).Error
+	})
+}
+
+// ListPaymentsForBill returns all payments recorded against a bill.
+func (r *BillRepository) ListPaymentsForBill(actor *ActorContext, billID uuid.UUID) ([]models.BillPayment, error) {
+	// Verify actor can see this bill
+	var bill models.MaintenanceBill
+	if err := r.db.First(&bill, "id = ?", billID).Error; err != nil {
+		return nil, err
+	}
+	if err := AssertOwnerOrAdmin(actor, bill.MemberID); err != nil {
+		return nil, err
+	}
+
+	var rows []models.BillPayment
+	err := r.db.Where("bill_id = ?", billID).
+		Order("payment_date ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
+// SendPaymentReminders generates notifications for overdue bills.
+// Returns count of reminders sent.
+func (r *BillRepository) GetOverdueBills() ([]models.MaintenanceBill, error) {
+	var bills []models.MaintenanceBill
+	now := time.Now()
+	err := r.db.Where("status = ? AND due_date < ?", models.BillIssued, now).
+		Preload("Member").Preload("Flat").
+		Find(&bills).Error
+	return bills, err
+}
+
+// GetBillsDueSoon returns bills due within the next N days that are still unpaid.
+func (r *BillRepository) GetBillsDueSoon(days int) ([]models.MaintenanceBill, error) {
+	var bills []models.MaintenanceBill
+	now := time.Now()
+	deadline := now.AddDate(0, 0, days)
+	err := r.db.Where("status = ? AND due_date > ? AND due_date <= ?",
+		models.BillIssued, now, deadline).
+		Preload("Member").Preload("Flat").
+		Find(&bills).Error
+	return bills, err
+}
+
 func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }

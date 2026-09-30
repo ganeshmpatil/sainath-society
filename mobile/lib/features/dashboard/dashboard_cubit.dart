@@ -89,7 +89,9 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   List<Map<String, dynamic>> _list(dynamic data, String key) {
     if (data is Map && data[key] is List) {
-      return (data[key] as List).cast<Map<String, dynamic>>();
+      return (data[key] as List)
+          .whereType<Map<String, dynamic>>()
+          .toList();
     }
     return [];
   }

@@ -30,7 +30,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     setState(() => _loading = true);
     try {
       final res = await api.get('/notifications/inbox');
-      final list = (res.data as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final list = (res.data as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       if (!mounted) return;
       setState(() {
         _notifications = list;
@@ -64,8 +64,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Icons.groups_rounded;
       case 'TASK_ASSIGNED':
         return Icons.checklist_rounded;
-      case 'POLL_PUBLISHED':
-        return Icons.how_to_vote_rounded;
       case 'BILL_GENERATED':
       case 'BILL_PAID':
         return Icons.account_balance_wallet_rounded;
@@ -89,8 +87,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return AppColors.resolved;
       case 'TASK_ASSIGNED':
         return const Color(0xFFF97316);
-      case 'POLL_PUBLISHED':
-        return const Color(0xFFEAB308);
       case 'BILL_GENERATED':
       case 'BILL_PAID':
         return AppColors.resolved;
@@ -118,7 +114,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () { if (context.canPop()) context.pop(); else context.go('/'); },
                         child: Icon(Icons.arrow_back_ios_rounded,
                             size: 20, color: AppColors.textSecondary),
                       ),

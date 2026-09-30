@@ -29,7 +29,7 @@ class _BsCubit extends Cubit<_BsState> {
     try {
       final res = await api.get('/finance/billing-structure/active');
       final data = res.data as Map<String, dynamic>? ?? {};
-      final heads = (data['chargeHeads'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final heads = (data['chargeHeads'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       emit(_BsState(structure: data, chargeHeads: heads));
     } catch (_) {
       emit(const _BsState());
@@ -98,7 +98,7 @@ class _BsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     context.watch<LocaleCubit>();
-    final isMr = context.read<LocaleCubit>().state == 'mr';
+    final isMr = context.read<LocaleCubit>().isMarathi;
     final authState = context.watch<AuthBloc>().state;
     final isAdmin = authState is Authenticated && authState.user.role == 'ADMIN';
 
@@ -216,9 +216,9 @@ class _BsView extends StatelessWidget {
     try {
       final res = await api.get('/finance/billing-structure/preview', queryParams: {'areaSqft': '1200'});
       final data = res.data;
-      final items = (data['lineItems'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final items = (data['lineItems'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       if (!context.mounted) return;
-      final isMr = context.read<LocaleCubit>().state == 'mr';
+      final isMr = context.read<LocaleCubit>().isMarathi;
 
       showModalBottomSheet(
         context: context,

@@ -13,6 +13,7 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/status_badge.dart';
 import '../../shared/utils/date_format.dart';
+import '../../core/update/update_service.dart';
 import '../notifications/notification_badge.dart';
 import 'dashboard_cubit.dart';
 
@@ -28,8 +29,21 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-class _DashboardView extends StatelessWidget {
+class _DashboardView extends StatefulWidget {
   const _DashboardView();
+
+  @override
+  State<_DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<_DashboardView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.instance.checkForUpdate(context);
+    });
+  }
 
   String _greeting(AppLocalizations l) {
     final hour = DateTime.now().hour;
@@ -200,10 +214,9 @@ class _QuickActionsGrid extends StatelessWidget {
     _QA(Icons.campaign_rounded, 'nav.notices', '/notices', Color(0x30EF4444)),
     _QA(Icons.report_problem_rounded, 'nav.grievances', '/grievances', Color(0x30F97316)),
     _QA(Icons.account_balance_wallet_rounded, 'nav.finance', '/finance', Color(0x3010B981)),
-    _QA(Icons.how_to_vote_rounded, 'nav.polls', '/polls', Color(0x30A855F7)),
+    _QA(Icons.phone_in_talk_rounded, 'nav.importantCalls', '/important-calls', Color(0x30EF4444)),
     _QA(Icons.directions_car_rounded, 'nav.vehicles', '/vehicles', Color(0x3006B6D4)),
     _QA(Icons.people_rounded, 'nav.residents', '/residents', Color(0x30EC4899)),
-    _QA(Icons.groups_rounded, 'nav.meetings', '/meetings', Color(0x30EAB308)),
     _QA(Icons.grid_view_rounded, 'common.more', '/more', Color(0x3064748B)),
   ];
 

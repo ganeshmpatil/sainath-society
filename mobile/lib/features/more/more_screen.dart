@@ -23,7 +23,6 @@ class _Module {
 const _modules = [
   _Module(Icons.people_rounded, 'nav.residents', '/residents', Color(0x303B82F6)),
   _Module(Icons.directions_car_rounded, 'nav.vehicles', '/vehicles', Color(0x3006B6D4)),
-  _Module(Icons.how_to_vote_rounded, 'nav.polls', '/polls', Color(0x30EAB308)),
   _Module(Icons.groups_rounded, 'nav.meetings', '/meetings', Color(0x3010B981)),
   _Module(Icons.checklist_rounded, 'nav.tasks', '/tasks', Color(0x30F97316)),
   _Module(Icons.event_available_rounded, 'nav.hallBooking', '/hall-booking', Color(0x30EF4444)),
@@ -31,7 +30,7 @@ const _modules = [
   _Module(Icons.swap_horiz_rounded, 'nav.moveInOut', '/move-in-out', Color(0x3010B981)),
   _Module(Icons.folder_shared_rounded, 'nav.memberDocs', '/member-documents', Color(0x30EF4444)),
   _Module(Icons.calendar_month_rounded, 'nav.calendar', '/calendar', Color(0x303B82F6)),
-  _Module(Icons.shield_rounded, 'nav.watchmen', '/watchmen', Color(0x3064748B)),
+  _Module(Icons.phone_in_talk_rounded, 'nav.importantCalls', '/important-calls', Color(0x30EF4444)),
   _Module(Icons.account_tree_rounded, 'nav.workflows', '/workflows', Color(0x30A855F7)),
 ];
 

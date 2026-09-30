@@ -590,9 +590,9 @@ class _FVS extends State<_FV> {
               const SizedBox(height: 16),
               if (_isAdmin)
                 SizedBox(width: double.infinity, child: ElevatedButton.icon(
-                  onPressed: () => _markBillPaid(bill),
-                  icon: const Icon(Icons.check_circle_outline, size: 18),
-                  label: Text(l.t('finance.markPaid')),
+                  onPressed: () => _showRecordPaymentSheet(bill),
+                  icon: const Icon(Icons.add_card, size: 18),
+                  label: Text(l.t('payment.recordPayment')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
@@ -613,6 +613,13 @@ class _FVS extends State<_FV> {
                   ),
                 )),
             ],
+
+            // Payment history
+            if (paid > 0) ...[
+              const SizedBox(height: 16),
+              _PaymentHistorySection(billId: bill['id'], l: l),
+            ],
+
             const SizedBox(height: 16),
           ],
         ),
@@ -620,43 +627,133 @@ class _FVS extends State<_FV> {
     );
   }
 
-  Future<void> _markBillPaid(Map<String, dynamic> bill) async {
+  void _showRecordPaymentSheet(Map<String, dynamic> bill) {
     final l = AppLocalizations.of(context);
     final total = (bill['totalAmount'] ?? 0).toDouble();
     final paid = (bill['amountPaid'] ?? 0).toDouble();
     final due = total - paid;
-    final confirmed = await showDialog<bool>(
+    final billId = bill['id'];
+    final amountCtl = TextEditingController(text: due.toStringAsFixed(0));
+    final refCtl = TextEditingController();
+    final dateCtl = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+    String mode = 'UPI';
+    bool submitting = false;
+
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l.t('finance.markPaid')),
-        content: Text('${l.t('finance.markPaidConfirm')}\n\n\u20B9${due.toStringAsFixed(0)}'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.t('common.cancel'))),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-            child: Text(l.t('finance.markPaid')),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (ctx2, setSheetState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 20,
+            bottom: MediaQuery.of(ctx2).viewInsets.bottom + 20,
           ),
-        ],
+          child: SingleChildScrollView(child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Container(width: 40, height: 4,
+                  decoration: BoxDecoration(color: AppColors.textTertiary, borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 16),
+              Text(l.t('payment.recordPayment'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 4),
+              Text('${l.t('finance.balanceDue')}: \u20B9${due.toStringAsFixed(0)}',
+                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+              const SizedBox(height: 16),
+              // Amount
+              TextField(
+                controller: amountCtl,
+                decoration: InputDecoration(
+                  labelText: l.t('payment.amount'),
+                  border: const OutlineInputBorder(),
+                  prefixText: '\u20B9 ',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              // Payment mode
+              DropdownButtonFormField<String>(
+                value: mode,
+                decoration: InputDecoration(
+                  labelText: l.t('payment.mode'),
+                  border: const OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'UPI', child: Text('UPI')),
+                  DropdownMenuItem(value: 'NEFT', child: Text('NEFT/RTGS')),
+                  DropdownMenuItem(value: 'CHEQUE', child: Text('Cheque')),
+                  DropdownMenuItem(value: 'CASH', child: Text('Cash')),
+                  DropdownMenuItem(value: 'RAZORPAY', child: Text('Razorpay')),
+                ],
+                onChanged: (v) => setSheetState(() => mode = v!),
+              ),
+              const SizedBox(height: 12),
+              // Reference
+              TextField(
+                controller: refCtl,
+                decoration: InputDecoration(
+                  labelText: mode == 'CHEQUE' ? l.t('payment.chequeNo') : l.t('payment.reference'),
+                  hintText: mode == 'UPI' ? 'UTR number' : mode == 'NEFT' ? 'Transaction ref' : mode == 'CHEQUE' ? 'Cheque number' : 'Receipt no',
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Date
+              TextField(
+                controller: dateCtl,
+                decoration: InputDecoration(
+                  labelText: l.t('payment.date'),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                ),
+                readOnly: true,
+                onTap: () async {
+                  final d = await showDatePicker(context: ctx2,
+                    initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime.now());
+                  if (d != null) dateCtl.text = d.toIso8601String().substring(0, 10);
+                },
+              ),
+              const SizedBox(height: 16),
+              SizedBox(width: double.infinity, child: FilledButton(
+                onPressed: submitting ? null : () async {
+                  final amt = double.tryParse(amountCtl.text) ?? 0;
+                  if (amt <= 0) return;
+                  setSheetState(() => submitting = true);
+                  try {
+                    await api.post('/finance/bills/$billId/record-payment', data: {
+                      'amount': amt,
+                      'paymentMode': mode,
+                      'paymentDate': dateCtl.text,
+                      'reference': refCtl.text.trim(),
+                    });
+                    if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                    if (mounted) {
+                      Navigator.pop(context); // close bill detail
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(l.t('payment.recorded')),
+                        backgroundColor: Colors.green,
+                      ));
+                      context.read<_FC>().load();
+                    }
+                  } catch (e) {
+                    setSheetState(() => submitting = false);
+                    if (sheetCtx.mounted) {
+                      ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                    }
+                  }
+                },
+                child: submitting
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text(l.t('payment.recordPayment')),
+              )),
+            ],
+          )),
+        ),
       ),
     );
-    if (confirmed != true || !mounted) return;
-    try {
-      await api.post('/finance/bills/${bill['id']}/mark-paid', data: {'amount': due});
-      if (mounted) {
-        Navigator.pop(context); // close detail sheet
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l.t('finance.markedPaid')),
-          backgroundColor: Colors.green,
-        ));
-        context.read<_FC>().load();
-      }
-    } catch (e) {
-      if (mounted) {
-        final msg = (e is DioException) ? (e.response?.data?['error'] ?? 'Error') : 'Error';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$msg'), backgroundColor: Colors.red));
-      }
-    }
   }
 
   List<Widget> _legacyRows(AppLocalizations l, Map<String, dynamic> bill, double arrear, double interest) {
@@ -992,5 +1089,90 @@ class _BC extends StatelessWidget {
         ],
       ])),
     );
+  }
+}
+
+// Payment history widget that fetches and shows payments for a bill
+class _PaymentHistorySection extends StatefulWidget {
+  final String billId;
+  final AppLocalizations l;
+  const _PaymentHistorySection({required this.billId, required this.l});
+  @override
+  State<_PaymentHistorySection> createState() => _PaymentHistorySectionState();
+}
+
+class _PaymentHistorySectionState extends State<_PaymentHistorySection> {
+  List<Map<String, dynamic>>? _payments;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await api.get('/finance/bills/${widget.billId}/payments');
+      final list = (res.data['payments'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      if (mounted) setState(() { _payments = list; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; });
+    }
+  }
+
+  IconData _modeIcon(String mode) {
+    switch (mode) {
+      case 'UPI': return Icons.qr_code_2;
+      case 'NEFT': return Icons.account_balance;
+      case 'CHEQUE': return Icons.description;
+      case 'CASH': return Icons.payments;
+      case 'RAZORPAY': return Icons.credit_card;
+      default: return Icons.payment;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))));
+    if (_payments == null || _payments!.isEmpty) return const SizedBox.shrink();
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(widget.l.t('payment.history'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      const SizedBox(height: 8),
+      ...List.generate(_payments!.length, (i) {
+        final p = _payments![i];
+        final mode = p['paymentMode'] ?? '';
+        final amount = ((p['amount'] ?? 0) as num).toDouble();
+        final ref = p['reference'] ?? '';
+        final receipt = p['receiptNo'] ?? '';
+        final date = p['paymentDate']?.toString().substring(0, 10) ?? '';
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.green.withAlpha(10),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.green.withAlpha(40)),
+          ),
+          child: Row(children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(color: Colors.green.withAlpha(25), borderRadius: BorderRadius.circular(8)),
+              child: Icon(_modeIcon(mode), size: 16, color: Colors.green),
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('$mode ${ref.isNotEmpty ? '• $ref' : ''}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+              Text('$receipt • $date',
+                  style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+            ])),
+            Text('\u20B9${amount.toStringAsFixed(0)}',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.green)),
+          ]),
+        );
+      }),
+    ]);
   }
 }

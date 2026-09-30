@@ -99,8 +99,10 @@ class ApiClient {
     return _dio.delete(path);
   }
 
-  Future<Response> postMultipart(String path, {required FormData data}) {
+  Future<Response> postMultipart(String path, {required FormData data, CancelToken? cancelToken, ProgressCallback? onSendProgress}) {
     return _dio.post(path, data: data,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
         options: Options(contentType: 'multipart/form-data'));
   }
 

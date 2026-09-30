@@ -198,7 +198,10 @@ class _NoticesViewState extends State<_NoticesView> {
                   } else {
                     await api.post('/notices', data: {'title': title, 'body': body, 'category': category});
                   }
-                  if (context.mounted) Navigator.pop(context); cubit.load();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    cubit.load();
+                  }
                 } catch (_) {}
               })),
             ]),

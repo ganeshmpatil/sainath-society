@@ -40,7 +40,7 @@ class ListCubit extends Cubit<ListData> {
     try {
       final res = await api.get(endpoint, queryParams: params);
       final data = res.data;
-      final list = (data[listKey] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final list = (data[listKey] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       emit(ListData(items: list, count: data['count'] ?? list.length));
     } catch (e) {
       emit(ListData(error: e.toString()));

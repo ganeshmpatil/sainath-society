@@ -48,7 +48,7 @@ class GrievancesCubit extends Cubit<GrievancesState> {
 
       final response = await api.get('/grievances', queryParams: params);
       final data = response.data;
-      final list = (data['grievances'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final list = (data['grievances'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
 
       emit(state.copyWith(
         loading: false,

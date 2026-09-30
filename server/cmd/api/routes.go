@@ -351,6 +351,10 @@ func SetupRoutes(
 		fn.GET("/bills/pending-dues", billHandler.PendingDues)
 		fn.GET("/bills/:id", billHandler.GetByID)
 		fn.POST("/bills/:id/mark-paid", billHandler.MarkPaid)
+		fn.POST("/bills/:id/record-payment", billHandler.RecordPayment)
+		fn.GET("/bills/:id/payments", billHandler.ListPayments)
+		fn.POST("/bills/send-reminders", billHandler.SendReminders)
+		fn.GET("/bills/overdue-summary", billHandler.OverdueSummary)
 
 		// Billing structure: charge heads + rate configuration.
 		bs := fn.Group("/billing-structure")

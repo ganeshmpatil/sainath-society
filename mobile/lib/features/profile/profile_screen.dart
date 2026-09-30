@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
                         child: Icon(Icons.arrow_back_ios_rounded,
                             size: 20, color: AppColors.textSecondary),
                       ),

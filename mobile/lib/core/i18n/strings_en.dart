@@ -459,6 +459,12 @@ const Map<String, String> stringsEn = {
   'payment.history': 'Payment History',
   'payment.amount': 'Amount',
   'payment.viewBankDetails': 'View Bank Details',
+  'payment.recordPayment': 'Record Payment',
+  'payment.mode': 'Payment Mode',
+  'payment.reference': 'Reference / UTR',
+  'payment.chequeNo': 'Cheque Number',
+  'payment.date': 'Payment Date',
+  'payment.recorded': 'Payment recorded successfully',
 
   // Billing Structure
   'billing.structure': 'Billing Structure',

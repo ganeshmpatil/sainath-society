@@ -68,7 +68,7 @@ class _BillGenerateScreenState extends State<BillGenerateScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     context.watch<LocaleCubit>();
-    final isMr = context.read<LocaleCubit>().state == 'mr';
+    final isMr = context.read<LocaleCubit>().isMarathi;
 
     return Scaffold(
       appBar: AppBar(title: Text(l.t('billing.generateBills'))),

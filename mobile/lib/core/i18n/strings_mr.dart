@@ -459,6 +459,12 @@ const Map<String, String> stringsMr = {
   'payment.history': 'पेमेंट इतिहास',
   'payment.amount': 'रक्कम',
   'payment.viewBankDetails': 'बँक तपशील पहा',
+  'payment.recordPayment': 'पेमेंट नोंदवा',
+  'payment.mode': 'पेमेंट पद्धत',
+  'payment.reference': 'संदर्भ / UTR',
+  'payment.chequeNo': 'चेक क्रमांक',
+  'payment.date': 'पेमेंट तारीख',
+  'payment.recorded': 'पेमेंट यशस्वीरित्या नोंदवले',
 
   // Billing Structure
   'billing.structure': 'बिलिंग रचना',

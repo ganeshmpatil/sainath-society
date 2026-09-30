@@ -21,9 +21,10 @@ class CalendarState {
   final bool loading;
   final String? error;
   final List<Map<String, dynamic>> todos;
-  const CalendarState({this.loading = false, this.error, this.todos = const []});
-  CalendarState copyWith({bool? loading, String? error, List<Map<String, dynamic>>? todos}) =>
-      CalendarState(loading: loading ?? this.loading, error: error, todos: todos ?? this.todos);
+  final List<Map<String, dynamic>> meetings;
+  const CalendarState({this.loading = false, this.error, this.todos = const [], this.meetings = const []});
+  CalendarState copyWith({bool? loading, String? error, List<Map<String, dynamic>>? todos, List<Map<String, dynamic>>? meetings}) =>
+      CalendarState(loading: loading ?? this.loading, error: error, todos: todos ?? this.todos, meetings: meetings ?? this.meetings);
 }
 
 class CalendarCubit extends Cubit<CalendarState> {
@@ -32,9 +33,13 @@ class CalendarCubit extends Cubit<CalendarState> {
   Future<void> load(int year, int month) async {
     emit(state.copyWith(loading: true));
     try {
-      final res = await api.get('/committee-calendar', queryParams: {'year': '$year', 'month': '$month'});
-      final list = (res.data['todos'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-      emit(state.copyWith(loading: false, todos: list));
+      final results = await Future.wait([
+        api.get('/committee-calendar', queryParams: {'year': '$year', 'month': '$month'}),
+        api.get('/meetings'),
+      ]);
+      final todos = (results[0].data['todos'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
+      final meetings = (results[1].data['meetings'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
+      emit(state.copyWith(loading: false, todos: todos, meetings: meetings));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -57,6 +62,24 @@ Color _todoColor(Map<String, dynamic> todo) {
   if (daysLeft <= 3) return const Color(0xFFF97316); // due soon — orange
   if (daysLeft <= 7) return const Color(0xFFEAB308); // this week — yellow
   return const Color(0xFF3B82F6); // future — blue
+}
+
+Color _meetingColor(Map<String, dynamic> meeting) {
+  final status = meeting['status'] ?? '';
+  if (status == 'COMPLETED') return const Color(0xFF10B981);
+  if (status == 'CANCELLED') return const Color(0xFF64748B);
+  return const Color(0xFFA855F7); // purple for meetings
+}
+
+IconData _meetingTypeIcon(String type) {
+  switch (type) {
+    case 'AGM': return Icons.groups_rounded;
+    case 'SGM': return Icons.people_alt_rounded;
+    case 'COMMITTEE': return Icons.group_work_rounded;
+    case 'EMERGENCY': return Icons.warning_rounded;
+    case 'REVIEW': return Icons.rate_review_rounded;
+    default: return Icons.event_rounded;
+  }
 }
 
 IconData _categoryIcon(String cat) {
@@ -109,6 +132,23 @@ class _CalendarViewState extends State<_CalendarView> {
     }).toList();
   }
 
+  List<Map<String, dynamic>> _meetingsForDay(DateTime day, List<Map<String, dynamic>> all) {
+    return all.where((m) {
+      final scheduled = DateTime.tryParse(m['scheduledAt'] ?? '');
+      if (scheduled == null) return false;
+      final local = scheduled.toLocal();
+      return local.year == day.year && local.month == day.month && local.day == day.day;
+    }).toList();
+  }
+
+  /// Combined event list for calendar markers (todos + meetings)
+  List<Map<String, dynamic>> _eventsForDay(DateTime day, CalendarState state) {
+    final todos = _todosForDay(day, state.todos);
+    final meetings = _meetingsForDay(day, state.meetings)
+        .map((m) => {...m, '_isMeeting': true}).toList();
+    return [...meetings, ...todos];
+  }
+
   List<Map<String, dynamic>> _overdueTodos(List<Map<String, dynamic>> all) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -134,7 +174,8 @@ class _CalendarViewState extends State<_CalendarView> {
         onRefresh: () => context.read<CalendarCubit>().load(_focusedDay.year, _focusedDay.month),
         color: AppColors.primary,
         child: BlocBuilder<CalendarCubit, CalendarState>(builder: (context, state) {
-          final selected = _todosForDay(_selectedDay, state.todos);
+          final selectedTodos = _todosForDay(_selectedDay, state.todos);
+          final selectedMeetings = _meetingsForDay(_selectedDay, state.meetings);
           final overdue = _overdueTodos(state.todos);
 
           return CustomScrollView(slivers: [
@@ -172,7 +213,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   _focusedDay = focused;
                   context.read<CalendarCubit>().load(focused.year, focused.month);
                 },
-                eventLoader: (day) => _todosForDay(day, state.todos),
+                eventLoader: (day) => _eventsForDay(day, state),
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(color: AppColors.primary.withAlpha(60), shape: BoxShape.circle),
                   selectedDecoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
@@ -200,10 +241,11 @@ class _CalendarViewState extends State<_CalendarView> {
                 calendarBuilders: CalendarBuilders(
                   markerBuilder: (ctx, day, events) {
                     if (events.isEmpty) return null;
-                    final todos = events.cast<Map<String, dynamic>>();
-                    return Row(mainAxisSize: MainAxisSize.min, children: todos.take(3).map((t) =>
+                    final items = events.cast<Map<String, dynamic>>();
+                    return Row(mainAxisSize: MainAxisSize.min, children: items.take(3).map((t) =>
                       Container(width: 6, height: 6, margin: const EdgeInsets.symmetric(horizontal: 0.8),
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: _todoColor(t)))).toList());
+                        decoration: BoxDecoration(shape: BoxShape.circle,
+                          color: t['_isMeeting'] == true ? _meetingColor(t) : _todoColor(t)))).toList());
                   },
                 ),
               ),
@@ -238,17 +280,23 @@ class _CalendarViewState extends State<_CalendarView> {
             if (state.loading)
               const SliverToBoxAdapter(child: ShimmerLoading()),
 
+            // Meetings for selected day
+            if (!state.loading && selectedMeetings.isNotEmpty)
+              SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
+                return _MeetingCard(meeting: selectedMeetings[i], isMr: isMr);
+              }, childCount: selectedMeetings.length)),
+
             // Task list for selected day
-            if (!state.loading && selected.isEmpty)
+            if (!state.loading && selectedTodos.isEmpty && selectedMeetings.isEmpty)
               SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(32),
                   child: Center(child: Text(l.t('calendar.noTodosForDay'), style: TextStyle(color: AppColors.textTertiary))))),
 
-            if (!state.loading && selected.isNotEmpty)
+            if (!state.loading && selectedTodos.isNotEmpty)
               SliverList(delegate: SliverChildBuilderDelegate((ctx, i) {
-                final t = selected[i];
+                final t = selectedTodos[i];
                 return _TodoCard(todo: t, isMr: isMr, isAdmin: isAdmin, onStatusChanged: () =>
                     context.read<CalendarCubit>().load(_focusedDay.year, _focusedDay.month));
-              }, childCount: selected.length)),
+              }, childCount: selectedTodos.length)),
 
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ]);
@@ -455,6 +503,68 @@ class _TodoCard extends StatelessWidget {
       case 'MEDIUM': return const Color(0xFFEAB308);
       default: return const Color(0xFF10B981);
     }
+  }
+}
+
+// ─── Meeting Card ────────────────────────────────────────────────
+
+class _MeetingCard extends StatelessWidget {
+  final Map<String, dynamic> meeting;
+  final bool isMr;
+  const _MeetingCard({required this.meeting, required this.isMr});
+
+  @override
+  Widget build(BuildContext context) {
+    final title = (isMr ? meeting['titleMr'] : null) ?? meeting['title'] ?? '';
+    final type = meeting['meetingType'] ?? 'COMMITTEE';
+    final status = meeting['status'] ?? 'PLANNED';
+    final location = meeting['location'] ?? '';
+    final color = _meetingColor(meeting);
+    final scheduledAt = DateTime.tryParse(meeting['scheduledAt'] ?? '')?.toLocal();
+    final timeStr = scheduledAt != null
+        ? DateFormat('h:mm a').format(scheduledAt)
+        : '';
+
+    return GlassCard(
+      onTap: () {
+        final id = meeting['id'];
+        if (id != null) context.push('/meetings/$id');
+      },
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(width: 40, height: 40,
+            decoration: BoxDecoration(color: color.withAlpha(30), borderRadius: BorderRadius.circular(10)),
+            child: Icon(_meetingTypeIcon(type), size: 20, color: color)),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                decoration: status == 'COMPLETED' ? TextDecoration.lineThrough : null)),
+            if (timeStr.isNotEmpty)
+              Text(timeStr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color)),
+          ])),
+          StatusBadge(label: type, color: color),
+        ]),
+        if (location.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Row(children: [
+            Icon(Icons.location_on_outlined, size: 14, color: AppColors.textTertiary),
+            const SizedBox(width: 4),
+            Expanded(child: Text(location, style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                maxLines: 1, overflow: TextOverflow.ellipsis)),
+          ]),
+        ],
+        const SizedBox(height: 6),
+        Row(children: [
+          Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(color: color.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.event_rounded, size: 11, color: color),
+              const SizedBox(width: 4),
+              Text(AppLocalizations.of(context).t('meetings.title'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
+            ])),
+        ]),
+      ]),
+    );
   }
 }
 

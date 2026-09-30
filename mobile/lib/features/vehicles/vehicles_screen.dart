@@ -112,7 +112,7 @@ class _VV extends StatelessWidget {
             Expanded(child: GradientButton(label: l.t('common.submit'), onPressed: () async {
               if (regNo.isEmpty) return;
               try { await api.post('/vehicles', data: {'registrationNo': regNo, 'vehicleType': type, 'make': make, 'model': model, 'color': color, 'parkingSlot': slot});
-                if (c.mounted) Navigator.pop(c); cubit.load(); } catch (_) {}
+                if (c.mounted) { Navigator.pop(c); cubit.load(); } } catch (_) {}
             })),
           ]),
         ])),

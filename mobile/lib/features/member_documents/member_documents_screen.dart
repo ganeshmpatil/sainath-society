@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,6 +55,8 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
   bool _loading = true;
   String? _error;
   int _filterIndex = 0;
+  StateSetter? _uploadDialogSetState;
+  double _uploadProgress = 0;
 
   static const _filterValues = ['', 'AADHAAR', 'PAN_CARD', 'SHARE_CERTIFICATE', 'HOUSE_REGISTRATION', 'OTHER'];
 
@@ -68,7 +71,7 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
     try {
       final params = docType != null && docType.isNotEmpty ? {'docType': docType} : null;
       final res = await api.get('/member-documents', queryParams: params);
-      final list = (res.data['memberDocuments'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final list = (res.data['memberDocuments'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       setState(() { _docs = list; _loading = false; });
     } catch (e) {
       setState(() { _error = e.toString(); _loading = false; });
@@ -163,8 +166,63 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
       return;
     }
 
-    // Upload
-    setState(() => _loading = true);
+    // Upload with progress dialog + cancel support
+    final cancelToken = CancelToken();
+    double uploadProgress = 0;
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          // Store the setter so we can update from onSendProgress
+          _uploadDialogSetState = setDialogState;
+          _uploadProgress = uploadProgress;
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 48, height: 48,
+                  child: CircularProgressIndicator(
+                    value: _uploadProgress > 0 ? _uploadProgress : null,
+                    strokeWidth: 3,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _uploadProgress > 0
+                      ? '${(_uploadProgress * 100).toInt()}%'
+                      : l.t('common.loading'),
+                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      cancelToken.cancel();
+                      Navigator.pop(ctx);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.urgent,
+                      side: BorderSide(color: AppColors.urgent.withAlpha(100)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Text(l.t('common.cancel')),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
     try {
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(pickedFile.path!, filename: pickedFile.name),
@@ -172,20 +230,34 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
         'title': isMr ? selectedType.labelMr : selectedType.labelEn,
         'titleMr': selectedType.labelMr,
       });
-      await api.postMultipart('/member-documents/upload', data: formData);
+      await api.postMultipart('/member-documents/upload', data: formData, cancelToken: cancelToken,
+        onSendProgress: (sent, total) {
+          if (total > 0 && _uploadDialogSetState != null) {
+            _uploadDialogSetState!(() {
+              _uploadProgress = sent / total;
+            });
+          }
+        },
+      );
       if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l.t('memberDocs.uploadSuccess'))),
         );
       }
       _load(_filterValues[_filterIndex]);
     } catch (e) {
-      setState(() => _loading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l.t("common.error")}: $e')),
-        );
+        // Dismiss dialog if still showing (not already cancelled)
+        if (!cancelToken.isCancelled) {
+          Navigator.of(context, rootNavigator: true).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${l.t("common.error")}: $e')),
+          );
+        }
       }
+    } finally {
+      _uploadDialogSetState = null;
     }
   }
 
@@ -266,13 +338,22 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(l.t('memberDocs.title'),
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-                      Text(l.t('memberDocs.subtitle'),
-                          style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                      GestureDetector(
+                        onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
+                        child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l.t('memberDocs.title'),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                          Text(l.t('memberDocs.subtitle'),
+                              style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                        ],
+                      ),
                     ],
                   ),
                 ),
