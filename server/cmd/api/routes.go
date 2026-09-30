@@ -53,7 +53,7 @@ func SetupRoutes(
 	residentHandler := handlers.NewResidentHandler(domain.Member, db)
 	flatHandler := handlers.NewFlatHandler(domain.Flat)
 	notificationHandler := handlers.NewNotificationHandler(domain.Notification, domain.Member)
-	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact)
+	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact, notifier)
 	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
 	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
@@ -297,6 +297,7 @@ func SetupRoutes(
 		ec.POST("", emergencyContactHandler.Create)
 		ec.PATCH("/:id", emergencyContactHandler.Update)
 		ec.DELETE("/:id", emergencyContactHandler.Delete)
+		ec.POST("/sos", emergencyContactHandler.SOS)
 
 		// Web Push subscription management.
 		push := protected.Group("/push")

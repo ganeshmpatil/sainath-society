@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,14 +11,16 @@ import (
 	"sainath-society/internal/middleware"
 	"sainath-society/internal/models"
 	"sainath-society/internal/repositories"
+	"sainath-society/internal/services"
 )
 
 type EmergencyContactHandler struct {
-	repo *repositories.EmergencyContactRepository
+	repo     *repositories.EmergencyContactRepository
+	notifier *services.Notifier
 }
 
-func NewEmergencyContactHandler(repo *repositories.EmergencyContactRepository) *EmergencyContactHandler {
-	return &EmergencyContactHandler{repo: repo}
+func NewEmergencyContactHandler(repo *repositories.EmergencyContactRepository, notifier *services.Notifier) *EmergencyContactHandler {
+	return &EmergencyContactHandler{repo: repo, notifier: notifier}
 }
 
 func (h *EmergencyContactHandler) List(c *gin.Context) {
@@ -140,4 +143,36 @@ func (h *EmergencyContactHandler) Delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
+}
+
+// ─── SOS Broadcast ─────────────────────────────────────────────
+
+type sosReq struct {
+	Type    string `json:"type" binding:"required"` // FIRE, MEDICAL, SECURITY, WATER, GAS, OTHER
+	Message string `json:"message"`
+	FlatNo  string `json:"flatNo"`
+}
+
+func (h *EmergencyContactHandler) SOS(c *gin.Context) {
+	var req sosReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	actor := middleware.GetActor(c)
+
+	// Build alert message
+	flat := req.FlatNo
+	if flat == "" {
+		flat = "Unknown"
+	}
+	subject := fmt.Sprintf("SOS ALERT: %s — Flat %s", req.Type, flat)
+	body := fmt.Sprintf("Emergency SOS from Flat %s!\nType: %s\n%s\nPlease respond immediately.", flat, req.Type, req.Message)
+	bodyMr := fmt.Sprintf("आपत्कालीन SOS — फ्लॅट %s!\nप्रकार: %s\n%s\nकृपया तातडीने प्रतिसाद द्या.", flat, req.Type, req.Message)
+
+	// Broadcast to all members
+	go h.notifier.NotifyAllMembers(subject, body, bodyMr, "SOS_ALERT", "emergency", nil)
+
+	_ = actor // logged for audit
+	c.JSON(http.StatusOK, gin.H{"message": "SOS alert sent to all members", "type": req.Type})
 }

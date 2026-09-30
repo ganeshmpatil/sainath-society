@@ -431,6 +431,21 @@ const Map<String, String> stringsMr = {
   'importantCalls.roleLabel': 'वर्णन',
   'importantCalls.roleMrLabel': 'वर्णन (मराठी)',
 
+  // SOS
+  'sos.title': 'आणीबाणी SOS',
+  'sos.subtitle': 'सर्व रहिवाशांना अलर्ट पाठवा',
+  'sos.send': 'SOS अलर्ट पाठवा',
+  'sos.sent': 'SOS अलर्ट सर्व सदस्यांना पाठवला!',
+  'sos.confirm': 'तुम्हाला खात्री आहे की सर्व रहिवाशांना आणीबाणी SOS अलर्ट पाठवायचा आहे?',
+  'sos.typeFire': 'आग',
+  'sos.typeMedical': 'वैद्यकीय',
+  'sos.typeSecurity': 'सुरक्षा',
+  'sos.typeWater': 'पाणी गळती',
+  'sos.typeGas': 'गॅस गळती',
+  'sos.typeOther': 'इतर',
+  'sos.selectType': 'आणीबाणी प्रकार निवडा',
+  'sos.messageHint': 'अतिरिक्त तपशील (ऐच्छिक)',
+
   // Misc UI
   'notices.tapToRead': 'वाचण्यासाठी टॅप करा',
   'grievances.viewDetails': 'तपशील',

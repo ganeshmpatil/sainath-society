@@ -431,6 +431,21 @@ const Map<String, String> stringsEn = {
   'importantCalls.roleLabel': 'Description',
   'importantCalls.roleMrLabel': 'Description (Marathi)',
 
+  // SOS
+  'sos.title': 'Emergency SOS',
+  'sos.subtitle': 'Send alert to all residents',
+  'sos.send': 'Send SOS Alert',
+  'sos.sent': 'SOS alert sent to all members!',
+  'sos.confirm': 'Are you sure you want to send an emergency SOS alert to ALL residents?',
+  'sos.typeFire': 'Fire',
+  'sos.typeMedical': 'Medical',
+  'sos.typeSecurity': 'Security',
+  'sos.typeWater': 'Water Leak',
+  'sos.typeGas': 'Gas Leak',
+  'sos.typeOther': 'Other',
+  'sos.selectType': 'Select emergency type',
+  'sos.messageHint': 'Additional details (optional)',
+
   // Misc UI
   'notices.tapToRead': 'Tap to read',
   'grievances.viewDetails': 'Details',

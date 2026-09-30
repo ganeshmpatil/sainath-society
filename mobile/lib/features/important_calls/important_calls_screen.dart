@@ -120,6 +120,36 @@ class _View extends StatelessWidget {
                     ),
                   ),
 
+                  // SOS Banner
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GestureDetector(
+                        onTap: () => _showSOSSheet(context, l),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFFDC2626), Color(0xFFEF4444)]),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(children: [
+                            Container(
+                              width: 48, height: 48,
+                              decoration: BoxDecoration(color: Colors.white.withAlpha(40), borderRadius: BorderRadius.circular(14)),
+                              child: const Icon(Icons.sos_rounded, size: 28, color: Colors.white),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Text(l.t('sos.title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                              Text(l.t('sos.subtitle'), style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(200))),
+                            ])),
+                            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   if (state.loading)
                     const SliverToBoxAdapter(child: ShimmerLoading()),
 
@@ -229,6 +259,113 @@ class _View extends StatelessWidget {
         }, childCount: items.length),
       ),
     ];
+  }
+
+  void _showSOSSheet(BuildContext ctx, AppLocalizations l) {
+    final authState = ctx.read<AuthBloc>().state;
+    final flatNo = authState is Authenticated ? authState.user.flatNumber : '';
+    String selectedType = 'FIRE';
+    String message = '';
+
+    final types = {
+      'FIRE': (l.t('sos.typeFire'), Icons.local_fire_department_rounded, const Color(0xFFEF4444)),
+      'MEDICAL': (l.t('sos.typeMedical'), Icons.local_hospital_rounded, const Color(0xFF3B82F6)),
+      'SECURITY': (l.t('sos.typeSecurity'), Icons.shield_rounded, const Color(0xFFF97316)),
+      'WATER': (l.t('sos.typeWater'), Icons.water_damage_rounded, const Color(0xFF06B6D4)),
+      'GAS': (l.t('sos.typeGas'), Icons.local_shipping_rounded, const Color(0xFF8B5CF6)),
+      'OTHER': (l.t('sos.typeOther'), Icons.warning_rounded, const Color(0xFF64748B)),
+    };
+
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
+          const SizedBox(height: 20),
+          Row(children: [
+            const Icon(Icons.sos_rounded, size: 28, color: Color(0xFFEF4444)),
+            const SizedBox(width: 10),
+            Text(l.t('sos.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ]),
+          const SizedBox(height: 6),
+          Text(l.t('sos.selectType'), style: TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+          const SizedBox(height: 16),
+          Wrap(spacing: 8, runSpacing: 8, children: types.entries.map((e) {
+            final selected = selectedType == e.key;
+            final (label, icon, color) = e.value;
+            return GestureDetector(
+              onTap: () => setState(() => selectedType = e.key),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: selected ? color.withAlpha(30) : AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: selected ? color : AppColors.border, width: selected ? 2 : 1),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(icon, size: 18, color: selected ? color : AppColors.textTertiary),
+                  const SizedBox(width: 6),
+                  Text(label, style: TextStyle(fontSize: 13, fontWeight: selected ? FontWeight.w600 : FontWeight.w400, color: selected ? color : AppColors.textSecondary)),
+                ]),
+              ),
+            );
+          }).toList()),
+          const SizedBox(height: 16),
+          TextField(
+            onChanged: (v) => message = v,
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: l.t('sos.messageHint'),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: c,
+                builder: (d) => AlertDialog(
+                  title: Text(l.t('sos.title')),
+                  content: Text(l.t('sos.confirm')),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l.t('common.cancel'))),
+                    TextButton(
+                      onPressed: () => Navigator.pop(d, true),
+                      child: Text(l.t('sos.send'), style: const TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700)),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed != true) return;
+              try {
+                await api.post('/emergency-contacts/sos', data: {
+                  'type': selectedType,
+                  'message': message,
+                  'flatNo': flatNo,
+                });
+                if (c.mounted) {
+                  Navigator.pop(c);
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(l.t('sos.sent')), backgroundColor: const Color(0xFF10B981)),
+                  );
+                }
+              } catch (_) {}
+            },
+            icon: const Icon(Icons.sos_rounded, color: Colors.white),
+            label: Text(l.t('sos.send'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+          ),
+        ]),
+      )),
+    );
   }
 
   void _showAddEdit(BuildContext ctx, AppLocalizations l, bool isMr, {Map<String, dynamic>? existing}) {
