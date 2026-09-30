@@ -61,6 +61,10 @@ func (h *AuditChecklistHandler) Create(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	cl := &models.AuditChecklist{
 		FinancialYear: req.FinancialYear,
 		Title:         req.Title,
@@ -86,6 +90,10 @@ func (h *AuditChecklistHandler) Update(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Update(actor, id, body); err != nil {
 		writeRepoError(c, err)
 		return
@@ -112,6 +120,10 @@ func (h *AuditChecklistHandler) AddItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	item := &models.AuditChecklistItem{
 		ChecklistID: checklistID,
 		Category:    req.Category,
@@ -140,6 +152,10 @@ func (h *AuditChecklistHandler) ToggleItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.ToggleItem(actor, itemID, body.Completed); err != nil {
 		writeRepoError(c, err)
 		return
@@ -161,6 +177,10 @@ func (h *AuditChecklistHandler) UpdateItemRemarks(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.UpdateItemRemarks(actor, itemID, body.Remarks); err != nil {
 		writeRepoError(c, err)
 		return
@@ -175,6 +195,10 @@ func (h *AuditChecklistHandler) DeleteItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.DeleteItem(actor, itemID); err != nil {
 		writeRepoError(c, err)
 		return

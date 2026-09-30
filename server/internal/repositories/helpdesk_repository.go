@@ -65,17 +65,22 @@ func (r *HelpdeskRepository) GetByID(actor *ActorContext, id uuid.UUID) (*models
 
 // Create adds a new helpdesk ticket with an auto-generated ticket number.
 func (r *HelpdeskRepository) Create(actor *ActorContext, t *models.HelpdeskTicket) error {
-	ticketNo, err := r.nextTicketNo()
-	if err != nil {
-		return err
+	if actor == nil {
+		return ErrForbidden
 	}
-	t.TicketNo = ticketNo
-	t.RaisedByID = actor.MemberID
-	t.Status = models.TicketOpen
-	if t.Priority == "" {
-		t.Priority = models.HelpdeskPriorityMedium
-	}
-	return r.db.Create(t).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		ticketNo, err := r.nextTicketNo(tx)
+		if err != nil {
+			return err
+		}
+		t.TicketNo = ticketNo
+		t.RaisedByID = actor.MemberID
+		t.Status = models.TicketOpen
+		if t.Priority == "" {
+			t.Priority = models.HelpdeskPriorityMedium
+		}
+		return tx.Create(t).Error
+	})
 }
 
 // AddMessage appends a message to a ticket.
@@ -170,15 +175,15 @@ func (r *HelpdeskRepository) Stats() (map[string]int64, error) {
 }
 
 // nextTicketNo generates the next ticket number (HD-001, HD-002, ...).
-func (r *HelpdeskRepository) nextTicketNo() (string, error) {
+// Must be called inside a transaction to avoid race conditions.
+func (r *HelpdeskRepository) nextTicketNo(tx *gorm.DB) (string, error) {
 	var lastNo string
-	err := r.db.Model(&models.HelpdeskTicket{}).
+	err := tx.Model(&models.HelpdeskTicket{}).
 		Select("ticket_no").
 		Order("created_at DESC").
 		Limit(1).
-		Row().Scan(&lastNo)
-	if err != nil {
-		// No rows — start at HD-001
+		Pluck("ticket_no", &lastNo).Error
+	if err != nil || lastNo == "" {
 		return "HD-001", nil
 	}
 	parts := strings.Split(lastNo, "-")

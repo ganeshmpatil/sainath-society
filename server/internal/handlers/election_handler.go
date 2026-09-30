@@ -95,6 +95,10 @@ func (h *ElectionHandler) Create(c *gin.Context) {
 	}
 
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	e := &models.Election{
 		Title:               req.Title,
 		TitleMr:             req.TitleMr,
@@ -111,6 +115,16 @@ func (h *ElectionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, e)
 }
 
+type updateElectionReq struct {
+	Title               string `json:"title"`
+	TitleMr             string `json:"titleMr"`
+	Description         string `json:"description"`
+	NominationStartDate string `json:"nominationStartDate"`
+	NominationEndDate   string `json:"nominationEndDate"`
+	VotingStartDate     string `json:"votingStartDate"`
+	VotingEndDate       string `json:"votingEndDate"`
+}
+
 // Update modifies an election. Admin only.
 func (h *ElectionHandler) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
@@ -118,12 +132,50 @@ func (h *ElectionHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID", Code: "INVALID_ID"})
 		return
 	}
-	var updates map[string]interface{}
-	if err := c.ShouldBindJSON(&updates); err != nil {
+	var req updateElectionReq
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
 		return
 	}
+	updates := map[string]interface{}{}
+	if req.Title != "" {
+		updates["title"] = req.Title
+	}
+	if req.TitleMr != "" {
+		updates["title_mr"] = req.TitleMr
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.NominationStartDate != "" {
+		if t, err := parseElectionDate(req.NominationStartDate); err == nil {
+			updates["nomination_start_date"] = t
+		}
+	}
+	if req.NominationEndDate != "" {
+		if t, err := parseElectionDate(req.NominationEndDate); err == nil {
+			updates["nomination_end_date"] = t
+		}
+	}
+	if req.VotingStartDate != "" {
+		if t, err := parseElectionDate(req.VotingStartDate); err == nil {
+			updates["voting_start_date"] = t
+		}
+	}
+	if req.VotingEndDate != "" {
+		if t, err := parseElectionDate(req.VotingEndDate); err == nil {
+			updates["voting_end_date"] = t
+		}
+	}
+	if len(updates) == 0 {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "No valid fields to update", Code: "INVALID_REQUEST"})
+		return
+	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Update(actor, id, updates); err != nil {
 		writeRepoError(c, err)
 		return
@@ -154,6 +206,10 @@ func (h *ElectionHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.UpdateStatus(actor, id, req.Status); err != nil {
 		writeRepoError(c, err)
 		return
@@ -181,6 +237,10 @@ func (h *ElectionHandler) AddPosition(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	maxCand := req.MaxCandidates
 	if maxCand <= 0 {
 		maxCand = 1
@@ -207,6 +267,10 @@ func (h *ElectionHandler) DeletePosition(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.DeletePosition(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -239,6 +303,10 @@ func (h *ElectionHandler) Nominate(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	candidate := &models.ElectionCandidate{
 		ElectionID: electionID,
 		PositionID: posID,
@@ -261,6 +329,10 @@ func (h *ElectionHandler) ApproveCandidate(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.ApproveCandidate(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -276,6 +348,10 @@ func (h *ElectionHandler) RejectCandidate(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.RejectCandidate(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -291,6 +367,10 @@ func (h *ElectionHandler) WithdrawCandidate(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.WithdrawCandidate(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -326,6 +406,10 @@ func (h *ElectionHandler) CastVote(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	vote := &models.ElectionVote{
 		ElectionID:  electionID,
 		PositionID:  posID,

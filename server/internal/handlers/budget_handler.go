@@ -23,6 +23,10 @@ func NewBudgetHandler(repo *repositories.BudgetRepository) *BudgetHandler {
 // List returns all budgets.
 func (h *BudgetHandler) List(c *gin.Context) {
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	rows, err := h.repo.List(actor)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "LIST_FAILED"})
@@ -63,6 +67,10 @@ func (h *BudgetHandler) Create(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	b := &models.Budget{
 		FinancialYear: req.FinancialYear,
 		Title:         req.Title,
@@ -92,6 +100,10 @@ func (h *BudgetHandler) Update(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Update(actor, id, updates); err != nil {
 		writeRepoError(c, err)
 		return
@@ -107,6 +119,10 @@ func (h *BudgetHandler) Delete(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Delete(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -136,6 +152,10 @@ func (h *BudgetHandler) AddLineItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	item := &models.BudgetLineItem{
 		BudgetID:       budgetID,
 		Category:       req.Category,
@@ -165,6 +185,10 @@ func (h *BudgetHandler) UpdateLineItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.UpdateLineItem(actor, id, updates); err != nil {
 		writeRepoError(c, err)
 		return
@@ -180,6 +204,10 @@ func (h *BudgetHandler) DeleteLineItem(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.DeleteLineItem(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -211,6 +239,10 @@ func (h *BudgetHandler) Approve(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Approve(actor, id, req.Status); err != nil {
 		writeRepoError(c, err)
 		return

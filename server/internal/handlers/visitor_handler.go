@@ -27,6 +27,10 @@ func NewVisitorHandler(repo *repositories.VisitorRepository, notifier *services.
 
 func (h *VisitorHandler) List(c *gin.Context) {
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	var flatID *uuid.UUID
 	if fid := c.Query("flatId"); fid != "" {
 		if id, err := uuid.Parse(fid); err == nil {
@@ -67,6 +71,10 @@ func (h *VisitorHandler) Create(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	v := &models.Visitor{
 		Name:        req.Name,
 		Phone:       req.Phone,
@@ -97,6 +105,10 @@ func (h *VisitorHandler) Approve(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Approve(actor, id); err != nil {
 		writeRepoError(c, err)
 		return
@@ -126,8 +138,12 @@ func (h *VisitorHandler) Reject(c *gin.Context) {
 	var req struct {
 		Reason string `json:"reason"`
 	}
-	_ = c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req) // intentionally ignored: body is optional (Reason only)
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Reject(actor, id, req.Reason); err != nil {
 		writeRepoError(c, err)
 		return
@@ -148,6 +164,10 @@ func (h *VisitorHandler) TodaySummary(c *gin.Context) {
 
 func (h *VisitorHandler) ListFrequent(c *gin.Context) {
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	var flatID *uuid.UUID
 	if fid := c.Query("flatId"); fid != "" {
 		if id, err := uuid.Parse(fid); err == nil {
@@ -180,6 +200,10 @@ func (h *VisitorHandler) CreateFrequent(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	fv := &models.FrequentVisitor{
 		Name:        req.Name,
 		NameMr:      req.NameMr,
@@ -220,7 +244,7 @@ func (h *VisitorHandler) BlacklistFrequent(c *gin.Context) {
 	var req struct {
 		Reason string `json:"reason"`
 	}
-	_ = c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req) // intentionally ignored: body is optional (Reason only)
 	if err := h.repo.BlacklistFrequent(id, req.Reason); err != nil {
 		writeRepoError(c, err)
 		return

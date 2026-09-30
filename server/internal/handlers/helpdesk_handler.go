@@ -25,6 +25,10 @@ func NewHelpdeskHandler(repo *repositories.HelpdeskRepository, notifier *service
 
 func (h *HelpdeskHandler) List(c *gin.Context) {
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	status := c.Query("status")
 	category := c.Query("category")
 	rows, err := h.repo.List(actor, status, category)
@@ -42,6 +46,10 @@ func (h *HelpdeskHandler) GetByID(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	ticket, err := h.repo.GetByID(actor, id)
 	if err != nil {
 		writeRepoError(c, err)
@@ -71,6 +79,10 @@ func (h *HelpdeskHandler) Create(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	priority := models.HelpdeskPriority(req.Priority)
 	if priority == "" {
 		priority = models.HelpdeskPriorityMedium
@@ -114,6 +126,10 @@ func (h *HelpdeskHandler) AddMessage(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	// Fetch ticket first for ownership check and notification
 	ticket, err := h.repo.GetByID(actor, ticketID)
@@ -172,6 +188,10 @@ func (h *HelpdeskHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.UpdateStatus(actor, id, req.Status); err != nil {
 		writeRepoError(c, err)
 		return
@@ -200,6 +220,10 @@ func (h *HelpdeskHandler) Assign(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Assign(actor, id, assigneeID); err != nil {
 		writeRepoError(c, err)
 		return

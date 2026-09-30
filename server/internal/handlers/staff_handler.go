@@ -23,6 +23,10 @@ func NewStaffHandler(repo *repositories.StaffRepository) *StaffHandler {
 
 func (h *StaffHandler) List(c *gin.Context) {
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	includeInactive := c.Query("includeInactive") == "true" && actor.IsAdmin()
 	rows, err := h.repo.List(actor, includeInactive)
 	if err != nil {
@@ -80,6 +84,10 @@ func (h *StaffHandler) Create(c *gin.Context) {
 		staffType = models.StaffContract
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	s := &models.Staff{
 		Name:          req.Name,
 		NameMr:        req.NameMr,
@@ -116,6 +124,10 @@ func (h *StaffHandler) Update(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.Update(actor, id, updates); err != nil {
 		writeRepoError(c, err)
 		return
@@ -143,6 +155,10 @@ func (h *StaffHandler) MarkAttendance(c *gin.Context) {
 	staffID, _ := uuid.Parse(req.StaffID)
 	date, _ := time.Parse("2006-01-02", req.Date)
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	att := &models.StaffAttendance{
 		StaffID: staffID,
 		Date:    date,
@@ -176,6 +192,10 @@ func (h *StaffHandler) BulkAttendance(c *gin.Context) {
 	}
 	date, _ := time.Parse("2006-01-02", req.Date)
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	var records []models.StaffAttendance
 	for _, r := range req.Records {
 		sid, _ := uuid.Parse(r.StaffID)
@@ -250,13 +270,17 @@ type recordSalaryReq struct {
 }
 
 func (h *StaffHandler) RecordSalary(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	if actor == nil || !actor.IsAdmin() {
+		c.JSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+		return
+	}
 	var req recordSalaryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
 		return
 	}
 	staffID, _ := uuid.Parse(req.StaffID)
-	actor := middleware.GetActor(c)
 	payment := &models.StaffSalaryPayment{
 		StaffID:     staffID,
 		Month:       req.Month,

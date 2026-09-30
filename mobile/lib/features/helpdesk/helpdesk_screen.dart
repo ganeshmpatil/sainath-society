@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -158,7 +159,25 @@ class _ViewState extends State<_View> {
                   if (state.loading)
                     const SliverToBoxAdapter(child: ShimmerLoading()),
 
-                  if (!state.loading && state.tickets.isEmpty)
+                  if (!state.loading && state.error != null)
+                    SliverToBoxAdapter(
+                      child: Center(child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 60),
+                          Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                          const SizedBox(height: 8),
+                          Text(state.error!, style: TextStyle(color: AppColors.textSecondary)),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => context.read<_Cu>().load(),
+                            child: Text(l.t('common.retry'), style: TextStyle(color: AppColors.primary)),
+                          ),
+                        ],
+                      )),
+                    ),
+
+                  if (!state.loading && state.error == null && state.tickets.isEmpty)
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(40),
@@ -171,7 +190,7 @@ class _ViewState extends State<_View> {
                     ),
 
                   // Ticket list
-                  if (!state.loading)
+                  if (!state.loading && state.error == null)
                     SliverList(
                       delegate: SliverChildBuilderDelegate((ctx, i) {
                         final t = state.tickets[i];
@@ -326,8 +345,14 @@ class _ViewState extends State<_View> {
                   'flatNo': flatNo,
                 });
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ])),

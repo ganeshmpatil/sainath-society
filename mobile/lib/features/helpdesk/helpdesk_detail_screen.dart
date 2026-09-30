@@ -39,14 +39,18 @@ class _Cu extends Cubit<_St> {
     try {
       await api.post('/helpdesk/$id/messages', data: {'body': body, 'isInternal': isInternal});
       load();
-    } catch (_) {}
+    } catch (e) {
+      emit(_St(ticket: state.ticket, messages: state.messages, error: e.toString()));
+    }
   }
 
   Future<void> updateStatus(String status) async {
     try {
       await api.patch('/helpdesk/$id/status', data: {'status': status});
       load();
-    } catch (_) {}
+    } catch (e) {
+      emit(_St(ticket: state.ticket, messages: state.messages, error: e.toString()));
+    }
   }
 }
 
@@ -178,7 +182,21 @@ class _ViewState extends State<_View> {
               Expanded(
                 child: state.loading
                     ? const Center(child: CircularProgressIndicator())
-                    : ListView.builder(
+                    : state.error != null
+                        ? Center(child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                              const SizedBox(height: 8),
+                              Text(state.error!, style: TextStyle(color: AppColors.textSecondary)),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: () => context.read<_Cu>().load(),
+                                child: Text(l.t('common.retry'), style: TextStyle(color: AppColors.primary)),
+                              ),
+                            ],
+                          ))
+                        : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                         itemCount: state.messages.length,
                         itemBuilder: (ctx, i) {

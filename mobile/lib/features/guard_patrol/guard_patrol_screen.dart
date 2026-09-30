@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -55,7 +56,9 @@ class _Cu extends Cubit<_St> {
       final res = await api.get('/patrol/rounds', queryParams: params);
       final rounds = (res.data['rounds'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       emit(_St(rounds: rounds, checkpoints: state.checkpoints, incidents: state.incidents));
-    } catch (_) {}
+    } catch (e) {
+      emit(_St(rounds: state.rounds, checkpoints: state.checkpoints, incidents: state.incidents, error: e.toString()));
+    }
   }
 
   Future<void> loadIncidents({String? status}) async {
@@ -65,7 +68,9 @@ class _Cu extends Cubit<_St> {
       final res = await api.get('/patrol/incidents', queryParams: params);
       final incidents = (res.data['incidents'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
       emit(_St(rounds: state.rounds, checkpoints: state.checkpoints, incidents: incidents));
-    } catch (_) {}
+    } catch (e) {
+      emit(_St(rounds: state.rounds, checkpoints: state.checkpoints, incidents: state.incidents, error: e.toString()));
+    }
   }
 }
 
@@ -339,8 +344,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               try {
                 await api.post('/patrol/rounds', data: {'guardName': guardName, 'shiftType': shiftType});
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ]),
@@ -384,8 +395,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               try {
                 await api.post('/patrol/checkpoints', data: {'name': name, 'nameMr': nameMr, 'location': location});
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ]),
@@ -478,8 +495,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                   'location': location,
                 });
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ])),
@@ -502,7 +525,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
           const SizedBox(height: 20),
-          Text('Update Status', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(l.t('common.updateStatus'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Wrap(spacing: 6, runSpacing: 6, children: [
             for (final s in [
@@ -518,7 +541,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               ),
           ]),
           const SizedBox(height: 12),
-          TextField(onChanged: (v) => notes = v, maxLines: 2, decoration: const InputDecoration(labelText: 'Notes')),
+          TextField(onChanged: (v) => notes = v, maxLines: 2, decoration: InputDecoration(labelText: l.t('common.notes'))),
           const SizedBox(height: 20),
           Row(children: [
             Expanded(child: OutlinedButton(
@@ -531,8 +554,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               try {
                 await api.put('/patrol/incidents/$id/status', data: {'status': status, 'notes': notes});
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ]),

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -136,8 +137,26 @@ class _View extends StatelessWidget {
                   if (state.loading)
                     const SliverToBoxAdapter(child: ShimmerLoading()),
 
+                  if (!state.loading && state.error != null)
+                    SliverToBoxAdapter(
+                      child: Center(child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 60),
+                          Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                          const SizedBox(height: 8),
+                          Text(state.error!, style: TextStyle(color: AppColors.textSecondary)),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => context.read<_Cu>().load(),
+                            child: Text(l.t('common.retry'), style: TextStyle(color: AppColors.primary)),
+                          ),
+                        ],
+                      )),
+                    ),
+
                   // Admin status controls
-                  if (!state.loading && isAdmin && e != null)
+                  if (!state.loading && state.error == null && isAdmin && e != null)
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -153,7 +172,7 @@ class _View extends StatelessWidget {
                     ),
 
                   // Positions & Candidates
-                  if (!state.loading)
+                  if (!state.loading && state.error == null)
                     ...state.positions.map((pos) {
                       final posTitle = (isMr ? pos['titleMr'] : null) ?? pos['title'] ?? '';
                       final posId = pos['id'] as String?;
@@ -221,8 +240,16 @@ class _View extends StatelessWidget {
                                     const SizedBox(width: 4),
                                     GestureDetector(
                                       onTap: () async {
-                                        await api.post('/elections/candidates/${cand['id']}/approve');
-                                        if (context.mounted) context.read<_Cu>().load();
+                                        try {
+                                          await api.post('/elections/candidates/${cand['id']}/approve');
+                                          if (context.mounted) context.read<_Cu>().load();
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                                            );
+                                          }
+                                        }
                                       },
                                       child: Container(
                                         width: 28, height: 28,
@@ -254,7 +281,7 @@ class _View extends StatelessWidget {
                     }),
 
                   // Add position (admin, upcoming)
-                  if (!state.loading && isAdmin && (status == 'UPCOMING' || status == 'NOMINATIONS_OPEN'))
+                  if (!state.loading && state.error == null && isAdmin && (status == 'UPCOMING' || status == 'NOMINATIONS_OPEN'))
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -291,7 +318,13 @@ class _View extends StatelessWidget {
     try {
       await api.patch('/elections/${ctx.read<_Cu>().id}/status', data: {'status': newStatus});
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 
   void _vote(BuildContext ctx, AppLocalizations l, String positionId, String? candidateId) async {
@@ -342,7 +375,13 @@ class _View extends StatelessWidget {
               await api.post('/elections/${ctx.read<_Cu>().id}/nominate', data: {'positionId': positionId, 'manifesto': manifesto});
               if (c.mounted) Navigator.pop(c);
               if (ctx.mounted) ctx.read<_Cu>().load();
-            } catch (_) {}
+            } catch (e) {
+              if (c.mounted) {
+                ScaffoldMessenger.of(c).showSnackBar(
+                  SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                );
+              }
+            }
           }),
         ]),
       ),
@@ -374,7 +413,13 @@ class _View extends StatelessWidget {
               await api.post('/elections/${ctx.read<_Cu>().id}/positions', data: {'title': title, 'titleMr': titleMr});
               if (c.mounted) Navigator.pop(c);
               if (ctx.mounted) ctx.read<_Cu>().load();
-            } catch (_) {}
+            } catch (e) {
+              if (c.mounted) {
+                ScaffoldMessenger.of(c).showSnackBar(
+                  SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                );
+              }
+            }
           }),
         ]),
       ),

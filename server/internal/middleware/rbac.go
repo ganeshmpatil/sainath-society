@@ -38,7 +38,14 @@ func RequirePermission(resource models.Resource, action models.Action) gin.Handl
 		}
 
 		required := string(resource) + ":" + string(action)
-		permList := permissions.([]string)
+		permList, ok := permissions.([]string)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, response.ErrorResponse{
+				Error: "Permission denied",
+				Code:  "FORBIDDEN",
+			})
+			return
+		}
 
 		for _, p := range permList {
 			if p == required {
@@ -97,7 +104,10 @@ func DataScopeMiddleware(resource models.Resource) gin.HandlerFunc {
 		permissions, exists := c.Get("userPermissions")
 		if exists {
 			readAllPerm := string(resource) + ":read_all"
-			permList := permissions.([]string)
+			permList, ok := permissions.([]string)
+			if !ok {
+				permList = nil
+			}
 
 			for _, p := range permList {
 				if p == readAllPerm {
@@ -153,7 +163,10 @@ func CanAccessResource(c *gin.Context, resource models.Resource, action models.A
 	}
 
 	required := string(resource) + ":" + string(action)
-	permList := permissions.([]string)
+	permList, ok := permissions.([]string)
+	if !ok {
+		return false
+	}
 
 	for _, p := range permList {
 		if p == required {

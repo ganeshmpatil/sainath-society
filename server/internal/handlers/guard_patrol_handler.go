@@ -47,6 +47,10 @@ func (h *GuardPatrolHandler) CreateCheckpoint(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	cp := &models.PatrolCheckpoint{
 		Name:       req.Name,
 		NameMr:     req.NameMr,
@@ -164,6 +168,10 @@ func (h *GuardPatrolHandler) StartRound(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	round := &models.PatrolRound{
 		GuardName: req.GuardName,
 		ShiftType: req.ShiftType,
@@ -186,7 +194,7 @@ func (h *GuardPatrolHandler) CompleteRound(c *gin.Context) {
 	var req struct {
 		Notes string `json:"notes"`
 	}
-	_ = c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req) // intentionally ignored: body is optional (Notes only)
 	if err := h.repo.CompleteRound(id, req.Notes); err != nil {
 		writeRepoError(c, err)
 		return
@@ -274,6 +282,10 @@ func (h *GuardPatrolHandler) CreateIncident(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	incident := &models.PatrolIncident{
 		Title:          req.Title,
 		TitleMr:        req.TitleMr,
@@ -306,6 +318,10 @@ func (h *GuardPatrolHandler) UpdateIncidentStatus(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+	if actor == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := h.repo.UpdateIncidentStatus(actor, id, req.Status, req.Notes); err != nil {
 		writeRepoError(c, err)
 		return

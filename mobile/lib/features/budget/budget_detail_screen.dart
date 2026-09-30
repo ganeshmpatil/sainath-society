@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -128,8 +129,26 @@ class _View extends StatelessWidget {
                   if (state.loading)
                     const SliverToBoxAdapter(child: ShimmerLoading()),
 
+                  if (!state.loading && state.error != null)
+                    SliverToBoxAdapter(
+                      child: Center(child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 60),
+                          Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                          const SizedBox(height: 8),
+                          Text(state.error!, style: TextStyle(color: AppColors.textSecondary)),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => context.read<_Cu>().load(),
+                            child: Text(l.t('common.retry'), style: TextStyle(color: AppColors.primary)),
+                          ),
+                        ],
+                      )),
+                    ),
+
                   // Admin status actions
-                  if (!state.loading && isAdmin && b != null && status != 'ACTIVE')
+                  if (!state.loading && state.error == null && isAdmin && b != null && status != 'ACTIVE')
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -158,7 +177,7 @@ class _View extends StatelessWidget {
                     ),
 
                   // Summary
-                  if (!state.loading && b != null)
+                  if (!state.loading && state.error == null && b != null)
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -189,7 +208,7 @@ class _View extends StatelessWidget {
                     ),
 
                   // Income section
-                  if (!state.loading) ...[
+                  if (!state.loading && state.error == null) ...[
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -214,7 +233,7 @@ class _View extends StatelessWidget {
                   ],
 
                   // Expense section
-                  if (!state.loading) ...[
+                  if (!state.loading && state.error == null) ...[
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -252,8 +271,14 @@ class _View extends StatelessWidget {
     try {
       final cubit = ctx.read<_Cu>();
       await api.post('/budgets/${cubit.id}/approve', data: {'status': newStatus});
-      cubit.load();
-    } catch (_) {}
+      if (ctx.mounted) cubit.load();
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 
   void _showAddLineItem(BuildContext ctx, AppLocalizations l, String category) {
@@ -307,8 +332,14 @@ class _View extends StatelessWidget {
                   'budgetedAmount': double.tryParse(amount) ?? 0,
                 });
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ]),
@@ -401,7 +432,13 @@ class _LineItemCard extends StatelessWidget {
                 try {
                   await api.delete('/budgets/line-items/${item['id']}');
                   if (context.mounted) context.read<_Cu>().load();
-                } catch (_) {}
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                    );
+                  }
+                }
               },
               child: Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
             ),

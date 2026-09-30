@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -153,13 +154,27 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                 ],
                 body: state.loading
                     ? const ShimmerLoading()
-                    : TabBarView(
-                        controller: _tabCtrl,
-                        children: [
-                          _EntryLogTab(visitors: state.visitors, isAdmin: isAdmin),
-                          _FrequentTab(frequentVisitors: state.frequentVisitors, flats: state.flats, isAdmin: isAdmin),
-                        ],
-                      ),
+                    : state.error != null
+                        ? Center(child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                              const SizedBox(height: 8),
+                              Text(state.error!, style: TextStyle(color: AppColors.textSecondary)),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: () => context.read<_Cu>().load(),
+                                child: Text(l.t('common.retry'), style: TextStyle(color: AppColors.primary)),
+                              ),
+                            ],
+                          ))
+                        : TabBarView(
+                            controller: _tabCtrl,
+                            children: [
+                              _EntryLogTab(visitors: state.visitors, isAdmin: isAdmin),
+                              _FrequentTab(frequentVisitors: state.frequentVisitors, flats: state.flats, isAdmin: isAdmin),
+                            ],
+                          ),
               );
             },
           ),
@@ -299,8 +314,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                   'companyName': companyName,
                 });
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                  );
+                }
+              }
             })),
           ]),
         ])),
@@ -481,7 +502,13 @@ class _EntryLogTab extends StatelessWidget {
     try {
       await api.post('/visitors/$id/approve');
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 
   void _reject(BuildContext ctx, String? id) async {
@@ -489,7 +516,13 @@ class _EntryLogTab extends StatelessWidget {
     try {
       await api.post('/visitors/$id/reject');
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 
   void _checkout(BuildContext ctx, String? id) async {
@@ -497,7 +530,13 @@ class _EntryLogTab extends StatelessWidget {
     try {
       await api.post('/visitors/$id/checkout');
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 }
 
@@ -680,8 +719,14 @@ class _FrequentTab extends StatelessWidget {
                   'roleMr': roleMr,
                 });
                 if (c.mounted) Navigator.pop(c);
-                cubit.load();
-              } catch (_) {}
+                if (c.mounted) cubit.load();
+              } catch (e) {
+                if (c.mounted) {
+                  ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                  );
+                }
+              }
             })),
           ]),
         ])),
@@ -694,7 +739,13 @@ class _FrequentTab extends StatelessWidget {
     try {
       await api.post('/frequent-visitors/$id/blacklist', data: {'reason': 'Blacklisted by admin'});
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 
   void _delete(BuildContext ctx, String? id) async {
@@ -702,6 +753,12 @@ class _FrequentTab extends StatelessWidget {
     try {
       await api.delete('/frequent-visitors/$id');
       if (ctx.mounted) ctx.read<_Cu>().load();
-    } catch (_) {}
+    } catch (e) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+        );
+      }
+    }
   }
 }

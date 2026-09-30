@@ -161,7 +161,15 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr.(string))
+	userIDStrVal, ok := userIDStr.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{
+			Error: "unauthorized",
+			Code:  "UNAUTHORIZED",
+		})
+		return
+	}
+	userID, err := uuid.Parse(userIDStrVal)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{
 			Error: "Invalid user ID",
@@ -190,8 +198,17 @@ type changePasswordReq struct {
 
 // ChangePassword updates the current user's password.
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
-	userIDStr, _ := c.Get("userID")
-	userID, err := uuid.Parse(userIDStr.(string))
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "unauthorized", Code: "UNAUTHORIZED"})
+		return
+	}
+	userIDStr, ok := userIDRaw.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "unauthorized", Code: "UNAUTHORIZED"})
+		return
+	}
+	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "Invalid user", Code: "INVALID_USER"})
 		return
@@ -279,7 +296,15 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr.(string))
+	userIDStrLogout, ok := userIDStr.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{
+			Error: "unauthorized",
+			Code:  "UNAUTHORIZED",
+		})
+		return
+	}
+	userID, err := uuid.Parse(userIDStrLogout)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{
 			Error: "Invalid user ID",
