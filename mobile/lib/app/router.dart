@@ -20,15 +20,16 @@ import '../features/profile/profile_screen.dart';
 import '../features/move_in_out/move_in_out_screen.dart';
 import '../features/notices/notice_detail_screen.dart';
 import '../features/notices/notices_screen.dart';
-import '../features/polls/polls_screen.dart';
+import '../features/important_calls/important_calls_screen.dart';
 import '../features/residents/residents_screen.dart';
 import '../features/suggestions/suggestions_screen.dart';
 import '../features/tasks/tasks_screen.dart';
 import '../features/vehicles/vehicles_screen.dart';
 import '../features/calendar/calendar_screen.dart';
-import '../features/watchmen/watchmen_screen.dart';
 import '../features/workflows/workflow_list_screen.dart';
 import '../features/workflows/workflow_detail_screen.dart';
+import '../features/finance/chart_of_accounts_screen.dart';
+import '../features/finance/journal_entries_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -120,7 +121,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
       // Module screens accessed from "More" tab
       GoRoute(path: '/residents', builder: (_, __) => const ResidentsScreen()),
       GoRoute(path: '/vehicles', builder: (_, __) => const VehiclesScreen()),
-      GoRoute(path: '/polls', builder: (_, __) => const PollsScreen()),
       GoRoute(
         path: '/meetings',
         builder: (_, __) => const MeetingsScreen(),
@@ -139,7 +139,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/move-in-out', builder: (_, __) => const MoveInOutScreen()),
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),
       GoRoute(path: '/calendar', builder: (_, __) => const CalendarScreen()),
-      GoRoute(path: '/watchmen', builder: (_, __) => const WatchmenScreen()),
       GoRoute(
         path: '/workflows',
         builder: (_, __) => const WorkflowListScreen(),
@@ -150,6 +149,9 @@ GoRouter buildRouter(AuthBloc authBloc) {
           ),
         ],
       ),
+      GoRoute(path: '/chart-of-accounts', builder: (_, __) => const ChartOfAccountsScreen()),
+      GoRoute(path: '/journal-entries', builder: (_, __) => const JournalEntriesScreen()),
+      GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],

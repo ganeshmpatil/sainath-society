@@ -127,6 +127,9 @@ func Migrate(db *gorm.DB) error {
 		&models.BillingStructure{},
 		&models.ChargeHead{},
 		&models.BillLineItem{},
+		&models.AccountHead{},
+		&models.JournalEntry{},
+		&models.JournalLine{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)
@@ -145,11 +148,17 @@ func Seed(db *gorm.DB) error {
 		return fmt.Errorf("failed to ensure wings: %w", err)
 	}
 
+	// Ensure default important contacts exist
+	ensureDefaultImportantContacts(db)
+
 	// Ensure society bank config exists (safe to run repeatedly)
 	ensureSocietyBankConfig(db)
 
 	// Ensure default billing structure exists
 	ensureDefaultBillingStructure(db)
+
+	// Ensure default chart of accounts exists
+	ensureDefaultChartOfAccounts(db)
 
 	// Check if already seeded
 	var memberCount int64
@@ -359,6 +368,33 @@ func ensureSocietyBankConfig(db *gorm.DB) {
 		log.Printf("Failed to seed society bank config: %v", err)
 	} else {
 		log.Println("Seeded society bank config (dummy)")
+	}
+}
+
+// ensureDefaultImportantContacts seeds emergency & utility contacts if none exist.
+func ensureDefaultImportantContacts(db *gorm.DB) {
+	var count int64
+	db.Model(&models.EmergencyContact{}).Count(&count)
+	if count > 0 {
+		return
+	}
+
+	contacts := []models.EmergencyContact{
+		{Name: "Police", NameMr: "पोलीस", Category: models.ContactCategoryEmergency, Phone: "100", Role: "Emergency Helpline", RoleMr: "आणीबाणी हेल्पलाइन", SortOrder: 1, IsActive: true},
+		{Name: "Fire Brigade", NameMr: "अग्निशमन दल", Category: models.ContactCategoryEmergency, Phone: "101", Role: "Fire Emergency", RoleMr: "अग्निशमन आणीबाणी", SortOrder: 2, IsActive: true},
+		{Name: "Ambulance", NameMr: "रुग्णवाहिका", Category: models.ContactCategoryEmergency, Phone: "102", Role: "Medical Emergency", RoleMr: "वैद्यकीय आणीबाणी", SortOrder: 3, IsActive: true},
+		{Name: "Women Helpline", NameMr: "महिला हेल्पलाइन", Category: models.ContactCategoryEmergency, Phone: "1091", Role: "Women Safety", RoleMr: "महिला सुरक्षा", SortOrder: 4, IsActive: true},
+		{Name: "Plumber", NameMr: "प्लंबर", Category: models.ContactCategoryUtility, Phone: "", Role: "Plumbing Services", RoleMr: "प्लंबिंग सेवा", SortOrder: 10, IsActive: true},
+		{Name: "Electrician", NameMr: "इलेक्ट्रिशियन", Category: models.ContactCategoryUtility, Phone: "", Role: "Electrical Services", RoleMr: "विद्युत सेवा", SortOrder: 11, IsActive: true},
+		{Name: "Pest Control", NameMr: "कीटक नियंत्रण", Category: models.ContactCategoryUtility, Phone: "", Role: "Pest Control", RoleMr: "कीटक नियंत्रण सेवा", SortOrder: 12, IsActive: true},
+		{Name: "Gas Agency", NameMr: "गॅस एजन्सी", Category: models.ContactCategoryUtility, Phone: "", Role: "LPG Cylinder", RoleMr: "गॅस सिलिंडर", SortOrder: 13, IsActive: true},
+		{Name: "Watchman", NameMr: "वॉचमन", Category: models.ContactCategoryUtility, Phone: "", Role: "Society Security", RoleMr: "सोसायटी सुरक्षा", SortOrder: 14, IsActive: true},
+	}
+
+	if err := db.Create(&contacts).Error; err != nil {
+		log.Printf("Failed to seed important contacts: %v", err)
+	} else {
+		log.Printf("Seeded %d default important contacts", len(contacts))
 	}
 }
 

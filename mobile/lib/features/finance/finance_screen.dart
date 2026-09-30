@@ -16,6 +16,8 @@ import '../../shared/widgets/shimmer_loading.dart';
 import '../../shared/widgets/status_badge.dart';
 import 'bill_generate_screen.dart';
 import 'billing_structure_screen.dart';
+import 'chart_of_accounts_screen.dart';
+import 'journal_entries_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -44,7 +46,7 @@ class _FC extends Cubit<_FD> {
       emit(_FD(
         pendingAmount: (dues['pendingAmount'] ?? 0).toDouble(),
         unpaidCount: dues['unpaidCount'] ?? 0,
-        bills: (bd['bills'] as List?)?.cast<Map<String, dynamic>>() ?? [],
+        bills: (bd['bills'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [],
         rzpKeyId: cfg['keyId'],
         rzpEnabled: cfg['enabled'] == true,
       ));
@@ -89,6 +91,8 @@ class _FVS extends State<_FV> {
   }
 
   void _onPaymentSuccess(PaymentSuccessResponse response) async {
+    // Show verifying overlay
+    _showPaymentOverlay(AppLocalizations.of(context).t('payment.processing'));
     try {
       await api.post('/payments/verify', data: {
         'razorpayOrderId': response.orderId,
@@ -96,44 +100,225 @@ class _FVS extends State<_FV> {
         'razorpaySignature': response.signature,
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context).t('payment.success')),
-          backgroundColor: Colors.green,
-        ));
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss overlay
+        _showPaymentResult(success: true);
         context.read<_FC>().load();
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context).t('payment.failed')),
-          backgroundColor: Colors.red,
-        ));
+        Navigator.of(context, rootNavigator: true).pop();
+        _showPaymentResult(success: false);
       }
     }
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('${AppLocalizations.of(context).t('payment.failed')}: ${response.message ?? ''}'),
-        backgroundColor: Colors.red,
-      ));
+      _showPaymentResult(success: false, message: response.message);
     }
   }
 
   void _onExternalWallet(ExternalWalletResponse response) {}
 
+  void _showPaymentOverlay(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(40),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(
+                width: 44, height: 44,
+                child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary),
+              ),
+              const SizedBox(height: 20),
+              Text(message, textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary, decoration: TextDecoration.none, fontWeight: FontWeight.w500)),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPaymentResult({required bool success, String? message}) {
+    final l = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(40),
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 64, height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: (success ? Colors.green : AppColors.urgent).withAlpha(20),
+              ),
+              child: Icon(
+                success ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                size: 40,
+                color: success ? Colors.green : AppColors.urgent,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l.t(success ? 'payment.success' : 'payment.failed'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
+            ),
+            if (!success && message != null && message.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(message, textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: AppColors.textTertiary, decoration: TextDecoration.none, fontWeight: FontWeight.w400)),
+            ],
+            if (success) ...[
+              const SizedBox(height: 8),
+              Text(l.t('payment.successDetail'), textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: AppColors.textTertiary, decoration: TextDecoration.none, fontWeight: FontWeight.w400)),
+            ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: success ? Colors.green : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(l.t('common.ok'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  void _showPayConfirmation(Map<String, dynamic> bill) {
+    final l = AppLocalizations.of(context);
+    final total = (bill['totalAmount'] ?? 0).toDouble();
+    final paid = (bill['amountPaid'] ?? 0).toDouble();
+    final due = total - paid;
+    final period = bill['billingPeriod'] ?? '';
+    final flat = bill['flat'];
+    final flatNumber = flat?['flatNumber'] ?? '';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Center(child: Container(width: 40, height: 4,
+              decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
+          const SizedBox(height: 24),
+          Container(
+            width: 56, height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary.withAlpha(20),
+            ),
+            child: Icon(Icons.payment_rounded, size: 28, color: AppColors.primary),
+          ),
+          const SizedBox(height: 16),
+          Text(l.t('payment.confirmTitle'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(children: [
+              _confirmRow(l.t('finance.maintenanceLabel'), period),
+              if (flatNumber.isNotEmpty) _confirmRow(l.t('billing.flat'), flatNumber),
+              const Divider(height: 20),
+              Row(children: [
+                Text(l.t('payment.amount'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                const Spacer(),
+                Text('\u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              ]),
+            ]),
+          ),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                side: BorderSide(color: AppColors.border),
+              ),
+              child: Text(l.t('common.cancel'), style: TextStyle(color: AppColors.textSecondary)),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _startPayment(bill);
+              },
+              icon: const Icon(Icons.lock_rounded, size: 16),
+              label: Text(l.t('payment.payNow'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            )),
+          ]),
+        ]),
+      ),
+    );
+  }
+
+  Widget _confirmRow(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(children: [
+      Text(label, style: TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+      const Spacer(),
+      Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+    ]),
+  );
+
   Future<void> _startPayment(Map<String, dynamic> bill) async {
+    final l = AppLocalizations.of(context);
     final state = context.read<_FC>().state;
     if (!state.rzpEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(AppLocalizations.of(context).t('payment.gatewayUnavailable')),
-      ));
+      _showPaymentResult(success: false, message: l.t('payment.gatewayUnavailable'));
       return;
     }
+    _showPaymentOverlay(l.t('payment.processing'));
     try {
       final res = await api.post('/payments/create-order', data: {'billId': bill['id']});
       final data = res.data;
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
       _razorpay.open({
         'key': data['razorpayKeyId'],
         'amount': data['amount'],
@@ -146,8 +331,9 @@ class _FVS extends State<_FV> {
       });
     } catch (e) {
       if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
         final msg = (e is DioException) ? (e.response?.data?['error'] ?? 'Error') : 'Error';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$msg'), backgroundColor: Colors.red));
+        _showPaymentResult(success: false, message: msg.toString());
       }
     }
   }
@@ -184,8 +370,8 @@ class _FVS extends State<_FV> {
 
   void _showBillDetail(Map<String, dynamic> bill) {
     final l = AppLocalizations.of(context);
-    final isMr = context.read<LocaleCubit>().state == 'mr';
-    final lineItems = (bill['lineItems'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final isMr = context.read<LocaleCubit>().isMarathi;
+    final lineItems = (bill['lineItems'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
     final status = bill['status'] ?? 'ISSUED';
     final total = (bill['totalAmount'] ?? 0).toDouble();
     final paid = (bill['amountPaid'] ?? 0).toDouble();
@@ -200,6 +386,7 @@ class _FVS extends State<_FV> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => DraggableScrollableSheet(
         expand: false,
@@ -212,7 +399,7 @@ class _FVS extends State<_FV> {
             // Drag handle
             Center(child: Container(
               width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
             )),
 
             // Header card
@@ -221,7 +408,7 @@ class _FVS extends State<_FV> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: status == 'PAID'
-                      ? [Colors.green.shade50, Colors.green.shade50]
+                      ? [Colors.green.withAlpha(20), Colors.green.withAlpha(20)]
                       : [AppColors.primary.withAlpha(20), AppColors.secondary.withAlpha(15)],
                 ),
                 borderRadius: BorderRadius.circular(14),
@@ -268,16 +455,16 @@ class _FVS extends State<_FV> {
             // Charges table
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.border),
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(children: [
                 // Table header
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  color: Colors.grey.shade50,
+                  color: AppColors.primary.withAlpha(15),
                   child: Row(children: [
                     const SizedBox(width: 28),
                     Expanded(child: Text(l.t('billing.breakdown'),
@@ -296,8 +483,8 @@ class _FVS extends State<_FV> {
                     final isArr = item['isArrear'] == true;
                     final isInt = item['isInterest'] == true;
                     final method = item['calcMethod'] ?? '';
-                    final rowColor = isArr ? Colors.orange.shade50 : isInt ? Colors.red.shade50 : (i.isEven ? Colors.white : Colors.grey.shade50);
-                    final textColor = isArr ? Colors.orange.shade800 : isInt ? Colors.red.shade700 : null;
+                    final rowColor = isArr ? Colors.orange.withAlpha(20) : isInt ? Colors.red.withAlpha(20) : (i.isEven ? AppColors.surface : AppColors.borderLight);
+                    final textColor = isArr ? Colors.orange : isInt ? Colors.red.shade300 : AppColors.textPrimary;
                     final icon = isArr ? Icons.history_rounded : isInt ? Icons.percent_rounded : (method == 'PER_SQFT' ? Icons.square_foot_rounded : Icons.tag_rounded);
                     final iconColor = isArr ? Colors.orange : isInt ? Colors.red : (method == 'PER_SQFT' ? Colors.blue : Colors.green);
 
@@ -305,12 +492,12 @@ class _FVS extends State<_FV> {
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                       decoration: BoxDecoration(
                         color: rowColor,
-                        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+                        border: Border(top: BorderSide(color: AppColors.border)),
                       ),
                       child: Row(children: [
                         Container(
                           width: 24, height: 24,
-                          decoration: BoxDecoration(color: iconColor.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+                          decoration: BoxDecoration(color: iconColor.withAlpha(30), borderRadius: BorderRadius.circular(6)),
                           child: Icon(icon, size: 13, color: iconColor),
                         ),
                         const SizedBox(width: 10),
@@ -340,9 +527,9 @@ class _FVS extends State<_FV> {
                   child: Row(children: [
                     const SizedBox(width: 34),
                     Expanded(child: Text(l.t('finance.totalAmount'),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
                     Text('\u20B9${total.toStringAsFixed(0)}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   ]),
                 ),
               ]),
@@ -355,7 +542,7 @@ class _FVS extends State<_FV> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(children: [
                   if (paid > 0)
@@ -364,24 +551,24 @@ class _FVS extends State<_FV> {
                       child: Row(children: [
                         Container(
                           width: 24, height: 24,
-                          decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)),
-                          child: Icon(Icons.check_circle_rounded, size: 14, color: Colors.green.shade600),
+                          decoration: BoxDecoration(color: Colors.green.withAlpha(30), borderRadius: BorderRadius.circular(6)),
+                          child: const Icon(Icons.check_circle_rounded, size: 14, color: Colors.green),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(child: Text('Paid', style: TextStyle(fontSize: 13, color: Colors.green.shade700))),
+                        Expanded(child: Text(l.t('finance.paid'), style: const TextStyle(fontSize: 13, color: Colors.green))),
                         Text('-\u20B9${paid.toStringAsFixed(0)}',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green)),
                       ]),
                     ),
                   if (status != 'PAID' && (total - paid) > 0)
                     Row(children: [
                       Container(
                         width: 24, height: 24,
-                        decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6)),
+                        decoration: BoxDecoration(color: AppColors.urgent.withAlpha(30), borderRadius: BorderRadius.circular(6)),
                         child: Icon(Icons.pending_rounded, size: 14, color: AppColors.urgent),
                       ),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('Balance Due',
+                      Expanded(child: Text(l.t('finance.balanceDue'),
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.urgent))),
                       Text('\u20B9${(total - paid).toStringAsFixed(0)}',
                           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.urgent)),
@@ -406,7 +593,7 @@ class _FVS extends State<_FV> {
                 ))
               else if (context.read<_FC>().state.rzpEnabled)
                 SizedBox(width: double.infinity, child: ElevatedButton.icon(
-                  onPressed: () { Navigator.pop(context); _startPayment(bill); },
+                  onPressed: () { Navigator.pop(context); _showPayConfirmation(bill); },
                   icon: const Icon(Icons.payment, size: 18),
                   label: Text(l.t('payment.payNow')),
                   style: ElevatedButton.styleFrom(
@@ -472,36 +659,36 @@ class _FVS extends State<_FV> {
     final oc = ((bill['otherCharges'] ?? 0) as num).toDouble();
     if (mc > 0) entries.add(MapEntry(l.t('finance.monthlyMaintenance'), mc));
     if (sf > 0) entries.add(MapEntry(l.t('finance.sinkingFund'), sf));
-    if (rf > 0) entries.add(MapEntry('Repair Fund', rf));
-    if (wc > 0) entries.add(MapEntry('Water Charge', wc));
-    if (oc > 0) entries.add(MapEntry('Other', oc));
-    if (arrear > 0) entries.add(MapEntry('Arrears', arrear));
-    if (interest > 0) entries.add(MapEntry('Interest', interest));
+    if (rf > 0) entries.add(MapEntry(l.t('finance.repairFund'), rf));
+    if (wc > 0) entries.add(MapEntry(l.t('finance.waterCharge'), wc));
+    if (oc > 0) entries.add(MapEntry(l.t('finance.otherCharges'), oc));
+    if (arrear > 0) entries.add(MapEntry(l.t('finance.arrears'), arrear));
+    if (interest > 0) entries.add(MapEntry(l.t('finance.interest'), interest));
 
     return entries.asMap().entries.map((e) {
       final i = e.key;
       final label = e.value.key;
       final amount = e.value.value;
-      final isSpecial = label == 'Arrears' || label == 'Interest';
-      final color = label == 'Arrears' ? Colors.orange : label == 'Interest' ? Colors.red : Colors.green;
-      final icon = label == 'Arrears' ? Icons.history_rounded : label == 'Interest' ? Icons.percent_rounded : Icons.tag_rounded;
+      final isSpecial = label == l.t('finance.arrears') || label == l.t('finance.interest');
+      final color = label == l.t('finance.arrears') ? Colors.orange : label == l.t('finance.interest') ? Colors.red : Colors.green;
+      final icon = label == l.t('finance.arrears') ? Icons.history_rounded : label == l.t('finance.interest') ? Icons.percent_rounded : Icons.tag_rounded;
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: isSpecial ? color.shade50 : (i.isEven ? Colors.white : Colors.grey.shade50),
-          border: Border(top: BorderSide(color: Colors.grey.shade100)),
+          color: isSpecial ? color.withAlpha(20) : (i.isEven ? AppColors.surface : AppColors.borderLight),
+          border: Border(top: BorderSide(color: AppColors.border)),
         ),
         child: Row(children: [
           Container(
             width: 24, height: 24,
-            decoration: BoxDecoration(color: color.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+            decoration: BoxDecoration(color: color.withAlpha(30), borderRadius: BorderRadius.circular(6)),
             child: Icon(icon, size: 13, color: color),
           ),
           const SizedBox(width: 10),
           Expanded(child: Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-              color: isSpecial ? color.shade800 : null))),
+              color: isSpecial ? color : AppColors.textPrimary))),
           Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-              color: isSpecial ? color.shade800 : null)),
+              color: isSpecial ? color : AppColors.textPrimary)),
         ]),
       );
     }).toList();
@@ -581,6 +768,23 @@ class _FVS extends State<_FV> {
                 )),
               ]),
             )),
+          if (isAdmin)
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.account_tree,
+                  label: l.t('coa.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChartOfAccountsScreen())),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.book_outlined,
+                  label: l.t('journal.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JournalEntriesScreen())),
+                )),
+              ]),
+            )),
 
           // Filter chips
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 12, bottom: 12), child: FilterChipsRow(
@@ -593,7 +797,7 @@ class _FVS extends State<_FV> {
             bill: state.bills[i],
             rzpEnabled: state.rzpEnabled,
             isAdmin: isAdmin,
-            onPay: () => _startPayment(state.bills[i]),
+            onPay: () => _showPayConfirmation(state.bills[i]),
             onTap: () => _showBillDetail(state.bills[i]),
           ), childCount: state.bills.length)),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -678,7 +882,7 @@ class _BC extends StatelessWidget {
             Row(children: [
               Text('\u20B9${amount.toStringAsFixed(0)}', style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
               if (hasArrear)
-                Text('  (incl. arrears)', style: TextStyle(fontSize: 10, color: Colors.orange.shade700)),
+                Text('  (${AppLocalizations.of(context).t('finance.inclArrears')})', style: TextStyle(fontSize: 10, color: Colors.orange.shade700)),
             ]),
           ])),
           StatusBadge.status(status),
@@ -686,7 +890,7 @@ class _BC extends StatelessWidget {
         if (!isPaid && due > 0) ...[
           const SizedBox(height: 10),
           Row(children: [
-            Text('Due: \u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.urgent)),
+            Text('${AppLocalizations.of(context).t('finance.dueLabel')}: \u20B9${due.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.urgent)),
             const Spacer(),
             if (rzpEnabled && !isAdmin)
               SizedBox(height: 32, child: ElevatedButton.icon(

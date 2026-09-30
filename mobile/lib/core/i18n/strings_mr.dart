@@ -77,7 +77,6 @@ const Map<String, String> stringsMr = {
   'nav.finance': 'वित्त',
   'nav.notices': 'सूचना',
   'nav.meetings': 'सभा',
-  'nav.polls': 'मतदान',
   'nav.vehicles': 'वाहने',
   'nav.hallBooking': 'हॉल बुकिंग',
   'nav.inventory': 'साठा',
@@ -88,7 +87,7 @@ const Map<String, String> stringsMr = {
   'nav.residents': 'रहिवासी',
   'nav.moveInOut': 'स्थलांतर नोंद',
   'nav.flatDetails': 'फ्लॅट तपशील',
-  'nav.watchmen': 'वॉचमन',
+  'nav.importantCalls': 'महत्त्वाचे फोन',
   'nav.calendar': 'दिनदर्शिका',
 
   // Dashboard
@@ -186,22 +185,6 @@ const Map<String, String> stringsMr = {
   'residents.wing': 'विंग',
   'residents.members': 'सदस्य',
 
-  // Polls
-  'polls.title': 'मतदान',
-  'polls.subtitle': 'सोसायटी मतदान',
-  'polls.active': 'सक्रिय',
-  'polls.completed': 'पूर्ण',
-  'polls.draft': 'मसुदा',
-  'polls.castVote': 'मतदान करा',
-  'polls.voted': 'मतदान केले',
-  'polls.results': 'निकाल',
-  'polls.endsOn': 'शेवट',
-  'polls.endedOn': 'संपले',
-  'polls.membersVoted': 'सदस्यांनी मतदान केले',
-  'polls.newPoll': 'नवीन मतदान',
-  'polls.question': 'प्रश्न',
-  'polls.options': 'पर्याय',
-  'polls.anonymous': 'गोपनीय मतदान',
 
   // Vehicles
   'vehicles.title': 'वाहने',
@@ -357,15 +340,6 @@ const Map<String, String> stringsMr = {
   'calendar.days': 'दिवस',
   'calendar.completed': 'पूर्ण',
 
-  // Watchmen
-  'watchmen.title': 'वॉचमन',
-  'watchmen.subtitle': 'सुरक्षा रक्षक',
-  'watchmen.addWatchman': 'वॉचमन जोडा',
-  'watchmen.name': 'नाव',
-  'watchmen.nameMr': 'नाव (मराठी)',
-  'watchmen.mobile': 'मोबाईल क्रमांक',
-  'watchmen.dutyStartTime': 'ड्युटी सुरू',
-  'watchmen.dutyEndTime': 'ड्युटी संपेल',
 
   // Flat Details
   'flatDetails.title': 'फ्लॅट तपशील',
@@ -441,6 +415,22 @@ const Map<String, String> stringsMr = {
   'workflows.seeded': 'साचे लोड केले!',
   'workflows.description': 'वर्णन',
 
+  // Important Calls
+  'importantCalls.title': 'महत्त्वाचे फोन',
+  'importantCalls.subtitle': 'आणीबाणी आणि सेवा संपर्क',
+  'importantCalls.emergency': 'आणीबाणी',
+  'importantCalls.utility': 'सेवा संपर्क',
+  'importantCalls.other': 'इतर',
+  'importantCalls.notConfigured': 'क्रमांक जोडलेला नाही',
+  'importantCalls.add': 'संपर्क जोडा',
+  'importantCalls.edit': 'संपर्क संपादित करा',
+  'importantCalls.nameLabel': 'नाव',
+  'importantCalls.nameMrLabel': 'नाव (मराठी)',
+  'importantCalls.phoneLabel': 'फोन क्रमांक',
+  'importantCalls.altPhoneLabel': 'पर्यायी फोन',
+  'importantCalls.roleLabel': 'वर्णन',
+  'importantCalls.roleMrLabel': 'वर्णन (मराठी)',
+
   // Misc UI
   'notices.tapToRead': 'वाचण्यासाठी टॅप करा',
   'grievances.viewDetails': 'तपशील',
@@ -464,6 +454,8 @@ const Map<String, String> stringsMr = {
   'payment.failed': 'पेमेंट अयशस्वी',
   'payment.cancelled': 'पेमेंट रद्द केले',
   'payment.gatewayUnavailable': 'ऑनलाइन पेमेंट उपलब्ध नाही',
+  'payment.confirmTitle': 'पेमेंट पुष्टी करा',
+  'payment.successDetail': 'तुमचे पेमेंट प्राप्त झाले आहे आणि तुमचे बिल अपडेट झाले आहे.',
   'payment.history': 'पेमेंट इतिहास',
   'payment.amount': 'रक्कम',
   'payment.viewBankDetails': 'बँक तपशील पहा',
@@ -503,4 +495,40 @@ const Map<String, String> stringsMr = {
   'finance.billsUnpaid': 'बिले थकीत',
   'finance.markPaidConfirm': 'हे बिल भरले म्हणून चिन्हांकित करायचे?',
   'finance.markedPaid': 'बिल भरले म्हणून चिन्हांकित केले',
+  'finance.balanceDue': 'शिल्लक थकबाकी',
+  'finance.repairFund': 'दुरुस्ती निधी',
+  'finance.waterCharge': 'पाणी शुल्क',
+  'finance.otherCharges': 'इतर शुल्क',
+  'finance.arrears': 'थकबाकी',
+  'finance.interest': 'व्याज',
+  'finance.inclArrears': 'थकबाकी समाविष्ट',
+  'finance.dueLabel': 'देय',
+
+  // Chart of Accounts
+  'coa.title': 'खातेवही',
+  'coa.subtitle': 'दुहेरी नोंदणी लेखांकनासाठी खाते शीर्षके',
+  'coa.addAccount': 'खाते जोडा',
+  'coa.code': 'खाते कोड',
+  'coa.accountName': 'खात्याचे नाव',
+  'coa.accountNameMr': 'खात्याचे नाव (मराठी)',
+  'coa.accountType': 'खात्याचा प्रकार',
+  'coa.isGroup': 'गट आहे (उप-खाती आहेत)',
+
+  // Journal Entries
+  'journal.title': 'रोजनामा नोंदी',
+  'journal.create': 'नवीन रोजनामा नोंद',
+  'journal.noEntries': 'रोजनामा नोंदी नाहीत',
+  'journal.entryDate': 'नोंदणी तारीख',
+  'journal.narration': 'वर्णन',
+  'journal.narrationMr': 'वर्णन (मराठी)',
+  'journal.lines': 'नोंदणी ओळी',
+  'journal.addLine': 'ओळ जोडा',
+  'journal.save': 'नोंद जतन करा',
+
+  // App Update
+  'update.updateAvailable': 'अपडेट उपलब्ध',
+  'update.newVersion': 'नवीन आवृत्ती',
+  'update.download': 'डाउनलोड करा',
+  'update.later': 'नंतर',
+  'update.downloading': 'डाउनलोड होत आहे...',
 };

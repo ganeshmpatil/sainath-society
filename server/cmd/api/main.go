@@ -83,6 +83,8 @@ func main() {
 		Workflow:         repositories.NewWorkflowRepository(db),
 		Payment:          repositories.NewPaymentRepository(db),
 		BillingStructure: repositories.NewBillingStructureRepository(db),
+		AccountHead:      repositories.NewAccountHeadRepository(db),
+		Journal:          repositories.NewJournalRepository(db),
 	}
 
 	// Create Gin router
@@ -190,4 +192,6 @@ type DomainRepositories struct {
 	Workflow         *repositories.WorkflowRepository
 	Payment          *repositories.PaymentRepository
 	BillingStructure *repositories.BillingStructureRepository
+	AccountHead      *repositories.AccountHeadRepository
+	Journal          *repositories.JournalRepository
 }

@@ -59,6 +59,8 @@ func SetupRoutes(
 	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow, notifier)
 	billingStructureHandler := handlers.NewBillingStructureHandler(domain.BillingStructure)
 	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
+	accountHeadHandler := handlers.NewAccountHeadHandler(domain.AccountHead)
+	journalHandler := handlers.NewJournalHandler(domain.Journal, domain.AccountHead)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -356,6 +358,24 @@ func SetupRoutes(
 		bs.POST("/:id/charge-heads", billingStructureHandler.AddChargeHead)
 		bs.PATCH("/:id/charge-heads/:chId", billingStructureHandler.UpdateChargeHead)
 		bs.DELETE("/:id/charge-heads/:chId", billingStructureHandler.DeleteChargeHead)
+
+		// Chart of Accounts: admin manages, used for double-entry bookkeeping.
+		coa := fn.Group("/accounts")
+		coa.GET("/tree", accountHeadHandler.ListTree)
+		coa.GET("", accountHeadHandler.ListAll)
+		coa.GET("/leaf", accountHeadHandler.ListLeaf)
+		coa.GET("/:id", accountHeadHandler.GetByID)
+		coa.POST("", accountHeadHandler.Create)
+		coa.PATCH("/:id", accountHeadHandler.Update)
+		coa.DELETE("/:id", accountHeadHandler.Delete)
+
+		// Journal entries: double-entry bookkeeping.
+		je := fn.Group("/journal")
+		je.GET("", journalHandler.List)
+		je.GET("/:id", journalHandler.GetByID)
+		je.POST("", journalHandler.Create)
+		je.GET("/ledger/:accountId", journalHandler.Ledger)
+		je.GET("/trial-balance", journalHandler.TrialBalance)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

@@ -77,7 +77,6 @@ const Map<String, String> stringsEn = {
   'nav.finance': 'Finance',
   'nav.notices': 'Notices',
   'nav.meetings': 'Meetings',
-  'nav.polls': 'Polls',
   'nav.vehicles': 'Vehicles',
   'nav.hallBooking': 'Hall Booking',
   'nav.inventory': 'Inventory',
@@ -88,7 +87,7 @@ const Map<String, String> stringsEn = {
   'nav.residents': 'Residents',
   'nav.moveInOut': 'Move In/Out',
   'nav.flatDetails': 'Flat Details',
-  'nav.watchmen': 'Watchmen',
+  'nav.importantCalls': 'Important Calls',
   'nav.calendar': 'Calendar',
 
   // Dashboard
@@ -186,22 +185,6 @@ const Map<String, String> stringsEn = {
   'residents.wing': 'Wing',
   'residents.members': 'members',
 
-  // Polls
-  'polls.title': 'Polls',
-  'polls.subtitle': 'Society voting',
-  'polls.active': 'Active',
-  'polls.completed': 'Completed',
-  'polls.draft': 'Draft',
-  'polls.castVote': 'Cast Vote',
-  'polls.voted': 'Voted',
-  'polls.results': 'Results',
-  'polls.endsOn': 'Ends',
-  'polls.endedOn': 'Ended',
-  'polls.membersVoted': 'members voted',
-  'polls.newPoll': 'New Poll',
-  'polls.question': 'Question',
-  'polls.options': 'Options',
-  'polls.anonymous': 'Anonymous voting',
 
   // Vehicles
   'vehicles.title': 'Vehicles',
@@ -357,15 +340,6 @@ const Map<String, String> stringsEn = {
   'calendar.days': 'days',
   'calendar.completed': 'Completed',
 
-  // Watchmen
-  'watchmen.title': 'Watchmen',
-  'watchmen.subtitle': 'Security guards',
-  'watchmen.addWatchman': 'Add Watchman',
-  'watchmen.name': 'Name',
-  'watchmen.nameMr': 'Name (Marathi)',
-  'watchmen.mobile': 'Mobile Number',
-  'watchmen.dutyStartTime': 'Duty Start',
-  'watchmen.dutyEndTime': 'Duty End',
 
   // Flat Details
   'flatDetails.title': 'Flat Details',
@@ -441,6 +415,22 @@ const Map<String, String> stringsEn = {
   'workflows.seeded': 'Templates loaded!',
   'workflows.description': 'Description',
 
+  // Important Calls
+  'importantCalls.title': 'Important Calls',
+  'importantCalls.subtitle': 'Emergency & utility contacts',
+  'importantCalls.emergency': 'Emergency',
+  'importantCalls.utility': 'Utility Services',
+  'importantCalls.other': 'Other',
+  'importantCalls.notConfigured': 'Number not added yet',
+  'importantCalls.add': 'Add Contact',
+  'importantCalls.edit': 'Edit Contact',
+  'importantCalls.nameLabel': 'Name',
+  'importantCalls.nameMrLabel': 'Name (Marathi)',
+  'importantCalls.phoneLabel': 'Phone Number',
+  'importantCalls.altPhoneLabel': 'Alternate Phone',
+  'importantCalls.roleLabel': 'Description',
+  'importantCalls.roleMrLabel': 'Description (Marathi)',
+
   // Misc UI
   'notices.tapToRead': 'Tap to read',
   'grievances.viewDetails': 'Details',
@@ -464,6 +454,8 @@ const Map<String, String> stringsEn = {
   'payment.failed': 'Payment failed',
   'payment.cancelled': 'Payment cancelled',
   'payment.gatewayUnavailable': 'Online payment not available',
+  'payment.confirmTitle': 'Confirm Payment',
+  'payment.successDetail': 'Your payment has been received and your bill has been updated.',
   'payment.history': 'Payment History',
   'payment.amount': 'Amount',
   'payment.viewBankDetails': 'View Bank Details',
@@ -503,4 +495,40 @@ const Map<String, String> stringsEn = {
   'finance.billsUnpaid': 'bills unpaid',
   'finance.markPaidConfirm': 'Mark this bill as fully paid?',
   'finance.markedPaid': 'Bill marked as paid',
+  'finance.balanceDue': 'Balance Due',
+  'finance.repairFund': 'Repair Fund',
+  'finance.waterCharge': 'Water Charge',
+  'finance.otherCharges': 'Other Charges',
+  'finance.arrears': 'Arrears',
+  'finance.interest': 'Interest',
+  'finance.inclArrears': 'incl. arrears',
+  'finance.dueLabel': 'Due',
+
+  // Chart of Accounts
+  'coa.title': 'Chart of Accounts',
+  'coa.subtitle': 'Account heads for double-entry bookkeeping',
+  'coa.addAccount': 'Add Account',
+  'coa.code': 'Account Code',
+  'coa.accountName': 'Account Name',
+  'coa.accountNameMr': 'Account Name (Marathi)',
+  'coa.accountType': 'Account Type',
+  'coa.isGroup': 'Is Group (has sub-accounts)',
+
+  // Journal Entries
+  'journal.title': 'Journal Entries',
+  'journal.create': 'New Journal Entry',
+  'journal.noEntries': 'No journal entries yet',
+  'journal.entryDate': 'Entry Date',
+  'journal.narration': 'Narration',
+  'journal.narrationMr': 'Narration (Marathi)',
+  'journal.lines': 'Entry Lines',
+  'journal.addLine': 'Add Line',
+  'journal.save': 'Save Entry',
+
+  // App Update
+  'update.updateAvailable': 'Update Available',
+  'update.newVersion': 'New version',
+  'update.download': 'Download',
+  'update.later': 'Later',
+  'update.downloading': 'Downloading...',
 };
