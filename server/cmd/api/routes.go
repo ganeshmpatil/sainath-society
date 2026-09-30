@@ -69,6 +69,8 @@ func SetupRoutes(
 	visitorHandler := handlers.NewVisitorHandler(domain.Visitor, notifier)
 	budgetHandler := handlers.NewBudgetHandler(domain.Budget)
 	helpdeskHandler := handlers.NewHelpdeskHandler(domain.Helpdesk, notifier)
+	electionHandler := handlers.NewElectionHandler(domain.Election)
+	auditChecklistHandler := handlers.NewAuditChecklistHandler(domain.AuditChecklist)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -528,5 +530,37 @@ func SetupRoutes(
 		hd.POST("/:id/messages", helpdeskHandler.AddMessage)
 		hd.PATCH("/:id/status", helpdeskHandler.UpdateStatus)
 		hd.PATCH("/:id/assign", helpdeskHandler.Assign)
+	}
+
+	// ─── Elections ─────────────────────────────────────────────
+	{
+		el := protected.Group("/elections")
+		el.GET("", electionHandler.List)
+		el.GET("/:id", electionHandler.GetByID)
+		el.GET("/:id/results", electionHandler.GetResults)
+		el.POST("", electionHandler.Create)
+		el.PATCH("/:id", electionHandler.Update)
+		el.PATCH("/:id/status", electionHandler.UpdateStatus)
+		el.POST("/:id/positions", electionHandler.AddPosition)
+		el.DELETE("/positions/:posId", electionHandler.DeletePosition)
+		el.POST("/:id/nominate", electionHandler.Nominate)
+		el.POST("/candidates/:candId/approve", electionHandler.ApproveCandidate)
+		el.POST("/candidates/:candId/reject", electionHandler.RejectCandidate)
+		el.POST("/candidates/:candId/withdraw", electionHandler.WithdrawCandidate)
+		el.POST("/:id/vote", electionHandler.CastVote)
+	}
+
+	// ─── Audit Checklists ─────────────────────────────────────
+	{
+		ac := protected.Group("/audit-checklists")
+		ac.GET("", auditChecklistHandler.List)
+		ac.GET("/:id", auditChecklistHandler.GetByID)
+		ac.GET("/:id/progress", auditChecklistHandler.Progress)
+		ac.POST("", auditChecklistHandler.Create)
+		ac.PATCH("/:id", auditChecklistHandler.Update)
+		ac.POST("/:id/items", auditChecklistHandler.AddItem)
+		ac.PATCH("/items/:itemId/toggle", auditChecklistHandler.ToggleItem)
+		ac.PATCH("/items/:itemId/remarks", auditChecklistHandler.UpdateItemRemarks)
+		ac.DELETE("/items/:itemId", auditChecklistHandler.DeleteItem)
 	}
 }

@@ -38,6 +38,8 @@ const _modules = [
   _Module(Icons.description_rounded, 'amc.title', '/amc-contracts', Color(0x30EF4444)),
   _Module(Icons.account_balance_rounded, 'nav.budget', '/budgets', Color(0x303B82F6)),
   _Module(Icons.support_agent_rounded, 'nav.helpdesk', '/helpdesk', Color(0x30F97316)),
+  _Module(Icons.how_to_vote_rounded, 'nav.elections', '/elections', Color(0x30A855F7)),
+  _Module(Icons.fact_check_rounded, 'nav.audit', '/audit', Color(0x3010B981)),
 ];
 
 class MoreScreen extends StatelessWidget {

@@ -49,6 +49,10 @@ import '../features/budget/budget_screen.dart';
 import '../features/budget/budget_detail_screen.dart';
 import '../features/helpdesk/helpdesk_screen.dart';
 import '../features/helpdesk/helpdesk_detail_screen.dart';
+import '../features/election/election_screen.dart';
+import '../features/election/election_detail_screen.dart';
+import '../features/audit/audit_screen.dart';
+import '../features/audit/audit_detail_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -209,6 +213,26 @@ GoRouter buildRouter(AuthBloc authBloc) {
           GoRoute(
             path: ':id',
             builder: (_, state) => HelpdeskDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/elections',
+        builder: (_, __) => const ElectionScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => ElectionDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/audit',
+        builder: (_, __) => const AuditScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => AuditDetailScreen(id: state.pathParameters['id']!),
           ),
         ],
       ),
