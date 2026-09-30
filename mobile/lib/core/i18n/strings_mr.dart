@@ -525,6 +525,17 @@ const Map<String, String> stringsMr = {
   'journal.addLine': 'ओळ जोडा',
   'journal.save': 'नोंद जतन करा',
 
+  // Defaulter Register
+  'defaulter.title': 'थकबाकीदार नोंदवही',
+  'defaulter.noDefaulters': 'कोणतीही थकबाकी नाही - सर्व ठीक!',
+  'defaulter.totalOutstanding': 'एकूण थकबाकी',
+  'defaulter.membersWithDues': 'थकबाकी सदस्य',
+  'defaulter.defaulters90': 'थकबाकीदार (90+ दिवस)',
+  'defaulter.agingAnalysis': 'थकबाकी वयोमान विश्लेषण',
+
+  // Member Statement
+  'statement.title': 'खाते उतारा',
+
   // App Update
   'update.updateAvailable': 'अपडेट उपलब्ध',
   'update.newVersion': 'नवीन आवृत्ती',

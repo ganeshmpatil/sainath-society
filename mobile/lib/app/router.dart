@@ -30,6 +30,8 @@ import '../features/workflows/workflow_list_screen.dart';
 import '../features/workflows/workflow_detail_screen.dart';
 import '../features/finance/chart_of_accounts_screen.dart';
 import '../features/finance/journal_entries_screen.dart';
+import '../features/finance/defaulter_register_screen.dart';
+import '../features/finance/member_statement_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -151,6 +153,8 @@ GoRouter buildRouter(AuthBloc authBloc) {
       ),
       GoRoute(path: '/chart-of-accounts', builder: (_, __) => const ChartOfAccountsScreen()),
       GoRoute(path: '/journal-entries', builder: (_, __) => const JournalEntriesScreen()),
+      GoRoute(path: '/defaulter-register', builder: (_, __) => const DefaulterRegisterScreen()),
+      GoRoute(path: '/my-statement', builder: (_, __) => const MemberStatementScreen()),
       GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),

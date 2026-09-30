@@ -18,6 +18,8 @@ import 'bill_generate_screen.dart';
 import 'billing_structure_screen.dart';
 import 'chart_of_accounts_screen.dart';
 import 'journal_entries_screen.dart';
+import 'defaulter_register_screen.dart';
+import 'member_statement_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -743,6 +745,13 @@ class _FVS extends State<_FV> {
                   label: Text(l.t('payment.viewBankDetails'), style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary.withAlpha(100))),
                 )),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MemberStatementScreen())),
+                  icon: const Icon(Icons.receipt_long, size: 16),
+                  label: Text(l.t('statement.title'), style: const TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary.withAlpha(100))),
+                )),
               ]),
             ]),
           )),
@@ -784,6 +793,15 @@ class _FVS extends State<_FV> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JournalEntriesScreen())),
                 )),
               ]),
+            )),
+          if (isAdmin)
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: _AdminActionChip(
+                icon: Icons.warning_amber,
+                label: l.t('defaulter.title'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DefaulterRegisterScreen())),
+              ),
             )),
 
           // Filter chips

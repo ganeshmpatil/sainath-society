@@ -525,6 +525,17 @@ const Map<String, String> stringsEn = {
   'journal.addLine': 'Add Line',
   'journal.save': 'Save Entry',
 
+  // Defaulter Register
+  'defaulter.title': 'Defaulter Register',
+  'defaulter.noDefaulters': 'No outstanding dues - all clear!',
+  'defaulter.totalOutstanding': 'Total Outstanding',
+  'defaulter.membersWithDues': 'Members with Dues',
+  'defaulter.defaulters90': 'Defaulters (90+ days)',
+  'defaulter.agingAnalysis': 'Aging Analysis',
+
+  // Member Statement
+  'statement.title': 'Statement of Account',
+
   // App Update
   'update.updateAvailable': 'Update Available',
   'update.newVersion': 'New version',

@@ -61,6 +61,7 @@ func SetupRoutes(
 	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
 	accountHeadHandler := handlers.NewAccountHeadHandler(domain.AccountHead)
 	journalHandler := handlers.NewJournalHandler(domain.Journal, domain.AccountHead)
+	defaulterHandler := handlers.NewDefaulterHandler(domain.Defaulter)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -376,6 +377,13 @@ func SetupRoutes(
 		je.POST("", journalHandler.Create)
 		je.GET("/ledger/:accountId", journalHandler.Ledger)
 		je.GET("/trial-balance", journalHandler.TrialBalance)
+
+		// Defaulter register, member statement, collection dashboard.
+		df := fn.Group("/defaulters")
+		df.GET("/register", defaulterHandler.Register)
+		df.GET("/summary", defaulterHandler.Summary)
+		df.GET("/my-statement", defaulterHandler.MyStatement)
+		df.GET("/statement/:memberId", defaulterHandler.MemberStatement)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")
