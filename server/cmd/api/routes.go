@@ -63,6 +63,7 @@ func SetupRoutes(
 	journalHandler := handlers.NewJournalHandler(domain.Journal, domain.AccountHead)
 	defaulterHandler := handlers.NewDefaulterHandler(domain.Defaulter)
 	financialReportHandler := handlers.NewFinancialReportHandler(domain.FinancialReport)
+	vendorHandler := handlers.NewVendorHandler(domain.Vendor)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -389,7 +390,17 @@ func SetupRoutes(
 		// Financial reports: I&E statement, collection dashboard.
 		rpt := fn.Group("/reports")
 		rpt.GET("/income-expenditure", financialReportHandler.IncomeExpenditure)
+		rpt.GET("/balance-sheet", financialReportHandler.BalanceSheet)
+		rpt.GET("/receipts-payments", financialReportHandler.ReceiptsPayments)
 		rpt.GET("/collection-dashboard", financialReportHandler.CollectionDashboard)
+
+		// Vendors: payee master for TDS compliance.
+		vnd := fn.Group("/vendors")
+		vnd.GET("", vendorHandler.List)
+		vnd.GET("/:id", vendorHandler.GetByID)
+		vnd.POST("", vendorHandler.Create)
+		vnd.PATCH("/:id", vendorHandler.Update)
+		vnd.DELETE("/:id", vendorHandler.Delete)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

@@ -112,6 +112,222 @@ func (r *FinancialReportRepository) GetIncomeExpenditure(actor *ActorContext, fr
 	return stmt, nil
 }
 
+// ─── Balance Sheet ─────────────────────────────────────────
+
+// BSLineItem represents one account in the balance sheet.
+type BSLineItem struct {
+	AccountID     uuid.UUID `json:"accountId"`
+	AccountCode   string    `json:"accountCode"`
+	AccountName   string    `json:"accountName"`
+	AccountNameMr string    `json:"accountNameMr"`
+	Balance       float64   `json:"balance"`
+}
+
+// BalanceSheet holds the complete balance sheet.
+type BalanceSheet struct {
+	AsOf             string       `json:"asOf"`
+	Assets           []BSLineItem `json:"assets"`
+	Liabilities      []BSLineItem `json:"liabilities"`
+	Funds            []BSLineItem `json:"funds"`
+	TotalAssets      float64      `json:"totalAssets"`
+	TotalLiabilities float64      `json:"totalLiabilities"`
+	TotalFunds       float64      `json:"totalFunds"`
+	Surplus          float64      `json:"surplus"` // from I&E
+}
+
+// GetBalanceSheet generates a balance sheet as of a given date.
+func (r *FinancialReportRepository) GetBalanceSheet(actor *ActorContext, asOf time.Time) (*BalanceSheet, error) {
+	if !actor.IsAdmin() {
+		return nil, ErrForbidden
+	}
+
+	type row struct {
+		AccountID     uuid.UUID
+		AccountCode   string
+		AccountName   string
+		AccountNameMr string
+		AccountType   string
+		TotalDebit    float64
+		TotalCredit   float64
+	}
+
+	var rows []row
+	err := r.db.Table("soc_mitra_journal_lines jl").
+		Select(`ah.id as account_id, ah.code as account_code, ah.name as account_name,
+			ah.name_mr as account_name_mr, ah.type as account_type,
+			COALESCE(SUM(jl.debit_amount), 0) as total_debit,
+			COALESCE(SUM(jl.credit_amount), 0) as total_credit`).
+		Joins("JOIN soc_mitra_account_heads ah ON ah.id = jl.account_head_id").
+		Joins("JOIN soc_mitra_journal_entries je ON je.id = jl.journal_entry_id").
+		Where("ah.type IN ? AND je.entry_date <= ? AND ah.is_group = ?",
+			[]string{"ASSET", "LIABILITY", "FUND"}, asOf, false).
+		Group("ah.id, ah.code, ah.name, ah.name_mr, ah.type").
+		Order("ah.code ASC").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	bs := &BalanceSheet{AsOf: asOf.Format("2006-01-02")}
+
+	for _, r := range rows {
+		var balance float64
+		switch r.AccountType {
+		case "ASSET":
+			balance = r.TotalDebit - r.TotalCredit // debit-normal
+		case "LIABILITY", "FUND":
+			balance = r.TotalCredit - r.TotalDebit // credit-normal
+		}
+		if balance == 0 {
+			continue
+		}
+		item := BSLineItem{
+			AccountID:     r.AccountID,
+			AccountCode:   r.AccountCode,
+			AccountName:   r.AccountName,
+			AccountNameMr: r.AccountNameMr,
+			Balance:       balance,
+		}
+		switch r.AccountType {
+		case "ASSET":
+			bs.Assets = append(bs.Assets, item)
+			bs.TotalAssets += balance
+		case "LIABILITY":
+			bs.Liabilities = append(bs.Liabilities, item)
+			bs.TotalLiabilities += balance
+		case "FUND":
+			bs.Funds = append(bs.Funds, item)
+			bs.TotalFunds += balance
+		}
+	}
+
+	// Calculate surplus from I&E (income - expenses up to asOf)
+	fyFrom := time.Date(asOf.Year(), time.April, 1, 0, 0, 0, 0, time.UTC)
+	if asOf.Month() < time.April {
+		fyFrom = time.Date(asOf.Year()-1, time.April, 1, 0, 0, 0, 0, time.UTC)
+	}
+	ie, err := r.GetIncomeExpenditure(actor, fyFrom, asOf)
+	if err == nil {
+		bs.Surplus = ie.Surplus
+	}
+
+	return bs, nil
+}
+
+// ─── Receipts & Payments Account ──────────────────────────
+
+// RPLineItem represents a line in the receipts/payments account.
+type RPLineItem struct {
+	AccountCode   string  `json:"accountCode"`
+	AccountName   string  `json:"accountName"`
+	AccountNameMr string  `json:"accountNameMr"`
+	Amount        float64 `json:"amount"`
+}
+
+// ReceiptsPayments holds the cash-basis receipts and payments report.
+type ReceiptsPayments struct {
+	PeriodFrom       string       `json:"periodFrom"`
+	PeriodTo         string       `json:"periodTo"`
+	OpeningBalance   float64      `json:"openingBalance"`
+	Receipts         []RPLineItem `json:"receipts"`
+	Payments         []RPLineItem `json:"payments"`
+	TotalReceipts    float64      `json:"totalReceipts"`
+	TotalPayments    float64      `json:"totalPayments"`
+	ClosingBalance   float64      `json:"closingBalance"`
+}
+
+// GetReceiptsPayments generates a cash-basis receipts and payments account.
+// It looks at debit/credit movements in ASSET accounts (bank/cash) and maps the
+// contra entries to show where money came from (receipts) and where it went (payments).
+func (r *FinancialReportRepository) GetReceiptsPayments(actor *ActorContext, from, to time.Time) (*ReceiptsPayments, error) {
+	if !actor.IsAdmin() {
+		return nil, ErrForbidden
+	}
+
+	rp := &ReceiptsPayments{
+		PeriodFrom: from.Format("2006-01-02"),
+		PeriodTo:   to.Format("2006-01-02"),
+	}
+
+	// Opening balance: sum of all ASSET (bank/cash) accounts before `from`
+	var openBal struct {
+		Debit  float64
+		Credit float64
+	}
+	r.db.Table("soc_mitra_journal_lines jl").
+		Select("COALESCE(SUM(jl.debit_amount), 0) as debit, COALESCE(SUM(jl.credit_amount), 0) as credit").
+		Joins("JOIN soc_mitra_account_heads ah ON ah.id = jl.account_head_id").
+		Joins("JOIN soc_mitra_journal_entries je ON je.id = jl.journal_entry_id").
+		Where("ah.type = ? AND je.entry_date < ? AND ah.is_group = ?", "ASSET", from, false).
+		Where("ah.code LIKE ? OR ah.code LIKE ?", "11%", "12%"). // bank + cash accounts
+		Row().Scan(&openBal.Debit, &openBal.Credit)
+	rp.OpeningBalance = openBal.Debit - openBal.Credit
+
+	// For the period: find all journal entries that touch bank/cash (asset) accounts.
+	// Receipts = credits to non-asset accounts in same journal entries where bank/cash was debited
+	// Payments = debits to non-asset accounts in same journal entries where bank/cash was credited
+
+	// Simpler approach: group contra-account movements
+	type contraRow struct {
+		AccountCode   string
+		AccountName   string
+		AccountNameMr string
+		AccountType   string
+		TotalDebit    float64
+		TotalCredit   float64
+	}
+
+	// Get all entries within the period that involve bank/cash accounts
+	var rows []contraRow
+	err := r.db.Table("soc_mitra_journal_lines jl").
+		Select(`ah.code as account_code, ah.name as account_name,
+			ah.name_mr as account_name_mr, ah.type as account_type,
+			COALESCE(SUM(jl.debit_amount), 0) as total_debit,
+			COALESCE(SUM(jl.credit_amount), 0) as total_credit`).
+		Joins("JOIN soc_mitra_account_heads ah ON ah.id = jl.account_head_id").
+		Joins("JOIN soc_mitra_journal_entries je ON je.id = jl.journal_entry_id").
+		Where("je.entry_date >= ? AND je.entry_date <= ? AND ah.is_group = ?", from, to, false).
+		Where("ah.type != ?", "ASSET"). // non-asset = the contra accounts
+		Where("jl.journal_entry_id IN (?)",
+			r.db.Table("soc_mitra_journal_lines jl2").
+				Select("jl2.journal_entry_id").
+				Joins("JOIN soc_mitra_account_heads ah2 ON ah2.id = jl2.account_head_id").
+				Where("ah2.type = ? AND (ah2.code LIKE ? OR ah2.code LIKE ?)", "ASSET", "11%", "12%"),
+		).
+		Group("ah.code, ah.name, ah.name_mr, ah.type").
+		Order("ah.code ASC").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		// Credit to contra = receipt (money came in); Debit to contra = payment (money went out)
+		if row.TotalCredit > row.TotalDebit {
+			// This contra account was credited = source of receipt
+			rp.Receipts = append(rp.Receipts, RPLineItem{
+				AccountCode:   row.AccountCode,
+				AccountName:   row.AccountName,
+				AccountNameMr: row.AccountNameMr,
+				Amount:        row.TotalCredit - row.TotalDebit,
+			})
+			rp.TotalReceipts += row.TotalCredit - row.TotalDebit
+		} else if row.TotalDebit > row.TotalCredit {
+			// This contra account was debited = payment destination
+			rp.Payments = append(rp.Payments, RPLineItem{
+				AccountCode:   row.AccountCode,
+				AccountName:   row.AccountName,
+				AccountNameMr: row.AccountNameMr,
+				Amount:        row.TotalDebit - row.TotalCredit,
+			})
+			rp.TotalPayments += row.TotalDebit - row.TotalCredit
+		}
+	}
+
+	rp.ClosingBalance = rp.OpeningBalance + rp.TotalReceipts - rp.TotalPayments
+	return rp, nil
+}
+
 // ─── Collection Dashboard ──────────────────────────────────
 
 // CollectionStats provides collection efficiency metrics.

@@ -44,6 +44,42 @@ func (h *FinancialReportHandler) IncomeExpenditure(c *gin.Context) {
 	c.JSON(http.StatusOK, stmt)
 }
 
+// BalanceSheet returns the balance sheet as of a date (default: today).
+func (h *FinancialReportHandler) BalanceSheet(c *gin.Context) {
+	actor := middleware.GetActor(c)
+
+	asOf := time.Now()
+	if d := c.Query("asOf"); d != "" {
+		if parsed, err := time.Parse("2006-01-02", d); err == nil {
+			asOf = parsed
+		}
+	}
+
+	bs, err := h.repo.GetBalanceSheet(actor, asOf)
+	if err != nil {
+		writeRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, bs)
+}
+
+// ReceiptsPayments returns the cash-basis receipts & payments account.
+func (h *FinancialReportHandler) ReceiptsPayments(c *gin.Context) {
+	actor := middleware.GetActor(c)
+
+	from, to, err := parseFinancialYearQuery(c)
+	if err != nil {
+		return
+	}
+
+	rp, err := h.repo.GetReceiptsPayments(actor, from, to)
+	if err != nil {
+		writeRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, rp)
+}
+
 // CollectionDashboard returns collection efficiency metrics.
 func (h *FinancialReportHandler) CollectionDashboard(c *gin.Context) {
 	actor := middleware.GetActor(c)
