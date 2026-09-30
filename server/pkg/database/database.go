@@ -139,6 +139,8 @@ func Migrate(db *gorm.DB) error {
 		&models.StaffAttendance{},
 		&models.StaffSalaryPayment{},
 		&models.Certificate{},
+		&models.AMCContract{},
+		&models.ServiceLog{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)

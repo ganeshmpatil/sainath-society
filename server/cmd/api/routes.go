@@ -466,5 +466,18 @@ func SetupRoutes(
 		cert.POST("/:id/approve", certHandler.Approve)
 		cert.POST("/:id/reject", certHandler.Reject)
 		cert.GET("/no-dues-check/:flatId", certHandler.NoDuesCheck)
+
+		// AMC / Vendor Contracts.
+		amcHandler := handlers.NewAMCContractHandler(domain.AMCContract)
+		amc := protected.Group("/amc-contracts")
+		amc.GET("", amcHandler.List)
+		amc.GET("/summary", amcHandler.Summary)
+		amc.GET("/expiring-soon", amcHandler.ExpiringSoon)
+		amc.GET("/:id", amcHandler.GetByID)
+		amc.POST("", amcHandler.Create)
+		amc.PATCH("/:id", amcHandler.Update)
+		amc.DELETE("/:id", amcHandler.Delete)
+		amc.POST("/:id/service-log", amcHandler.LogService)
+		amc.GET("/:id/service-logs", amcHandler.ListServiceLogs)
 	}
 }

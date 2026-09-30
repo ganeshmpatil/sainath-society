@@ -564,6 +564,20 @@ const Map<String, String> stringsEn = {
   'cert.reject': 'Reject',
   'cert.rejectReason': 'Reason for rejection',
 
+  // AMC / Contracts
+  'amc.title': 'AMC & Contracts',
+  'amc.addContract': 'Add Contract',
+  'amc.serviceType': 'Service Type',
+  'amc.description': 'Description',
+  'amc.contractAmount': 'Contract Amount',
+  'amc.startDate': 'Start Date',
+  'amc.endDate': 'End Date',
+  'amc.active': 'Active',
+  'amc.expiring': 'Expiring',
+  'amc.expired': 'Expired',
+  'amc.totalValue': 'Total Value',
+  'amc.left': 'left',
+
   // Role-based finance
   'finance.societyPendingDues': 'Society Pending Dues',
   'finance.billsUnpaid': 'bills unpaid',

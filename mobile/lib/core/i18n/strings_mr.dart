@@ -564,6 +564,20 @@ const Map<String, String> stringsMr = {
   'cert.reject': 'नाकारा',
   'cert.rejectReason': 'नाकारण्याचे कारण',
 
+  // AMC / Contracts
+  'amc.title': 'AMC आणि करार',
+  'amc.addContract': 'करार जोडा',
+  'amc.serviceType': 'सेवा प्रकार',
+  'amc.description': 'वर्णन',
+  'amc.contractAmount': 'करार रक्कम',
+  'amc.startDate': 'सुरुवात तारीख',
+  'amc.endDate': 'शेवट तारीख',
+  'amc.active': 'सक्रिय',
+  'amc.expiring': 'कालबाह्य होणार',
+  'amc.expired': 'कालबाह्य',
+  'amc.totalValue': 'एकूण मूल्य',
+  'amc.left': 'शिल्लक',
+
   // Role-based finance
   'finance.societyPendingDues': 'सोसायटी थकबाकी',
   'finance.billsUnpaid': 'बिले थकीत',

@@ -34,6 +34,7 @@ const _modules = [
   _Module(Icons.account_tree_rounded, 'nav.workflows', '/workflows', Color(0x30A855F7)),
   _Module(Icons.groups_3_rounded, 'staff.title', '/staff', Color(0x30F97316)),
   _Module(Icons.verified_rounded, 'cert.title', '/certificates', Color(0x3010B981)),
+  _Module(Icons.description_rounded, 'amc.title', '/amc-contracts', Color(0x30EF4444)),
 ];
 
 class MoreScreen extends StatelessWidget {
