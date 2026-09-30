@@ -135,6 +135,10 @@ func Migrate(db *gorm.DB) error {
 		&models.BillPayment{},
 		&models.FlatChargeOverride{},
 		&models.SocietySetting{},
+		&models.Staff{},
+		&models.StaffAttendance{},
+		&models.StaffSalaryPayment{},
+		&models.Certificate{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 3 soc_mitra_*): %w", err)

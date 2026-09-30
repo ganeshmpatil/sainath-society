@@ -440,5 +440,31 @@ func SetupRoutes(
 		pay.POST("/create-order", paymentHandler.CreateOrder)
 		pay.POST("/verify", paymentHandler.VerifyPayment)
 		pay.GET("", paymentHandler.ListPayments)
+
+		// Staff management.
+		staffHandler := handlers.NewStaffHandler(domain.Staff)
+		st := protected.Group("/staff")
+		st.GET("", staffHandler.List)
+		st.GET("/:id", staffHandler.GetByID)
+		st.POST("", staffHandler.Create)
+		st.PATCH("/:id", staffHandler.Update)
+		st.POST("/attendance", staffHandler.MarkAttendance)
+		st.POST("/attendance/bulk", staffHandler.BulkAttendance)
+		st.GET("/attendance/today", staffHandler.TodayAttendance)
+		st.GET("/:id/attendance", staffHandler.GetAttendance)
+		st.GET("/:id/salary/calculate", staffHandler.CalculateSalary)
+		st.POST("/salary", staffHandler.RecordSalary)
+		st.GET("/:id/salary", staffHandler.ListSalaryPayments)
+		st.GET("/salary/summary", staffHandler.MonthlySummary)
+
+		// Certificates (NOC, No Dues).
+		certHandler := handlers.NewCertificateHandler(domain.Certificate)
+		cert := protected.Group("/certificates")
+		cert.GET("", certHandler.List)
+		cert.POST("", certHandler.Request)
+		cert.GET("/:id", certHandler.GetByID)
+		cert.POST("/:id/approve", certHandler.Approve)
+		cert.POST("/:id/reject", certHandler.Reject)
+		cert.GET("/no-dues-check/:flatId", certHandler.NoDuesCheck)
 	}
 }

@@ -89,6 +89,8 @@ func main() {
 		FinancialReport:  repositories.NewFinancialReportRepository(db),
 		Vendor:           repositories.NewVendorRepository(db),
 		VendorPayment:    repositories.NewVendorPaymentRepository(db, repositories.NewJournalRepository(db)),
+		Staff:            repositories.NewStaffRepository(db),
+		Certificate:      repositories.NewCertificateRepository(db),
 	}
 
 	// Create Gin router
@@ -202,4 +204,6 @@ type DomainRepositories struct {
 	FinancialReport  *repositories.FinancialReportRepository
 	Vendor           *repositories.VendorRepository
 	VendorPayment    *repositories.VendorPaymentRepository
+	Staff            *repositories.StaffRepository
+	Certificate      *repositories.CertificateRepository
 }
