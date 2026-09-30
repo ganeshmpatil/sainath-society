@@ -6,6 +6,7 @@ import (
 
 	"sainath-society/internal/handlers"
 	"sainath-society/internal/middleware"
+	"sainath-society/internal/repositories"
 	"sainath-society/internal/repository"
 	"sainath-society/internal/services"
 	"sainath-society/pkg/database"
@@ -415,6 +416,22 @@ func SetupRoutes(
 		vp.POST("/:id/tds-deposited", vendorPaymentHandler.MarkTDSDeposited)
 		vp.GET("/tds-summary", vendorPaymentHandler.TDSSummary)
 		vp.GET("/tds-pending", vendorPaymentHandler.PendingTDS)
+
+		// Flat charge overrides (differential billing).
+		overrideRepo := repositories.NewFlatChargeOverrideRepository(database.DB)
+		overrideHandler := handlers.NewFlatChargeOverrideHandler(overrideRepo)
+		ov := fn.Group("/charge-overrides")
+		ov.GET("", overrideHandler.ListAll)
+		ov.GET("/flat/:flatId", overrideHandler.ListForFlat)
+		ov.POST("", overrideHandler.Upsert)
+		ov.DELETE("/:id", overrideHandler.Delete)
+
+		// GST invoice and society settings.
+		gstHandler := handlers.NewGSTInvoiceHandler(domain.Bill, database.DB)
+		fn.GET("/bills/:id/gst-invoice", gstHandler.GetInvoice)
+		settings := fn.Group("/settings")
+		settings.GET("", gstHandler.ListSettings)
+		settings.POST("", gstHandler.UpsertSetting)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

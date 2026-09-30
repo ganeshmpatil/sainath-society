@@ -27,6 +27,8 @@ import 'vendor_master_screen.dart';
 import 'expense_dashboard_screen.dart';
 import 'fund_tracking_screen.dart';
 import 'tds_dashboard_screen.dart';
+import 'charge_overrides_screen.dart';
+import 'gst_invoice_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -620,6 +622,22 @@ class _FVS extends State<_FV> {
               _PaymentHistorySection(billId: bill['id'], l: l),
             ],
 
+            // GST Invoice button
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => GSTInvoiceScreen(billId: bill['id'])));
+              },
+              icon: const Icon(Icons.receipt_long, size: 16),
+              label: Text(l.t('gst.viewInvoice')),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            )),
+
             const SizedBox(height: 16),
           ],
         ),
@@ -964,6 +982,19 @@ class _FVS extends State<_FV> {
                   label: l.t('tds.title'),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TdsDashboardScreen())),
                 )),
+              ]),
+            )),
+          if (isAdmin)
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.tune,
+                  label: l.t('override.chargeOverrides'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChargeOverridesScreen())),
+                )),
+                const SizedBox(width: 8),
+                const Expanded(child: SizedBox()),
               ]),
             )),
 

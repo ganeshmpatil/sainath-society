@@ -40,6 +40,7 @@ import '../features/finance/vendor_master_screen.dart';
 import '../features/finance/expense_dashboard_screen.dart';
 import '../features/finance/fund_tracking_screen.dart';
 import '../features/finance/tds_dashboard_screen.dart';
+import '../features/finance/charge_overrides_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -177,6 +178,7 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/expense-dashboard', builder: (_, __) => const ExpenseDashboardScreen()),
       GoRoute(path: '/fund-tracking', builder: (_, __) => const FundTrackingScreen()),
       GoRoute(path: '/tds-dashboard', builder: (_, __) => const TdsDashboardScreen()),
+      GoRoute(path: '/charge-overrides', builder: (_, __) => const ChargeOverridesScreen()),
       GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),

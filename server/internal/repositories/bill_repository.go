@@ -129,6 +129,7 @@ func (r *BillRepository) GenerateForPeriod(actor *ActorContext, req BillGenerati
 }
 
 // buildBillFromStructure calculates per-flat charges from the active billing structure.
+// Applies FlatChargeOverride records for differential billing (FIN-006).
 func (r *BillRepository) buildBillFromStructure(
 	bs *models.BillingStructure, f flatInfo, req BillGenerationRequest,
 	generatedBy uuid.UUID, issueDate time.Time,
@@ -145,6 +146,14 @@ func (r *BillRepository) buildBillFromStructure(
 		BillingStructureID: &bs.ID,
 	}
 
+	// Load per-flat overrides keyed by charge head ID
+	var overrides []models.FlatChargeOverride
+	r.db.Where("flat_id = ?", f.FlatID).Find(&overrides)
+	overrideMap := make(map[uuid.UUID]models.FlatChargeOverride, len(overrides))
+	for _, o := range overrides {
+		overrideMap[o.ChargeHeadID] = o
+	}
+
 	var total float64
 	var items []models.BillLineItem
 
@@ -154,6 +163,14 @@ func (r *BillRepository) buildBillFromStructure(
 	}
 
 	for _, ch := range bs.ChargeHeads {
+		// Check for per-flat override
+		if ov, ok := overrideMap[ch.ID]; ok {
+			if ov.Exempt {
+				continue // skip this charge for this flat
+			}
+			ch.Rate = ov.Rate // use override rate
+		}
+
 		var amount float64
 		var qty float64 = 1
 
