@@ -587,6 +587,24 @@ const Map<String, String> stringsEn = {
   'fund.entries': 'Entries',
   'fund.recentActivity': 'Recent Activity',
 
+  // TDS Dashboard
+  'tds.title': 'TDS Dashboard',
+  'tds.totalDeducted': 'Total Deducted',
+  'tds.deposited': 'Deposited',
+  'tds.pendingDeposit': 'Pending',
+  'tds.sectionWise': 'Section-wise Breakdown',
+  'tds.pendingDeposits': 'Pending TDS Deposits',
+  'tds.depositReminder': 'TDS must be deposited by 7th of following month',
+  'tds.recentPayments': 'Vendor Payments',
+  'tds.noPayments': 'No vendor payments recorded yet',
+  'tds.recordPayment': 'Record Payment',
+  'tds.selectVendor': 'Select Vendor',
+  'tds.expenseAccount': 'Expense Account',
+  'tds.grossAmount': 'Gross Amount',
+  'tds.paymentDate': 'Payment Date',
+  'tds.narration': 'Narration',
+  'tds.paymentMode': 'Payment Mode',
+
   // Expense Dashboard
   'expDash.title': 'Expense Dashboard',
   'expDash.totalExpenses': 'Total Expenses',

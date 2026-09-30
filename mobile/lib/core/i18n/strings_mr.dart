@@ -587,6 +587,24 @@ const Map<String, String> stringsMr = {
   'fund.entries': 'नोंदी',
   'fund.recentActivity': 'अलीकडील क्रिया',
 
+  // TDS Dashboard
+  'tds.title': 'TDS डॅशबोर्ड',
+  'tds.totalDeducted': 'एकूण कपात',
+  'tds.deposited': 'जमा',
+  'tds.pendingDeposit': 'प्रलंबित',
+  'tds.sectionWise': 'कलमानुसार तपशील',
+  'tds.pendingDeposits': 'प्रलंबित TDS जमा',
+  'tds.depositReminder': 'TDS पुढील महिन्याच्या ७ तारखेपर्यंत जमा करणे आवश्यक',
+  'tds.recentPayments': 'विक्रेता देयके',
+  'tds.noPayments': 'अजून विक्रेता देयके नोंदवलेली नाहीत',
+  'tds.recordPayment': 'देयक नोंदवा',
+  'tds.selectVendor': 'विक्रेता निवडा',
+  'tds.expenseAccount': 'खर्च खाते',
+  'tds.grossAmount': 'एकूण रक्कम',
+  'tds.paymentDate': 'देयक तारीख',
+  'tds.narration': 'वर्णन',
+  'tds.paymentMode': 'देयक पद्धत',
+
   // Expense Dashboard
   'expDash.title': 'खर्च डॅशबोर्ड',
   'expDash.totalExpenses': 'एकूण खर्च',

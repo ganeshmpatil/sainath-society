@@ -64,6 +64,7 @@ func SetupRoutes(
 	defaulterHandler := handlers.NewDefaulterHandler(domain.Defaulter)
 	financialReportHandler := handlers.NewFinancialReportHandler(domain.FinancialReport)
 	vendorHandler := handlers.NewVendorHandler(domain.Vendor)
+	vendorPaymentHandler := handlers.NewVendorPaymentHandler(domain.VendorPayment)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -401,6 +402,15 @@ func SetupRoutes(
 		vnd.POST("", vendorHandler.Create)
 		vnd.PATCH("/:id", vendorHandler.Update)
 		vnd.DELETE("/:id", vendorHandler.Delete)
+
+		// Vendor payments with TDS deduction.
+		vp := fn.Group("/vendor-payments")
+		vp.GET("", vendorPaymentHandler.List)
+		vp.GET("/:id", vendorPaymentHandler.GetByID)
+		vp.POST("", vendorPaymentHandler.Create)
+		vp.POST("/:id/tds-deposited", vendorPaymentHandler.MarkTDSDeposited)
+		vp.GET("/tds-summary", vendorPaymentHandler.TDSSummary)
+		vp.GET("/tds-pending", vendorPaymentHandler.PendingTDS)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

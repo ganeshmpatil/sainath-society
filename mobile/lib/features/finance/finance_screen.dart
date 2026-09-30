@@ -26,6 +26,7 @@ import 'receipts_payments_screen.dart';
 import 'vendor_master_screen.dart';
 import 'expense_dashboard_screen.dart';
 import 'fund_tracking_screen.dart';
+import 'tds_dashboard_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -851,7 +852,7 @@ class _FVS extends State<_FV> {
                 )),
               ]),
             )),
-            // Row 6: Fund Tracking
+            // Row 6: Fund Tracking, TDS Dashboard
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Row(children: [
@@ -861,7 +862,11 @@ class _FVS extends State<_FV> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FundTrackingScreen())),
                 )),
                 const SizedBox(width: 8),
-                const Expanded(child: SizedBox()),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.receipt_long,
+                  label: l.t('tds.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TdsDashboardScreen())),
+                )),
               ]),
             )),
 
