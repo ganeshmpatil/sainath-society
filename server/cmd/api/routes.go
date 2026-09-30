@@ -67,6 +67,8 @@ func SetupRoutes(
 	vendorHandler := handlers.NewVendorHandler(domain.Vendor)
 	vendorPaymentHandler := handlers.NewVendorPaymentHandler(domain.VendorPayment)
 	visitorHandler := handlers.NewVisitorHandler(domain.Visitor, notifier)
+	budgetHandler := handlers.NewBudgetHandler(domain.Budget)
+	helpdeskHandler := handlers.NewHelpdeskHandler(domain.Helpdesk, notifier)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -498,5 +500,33 @@ func SetupRoutes(
 		fv.POST("", visitorHandler.CreateFrequent)
 		fv.DELETE("/:id", visitorHandler.DeleteFrequent)
 		fv.POST("/:id/blacklist", visitorHandler.BlacklistFrequent)
+	}
+
+	// ─── Budget Planning ──────────────────────────────────────
+	{
+		bg := protected.Group("/budgets")
+		bg.GET("", budgetHandler.List)
+		bg.GET("/active", budgetHandler.GetActive)
+		bg.GET("/:id", budgetHandler.GetByID)
+		bg.GET("/:id/comparison", budgetHandler.BudgetVsActual)
+		bg.POST("", budgetHandler.Create)
+		bg.PATCH("/:id", budgetHandler.Update)
+		bg.DELETE("/:id", budgetHandler.Delete)
+		bg.POST("/:id/approve", budgetHandler.Approve)
+		bg.POST("/:id/line-items", budgetHandler.AddLineItem)
+		bg.PATCH("/line-items/:itemId", budgetHandler.UpdateLineItem)
+		bg.DELETE("/line-items/:itemId", budgetHandler.DeleteLineItem)
+	}
+
+	// ─── Helpdesk ─────────────────────────────────────────────
+	{
+		hd := protected.Group("/helpdesk")
+		hd.GET("", helpdeskHandler.List)
+		hd.GET("/stats", helpdeskHandler.Stats)
+		hd.GET("/:id", helpdeskHandler.GetByID)
+		hd.POST("", helpdeskHandler.Create)
+		hd.POST("/:id/messages", helpdeskHandler.AddMessage)
+		hd.PATCH("/:id/status", helpdeskHandler.UpdateStatus)
+		hd.PATCH("/:id/assign", helpdeskHandler.Assign)
 	}
 }

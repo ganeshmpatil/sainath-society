@@ -45,6 +45,10 @@ import '../features/staff/staff_screen.dart';
 import '../features/certificates/certificate_screen.dart';
 import '../features/amc/amc_screen.dart';
 import '../features/visitors/visitor_screen.dart';
+import '../features/budget/budget_screen.dart';
+import '../features/budget/budget_detail_screen.dart';
+import '../features/helpdesk/helpdesk_screen.dart';
+import '../features/helpdesk/helpdesk_detail_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -188,6 +192,26 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/amc-contracts', builder: (_, __) => const AMCScreen()),
       GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/visitors', builder: (_, __) => const VisitorScreen()),
+      GoRoute(
+        path: '/budgets',
+        builder: (_, __) => const BudgetScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => BudgetDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/helpdesk',
+        builder: (_, __) => const HelpdeskScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) => HelpdeskDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
+      ),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],
