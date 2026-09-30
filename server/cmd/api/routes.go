@@ -71,6 +71,17 @@ func SetupRoutes(
 		})
 	})
 
+	// App version check (public — no auth needed)
+	api.GET("/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"latestVersion": "1.0.1",
+			"minVersion":    "1.0.0",
+			"downloadUrl":   "https://github.com/ganeshmpatil/sainath-society/releases/download/v1.0.0/sainath-society.apk",
+			"releaseNotes":  "In-app update support added",
+			"releaseNotesMr": "अ\u200dॅपमध्ये अपडेट सुविधा जोडली",
+		})
+	})
+
 	// Auth routes (public)
 	auth := api.Group("/auth")
 	{
