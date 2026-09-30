@@ -536,6 +536,13 @@ const Map<String, String> stringsEn = {
   // Member Statement
   'statement.title': 'Statement of Account',
 
+  // Income & Expenditure
+  'ie.title': 'Income & Expenditure',
+  'ie.period': 'Financial Year',
+  'ie.income': 'Income',
+  'ie.expenses': 'Expenses',
+  'ie.noJournalEntries': 'No journal entries found for this period. Create journal entries to see the I&E statement.',
+
   // App Update
   'update.updateAvailable': 'Update Available',
   'update.newVersion': 'New version',

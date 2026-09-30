@@ -86,6 +86,7 @@ func main() {
 		AccountHead:      repositories.NewAccountHeadRepository(db),
 		Journal:          repositories.NewJournalRepository(db),
 		Defaulter:        repositories.NewDefaulterRepository(db),
+		FinancialReport:  repositories.NewFinancialReportRepository(db),
 	}
 
 	// Create Gin router
@@ -196,4 +197,5 @@ type DomainRepositories struct {
 	AccountHead      *repositories.AccountHeadRepository
 	Journal          *repositories.JournalRepository
 	Defaulter        *repositories.DefaulterRepository
+	FinancialReport  *repositories.FinancialReportRepository
 }

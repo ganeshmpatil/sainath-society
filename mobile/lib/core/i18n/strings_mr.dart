@@ -536,6 +536,13 @@ const Map<String, String> stringsMr = {
   // Member Statement
   'statement.title': 'खाते उतारा',
 
+  // Income & Expenditure
+  'ie.title': 'उत्पन्न व खर्च',
+  'ie.period': 'आर्थिक वर्ष',
+  'ie.income': 'उत्पन्न',
+  'ie.expenses': 'खर्च',
+  'ie.noJournalEntries': 'या कालावधीसाठी रोजनामा नोंदी सापडल्या नाहीत. I&E विवरण पाहण्यासाठी रोजनामा नोंदी तयार करा.',
+
   // App Update
   'update.updateAvailable': 'अपडेट उपलब्ध',
   'update.newVersion': 'नवीन आवृत्ती',

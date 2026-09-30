@@ -62,6 +62,7 @@ func SetupRoutes(
 	accountHeadHandler := handlers.NewAccountHeadHandler(domain.AccountHead)
 	journalHandler := handlers.NewJournalHandler(domain.Journal, domain.AccountHead)
 	defaulterHandler := handlers.NewDefaulterHandler(domain.Defaulter)
+	financialReportHandler := handlers.NewFinancialReportHandler(domain.FinancialReport)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -384,6 +385,11 @@ func SetupRoutes(
 		df.GET("/summary", defaulterHandler.Summary)
 		df.GET("/my-statement", defaulterHandler.MyStatement)
 		df.GET("/statement/:memberId", defaulterHandler.MemberStatement)
+
+		// Financial reports: I&E statement, collection dashboard.
+		rpt := fn.Group("/reports")
+		rpt.GET("/income-expenditure", financialReportHandler.IncomeExpenditure)
+		rpt.GET("/collection-dashboard", financialReportHandler.CollectionDashboard)
 
 		// Payments: Razorpay gateway + bank details.
 		pay := protected.Group("/payments")

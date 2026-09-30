@@ -20,6 +20,7 @@ import 'chart_of_accounts_screen.dart';
 import 'journal_entries_screen.dart';
 import 'defaulter_register_screen.dart';
 import 'member_statement_screen.dart';
+import 'income_expenditure_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -797,11 +798,19 @@ class _FVS extends State<_FV> {
           if (isAdmin)
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: _AdminActionChip(
-                icon: Icons.warning_amber,
-                label: l.t('defaulter.title'),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DefaulterRegisterScreen())),
-              ),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.warning_amber,
+                  label: l.t('defaulter.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DefaulterRegisterScreen())),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.analytics_outlined,
+                  label: l.t('ie.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IncomeExpenditureScreen())),
+                )),
+              ]),
             )),
 
           // Filter chips
