@@ -37,6 +37,8 @@ import '../features/finance/ledger_screen.dart';
 import '../features/finance/balance_sheet_screen.dart';
 import '../features/finance/receipts_payments_screen.dart';
 import '../features/finance/vendor_master_screen.dart';
+import '../features/finance/expense_dashboard_screen.dart';
+import '../features/finance/fund_tracking_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -171,6 +173,8 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/balance-sheet', builder: (_, __) => const BalanceSheetScreen()),
       GoRoute(path: '/receipts-payments', builder: (_, __) => const ReceiptsPaymentsScreen()),
       GoRoute(path: '/vendor-master', builder: (_, __) => const VendorMasterScreen()),
+      GoRoute(path: '/expense-dashboard', builder: (_, __) => const ExpenseDashboardScreen()),
+      GoRoute(path: '/fund-tracking', builder: (_, __) => const FundTrackingScreen()),
       GoRoute(path: '/important-calls', builder: (_, __) => const ImportantCallsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),

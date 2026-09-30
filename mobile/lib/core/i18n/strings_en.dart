@@ -576,6 +576,30 @@ const Map<String, String> stringsEn = {
   'vendor.email': 'Email',
   'vendor.address': 'Address',
 
+  // Fund Tracking
+  'fund.title': 'Fund Tracking',
+  'fund.noFunds': 'No fund accounts found',
+  'fund.noFundsHint': 'Fund accounts appear once journal entries are posted',
+  'fund.totalCorpus': 'Total Fund Corpus',
+  'fund.activeFunds': 'active funds',
+  'fund.contributions': 'Contributions',
+  'fund.withdrawals': 'Withdrawals',
+  'fund.entries': 'Entries',
+  'fund.recentActivity': 'Recent Activity',
+
+  // Expense Dashboard
+  'expDash.title': 'Expense Dashboard',
+  'expDash.totalExpenses': 'Total Expenses',
+  'expDash.totalIncome': 'Total Income',
+  'expDash.surplus': 'Surplus',
+  'expDash.deficit': 'Deficit',
+  'expDash.collectionRate': 'Collection Rate',
+  'expDash.collectionProgress': 'Collection Progress',
+  'expDash.collected': 'Collected',
+  'expDash.billed': 'Billed',
+  'expDash.categoryBreakdown': 'Expense by Category',
+  'expDash.noExpenses': 'No expenses recorded yet',
+
   // App Update
   'update.updateAvailable': 'Update Available',
   'update.newVersion': 'New version',

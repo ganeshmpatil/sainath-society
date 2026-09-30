@@ -24,6 +24,8 @@ import 'income_expenditure_screen.dart';
 import 'balance_sheet_screen.dart';
 import 'receipts_payments_screen.dart';
 import 'vendor_master_screen.dart';
+import 'expense_dashboard_screen.dart';
+import 'fund_tracking_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -840,6 +842,23 @@ class _FVS extends State<_FV> {
                   icon: Icons.store,
                   label: l.t('vendor.title'),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VendorMasterScreen())),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.pie_chart,
+                  label: l.t('expDash.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpenseDashboardScreen())),
+                )),
+              ]),
+            )),
+            // Row 6: Fund Tracking
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Row(children: [
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.savings,
+                  label: l.t('fund.title'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FundTrackingScreen())),
                 )),
                 const SizedBox(width: 8),
                 const Expanded(child: SizedBox()),

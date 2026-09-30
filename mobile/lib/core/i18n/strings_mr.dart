@@ -576,6 +576,30 @@ const Map<String, String> stringsMr = {
   'vendor.email': 'ईमेल',
   'vendor.address': 'पत्ता',
 
+  // Fund Tracking
+  'fund.title': 'निधी ट्रॅकिंग',
+  'fund.noFunds': 'निधी खाती सापडली नाहीत',
+  'fund.noFundsHint': 'रोजनामा नोंदी पोस्ट केल्यावर निधी खाती दिसतील',
+  'fund.totalCorpus': 'एकूण निधी',
+  'fund.activeFunds': 'सक्रिय निधी',
+  'fund.contributions': 'योगदान',
+  'fund.withdrawals': 'काढणे',
+  'fund.entries': 'नोंदी',
+  'fund.recentActivity': 'अलीकडील क्रिया',
+
+  // Expense Dashboard
+  'expDash.title': 'खर्च डॅशबोर्ड',
+  'expDash.totalExpenses': 'एकूण खर्च',
+  'expDash.totalIncome': 'एकूण उत्पन्न',
+  'expDash.surplus': 'अधिशेष',
+  'expDash.deficit': 'तूट',
+  'expDash.collectionRate': 'वसुली दर',
+  'expDash.collectionProgress': 'वसुली प्रगती',
+  'expDash.collected': 'वसूल',
+  'expDash.billed': 'बिल',
+  'expDash.categoryBreakdown': 'श्रेणीनुसार खर्च',
+  'expDash.noExpenses': 'अजून खर्च नोंदवलेले नाहीत',
+
   // App Update
   'update.updateAvailable': 'अपडेट उपलब्ध',
   'update.newVersion': 'नवीन आवृत्ती',
