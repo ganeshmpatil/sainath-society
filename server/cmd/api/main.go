@@ -97,6 +97,7 @@ func main() {
 		Helpdesk:         repositories.NewHelpdeskRepository(db),
 		Election:         repositories.NewElectionRepository(db),
 		AuditChecklist:   repositories.NewAuditChecklistRepository(db),
+		GuardPatrol:      repositories.NewGuardPatrolRepository(db),
 	}
 
 	// Create Gin router
@@ -218,4 +219,5 @@ type DomainRepositories struct {
 	Helpdesk         *repositories.HelpdeskRepository
 	Election         *repositories.ElectionRepository
 	AuditChecklist   *repositories.AuditChecklistRepository
+	GuardPatrol      *repositories.GuardPatrolRepository
 }

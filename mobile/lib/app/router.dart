@@ -53,6 +53,8 @@ import '../features/election/election_screen.dart';
 import '../features/election/election_detail_screen.dart';
 import '../features/audit/audit_screen.dart';
 import '../features/audit/audit_detail_screen.dart';
+import '../features/guard_patrol/guard_patrol_screen.dart';
+import '../features/analytics/analytics_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -236,6 +238,8 @@ GoRouter buildRouter(AuthBloc authBloc) {
           ),
         ],
       ),
+      GoRoute(path: '/guard-patrol', builder: (_, __) => const GuardPatrolScreen()),
+      GoRoute(path: '/analytics', builder: (_, __) => const AnalyticsScreen()),
       GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],

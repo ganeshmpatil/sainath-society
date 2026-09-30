@@ -71,6 +71,8 @@ func SetupRoutes(
 	helpdeskHandler := handlers.NewHelpdeskHandler(domain.Helpdesk, notifier)
 	electionHandler := handlers.NewElectionHandler(domain.Election)
 	auditChecklistHandler := handlers.NewAuditChecklistHandler(domain.AuditChecklist)
+	analyticsHandler := handlers.NewAnalyticsHandler(db)
+	guardPatrolHandler := handlers.NewGuardPatrolHandler(domain.GuardPatrol)
 
 	// API v1 group
 	api := r.Group("/api/v1")
@@ -550,6 +552,17 @@ func SetupRoutes(
 		el.POST("/:id/vote", electionHandler.CastVote)
 	}
 
+	// ─── Analytics ────────────────────────────────────────────────
+	{
+		an := protected.Group("/analytics")
+		an.GET("/collection-efficiency", analyticsHandler.CollectionEfficiency)
+		an.GET("/grievance-trends", analyticsHandler.GrievanceTrends)
+		an.GET("/occupancy", analyticsHandler.Occupancy)
+		an.GET("/vehicle-stats", analyticsHandler.VehicleStats)
+		an.GET("/visitor-trends", analyticsHandler.VisitorTrends)
+		an.GET("/financial-summary", analyticsHandler.FinancialSummary)
+	}
+
 	// ─── Audit Checklists ─────────────────────────────────────
 	{
 		ac := protected.Group("/audit-checklists")
@@ -562,5 +575,23 @@ func SetupRoutes(
 		ac.PATCH("/items/:itemId/toggle", auditChecklistHandler.ToggleItem)
 		ac.PATCH("/items/:itemId/remarks", auditChecklistHandler.UpdateItemRemarks)
 		ac.DELETE("/items/:itemId", auditChecklistHandler.DeleteItem)
+	}
+
+	// ─── Guard Patrol & Incidents ─────────────────────────────
+	{
+		patrol := protected.Group("/patrol")
+		patrol.GET("/checkpoints", guardPatrolHandler.ListCheckpoints)
+		patrol.POST("/checkpoints", guardPatrolHandler.CreateCheckpoint)
+		patrol.PUT("/checkpoints/:id", guardPatrolHandler.UpdateCheckpoint)
+		patrol.DELETE("/checkpoints/:id", guardPatrolHandler.DeleteCheckpoint)
+		patrol.GET("/rounds", guardPatrolHandler.ListRounds)
+		patrol.GET("/rounds/:id", guardPatrolHandler.GetRound)
+		patrol.POST("/rounds", guardPatrolHandler.StartRound)
+		patrol.PUT("/rounds/:id/complete", guardPatrolHandler.CompleteRound)
+		patrol.POST("/rounds/:id/scan", guardPatrolHandler.AddScan)
+		patrol.GET("/incidents", guardPatrolHandler.ListIncidents)
+		patrol.GET("/incidents/:id", guardPatrolHandler.GetIncident)
+		patrol.POST("/incidents", guardPatrolHandler.CreateIncident)
+		patrol.PUT("/incidents/:id/status", guardPatrolHandler.UpdateIncidentStatus)
 	}
 }
