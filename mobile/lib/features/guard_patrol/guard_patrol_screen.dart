@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_bloc.dart';
@@ -192,7 +193,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).maybePop(),
+                      onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
                       child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary),
                     ),
                     const SizedBox(width: 12),

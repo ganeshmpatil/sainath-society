@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/i18n/app_localizations.dart';
@@ -156,7 +157,7 @@ class _SocietyRegistrationScreenState
                   const SizedBox(height: 32),
                   GradientButton(
                     label: l.t('onboarding.backToLogin'),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => context.pop(),
                   ),
                 ],
               ),
@@ -178,7 +179,7 @@ class _SocietyRegistrationScreenState
                     IconButton(
                       icon: Icon(Icons.arrow_back_rounded,
                           color: AppColors.textPrimary),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => context.pop(),
                     ),
                     Expanded(
                       child: Text(

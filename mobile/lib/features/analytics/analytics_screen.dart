@@ -2,6 +2,7 @@ import 'dart:math' show max;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_bloc.dart';
@@ -155,7 +156,7 @@ class _View extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                       child: Row(children: [
                         GestureDetector(
-                          onTap: () => Navigator.of(context).maybePop(),
+                          onTap: () { if (context.canPop()) context.pop(); else context.go('/more'); },
                           child: Icon(Icons.arrow_back_ios_rounded,
                               size: 20, color: AppColors.textSecondary),
                         ),
