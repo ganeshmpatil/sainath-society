@@ -27,6 +27,7 @@
               {{if gt .PendingCount 0}}<span class="ml-1 bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-full">{{.PendingCount}}</span>{{end}}
             </a>
             <a href="/platform/societies" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "societies"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Societies</a>
+            <a href="/platform/invoices" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "invoices"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Invoices</a>
             <a href="/platform/audit-log" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "audit"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Audit Log</a>
           </div>
         </div>

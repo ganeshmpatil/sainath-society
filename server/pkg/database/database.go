@@ -65,6 +65,9 @@ func Migrate(db *gorm.DB) error {
 		&models.PlatformSociety{},
 		&models.PlatformOnboardingRequest{},
 		&models.PlatformAuditLog{},
+		&models.PlatformBillingConfig{},
+		&models.PlatformInvoice{},
+		&models.PlatformBillingAudit{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed (phase 0 platform): %w", err)

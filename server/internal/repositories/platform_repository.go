@@ -39,10 +39,13 @@ func (r *PlatformRepository) FindAdminByID(id uuid.UUID) (*models.PlatformAdmin,
 // ─── Dashboard Stats ────────────────────────────────────────────────────────
 
 type DashboardStats struct {
-	TotalSocieties   int64 `json:"totalSocieties"`
-	ActiveSocieties  int64 `json:"activeSocieties"`
-	PendingRequests  int64 `json:"pendingRequests"`
-	SuspendedCount   int64 `json:"suspendedSocieties"`
+	TotalSocieties      int64   `json:"totalSocieties"`
+	ActiveSocieties     int64   `json:"activeSocieties"`
+	PendingRequests     int64   `json:"pendingRequests"`
+	SuspendedCount      int64   `json:"suspendedSocieties"`
+	TotalMonthlyRevenue float64 `json:"totalMonthlyRevenue"`
+	OutstandingAmount   float64 `json:"outstandingAmount"`
+	CollectedThisMonth  float64 `json:"collectedThisMonth"`
 }
 
 func (r *PlatformRepository) GetDashboardStats() (*DashboardStats, error) {
@@ -51,6 +54,29 @@ func (r *PlatformRepository) GetDashboardStats() (*DashboardStats, error) {
 	r.db.Model(&models.PlatformSociety{}).Where("status = ?", models.SocietyActive).Count(&stats.ActiveSocieties)
 	r.db.Model(&models.PlatformSociety{}).Where("status = ?", models.SocietySuspended).Count(&stats.SuspendedCount)
 	r.db.Model(&models.PlatformOnboardingRequest{}).Where("status = ?", models.OnboardingPending).Count(&stats.PendingRequests)
+
+	// Billing stats: total monthly revenue = sum of (rate_per_flat * total_flats) for active configs
+	r.db.Raw(`
+		SELECT COALESCE(SUM(c.rate_per_flat * s.total_flats), 0)
+		FROM platform_billing_configs c
+		JOIN platform_societies s ON s.id = c.society_id
+		WHERE c.is_active = true AND s.status = 'ACTIVE'
+	`).Scan(&stats.TotalMonthlyRevenue)
+
+	// Outstanding amount
+	r.db.Model(&models.PlatformInvoice{}).
+		Where("status IN ?", []string{"GENERATED", "OVERDUE", "PARTIALLY_PAID"}).
+		Select("COALESCE(SUM(total_amount - paid_amount), 0)").
+		Scan(&stats.OutstandingAmount)
+
+	// Collected this month
+	now := time.Now()
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	r.db.Model(&models.PlatformInvoice{}).
+		Where("paid_date >= ?", monthStart).
+		Select("COALESCE(SUM(paid_amount), 0)").
+		Scan(&stats.CollectedThisMonth)
+
 	return &stats, nil
 }
 

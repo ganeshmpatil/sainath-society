@@ -11,10 +11,46 @@
 <div id="approve-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
   <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-3">Approve Society?</h3>
-    <p class="text-sm text-gray-600 mb-4">This will create the society, wings, flats, and admin account. Credentials will be emailed.</p>
+    <p class="text-sm text-gray-600 mb-4">This will create the society, wings, flats, admin account, and billing config.</p>
     <textarea id="approve-notes" rows="2" placeholder="Review notes (optional)"
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4"></textarea>
-    <div class="flex gap-3 justify-end">
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-3"></textarea>
+
+    <div class="border-t border-gray-200 pt-3 mt-2 space-y-3">
+      <h4 class="text-sm font-semibold text-gray-700">Platform Billing Config</h4>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Rate per flat (INR/month) *</label>
+          <input type="number" id="approve-rate" value="25" min="1" step="0.5"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Billing cycle</label>
+          <select id="approve-cycle" onchange="toggleBillingDay()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="MONTH_END">Month End</option>
+            <option value="ANNIVERSARY">Anniversary</option>
+          </select>
+        </div>
+        <div id="billing-day-group" class="hidden">
+          <label class="block text-xs text-gray-500 mb-1">Billing day (1-28)</label>
+          <input type="number" id="approve-billing-day" value="1" min="1" max="28"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Due days</label>
+          <input type="number" id="approve-due-days" value="15" min="1" max="60"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        </div>
+        <div class="col-span-2">
+          <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" id="approve-gst" class="rounded">
+            GST applicable (18%)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 justify-end mt-4">
       <button onclick="closeModal('approve-modal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
       <button onclick="confirmApprove()" id="approve-btn" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Confirm Approve</button>
     </div>
@@ -204,6 +240,11 @@ async function loadDetail() {
   `;
 }
 
+function toggleBillingDay() {
+  const cycle = document.getElementById('approve-cycle').value;
+  document.getElementById('billing-day-group').classList.toggle('hidden', cycle !== 'ANNIVERSARY');
+}
+
 async function confirmApprove() {
   const btn = document.getElementById('approve-btn');
   btn.disabled = true;
@@ -211,7 +252,14 @@ async function confirmApprove() {
   try {
     const resp = await apiFetch(`/requests/${requestId}/approve`, {
       method: 'POST',
-      body: JSON.stringify({ notes: document.getElementById('approve-notes').value }),
+      body: JSON.stringify({
+        notes: document.getElementById('approve-notes').value,
+        ratePerFlat: parseFloat(document.getElementById('approve-rate').value) || 25,
+        billingCycle: document.getElementById('approve-cycle').value,
+        billingDay: parseInt(document.getElementById('approve-billing-day').value) || 0,
+        dueDays: parseInt(document.getElementById('approve-due-days').value) || 15,
+        gstApplicable: document.getElementById('approve-gst').checked,
+      }),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error);

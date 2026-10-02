@@ -148,11 +148,24 @@ func (h *PlatformHandler) ApproveRequest(c *gin.Context) {
 	adminID := getPlatformAdminID(c)
 
 	var body struct {
-		Notes string `json:"notes"`
+		Notes         string  `json:"notes"`
+		RatePerFlat   float64 `json:"ratePerFlat"`
+		BillingCycle  string  `json:"billingCycle"`
+		BillingDay    int     `json:"billingDay"`
+		DueDays       int     `json:"dueDays"`
+		GSTApplicable bool    `json:"gstApplicable"`
 	}
 	c.ShouldBindJSON(&body)
 
-	result, err := h.svc.ApproveRequest(id, adminID, body.Notes)
+	billingInput := &services.BillingConfigInput{
+		RatePerFlat:   body.RatePerFlat,
+		BillingCycle:  body.BillingCycle,
+		BillingDay:    body.BillingDay,
+		DueDays:       body.DueDays,
+		GSTApplicable: body.GSTApplicable,
+	}
+
+	result, err := h.svc.ApproveRequest(id, adminID, body.Notes, billingInput)
 	if err != nil {
 		if errors.Is(err, services.ErrRequestNotPending) {
 			c.JSON(http.StatusConflict, response.ErrorResponse{Error: err.Error(), Code: "NOT_PENDING"})

@@ -168,14 +168,24 @@ type ProvisionResult struct {
 	TempPass string                  `json:"tempPassword,omitempty"`
 }
 
+// BillingConfigInput holds the billing configuration set by platform admin during approval.
+type BillingConfigInput struct {
+	RatePerFlat   float64
+	BillingCycle  string
+	BillingDay    int
+	DueDays       int
+	GSTApplicable bool
+}
+
 // ApproveRequest approves a pending request and provisions the full society:
 // 1. Creates platform_societies row
 // 2. Creates wings (generic A, B, C... based on totalWings)
 // 3. Creates flats (4 floors x 4 units per wing, capped at totalFlats)
 // 4. Creates the requester as first ADMIN member
 // 5. Creates a user account with temporary password
-// 6. Sends welcome email with credentials
-func (s *PlatformService) ApproveRequest(requestID, adminID uuid.UUID, notes string) (*ProvisionResult, error) {
+// 6. Creates billing config for the society
+// 7. Sends welcome email with credentials
+func (s *PlatformService) ApproveRequest(requestID, adminID uuid.UUID, notes string, billing *BillingConfigInput) (*ProvisionResult, error) {
 	req, err := s.repo.GetOnboardingRequest(requestID)
 	if err != nil {
 		return nil, err
@@ -298,6 +308,38 @@ func (s *PlatformService) ApproveRequest(requestID, adminID uuid.UUID, notes str
 		req.ProvisionedSocID = &society.ID
 		if err := tx.Save(req).Error; err != nil {
 			return fmt.Errorf("update request: %w", err)
+		}
+
+		// 8. Create billing config if rate provided
+		if billing != nil && billing.RatePerFlat > 0 {
+			billingCycle := models.BillingCycleMonthEnd
+			if billing.BillingCycle == "ANNIVERSARY" {
+				billingCycle = models.BillingCycleAnniversary
+			}
+			dueDays := billing.DueDays
+			if dueDays <= 0 {
+				dueDays = 15
+			}
+			// Start billing from first day of next month
+			nextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+
+			billingConfig := &models.PlatformBillingConfig{
+				SocietyID:        society.ID,
+				RatePerFlat:      billing.RatePerFlat,
+				BillingCycle:     billingCycle,
+				BillingDay:       billing.BillingDay,
+				DueDays:          dueDays,
+				GraceDays:        5,
+				InterestRate:     18.0,
+				GSTApplicable:    billing.GSTApplicable,
+				BillPrefix:       BillPrefixFromSlug(slug),
+				NextSequence:     1,
+				StartBillingFrom: nextMonth,
+				IsActive:         true,
+			}
+			if err := tx.Create(billingConfig).Error; err != nil {
+				return fmt.Errorf("create billing config: %w", err)
+			}
 		}
 
 		return nil

@@ -1,0 +1,258 @@
+{{define "content"}}
+<div class="fade-in">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-900">Platform Invoices</h1>
+    <div class="flex gap-3">
+      <button onclick="runBilling()" id="run-billing-btn" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        Run Billing Now
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6" id="summary-cards">
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="text-xs text-gray-500 uppercase tracking-wide">Monthly Revenue</div>
+      <div class="text-2xl font-bold text-gray-900 mt-1" id="stat-monthly">--</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="text-xs text-gray-500 uppercase tracking-wide">Outstanding</div>
+      <div class="text-2xl font-bold text-red-600 mt-1" id="stat-outstanding">--</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="text-xs text-gray-500 uppercase tracking-wide">Collected This Month</div>
+      <div class="text-2xl font-bold text-green-600 mt-1" id="stat-collected">--</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="text-xs text-gray-500 uppercase tracking-wide">Total Billed</div>
+      <div class="text-2xl font-bold text-gray-900 mt-1" id="stat-total-billed">--</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex gap-3 mb-4 flex-wrap">
+    <select id="filter-status" onchange="loadInvoices()" class="px-3 py-2 text-sm border border-gray-300 rounded-lg">
+      <option value="">All Statuses</option>
+      <option value="GENERATED">Generated</option>
+      <option value="PAID">Paid</option>
+      <option value="OVERDUE">Overdue</option>
+      <option value="PARTIALLY_PAID">Partially Paid</option>
+      <option value="WAIVED">Waived</option>
+    </select>
+    <select id="filter-society" onchange="loadInvoices()" class="px-3 py-2 text-sm border border-gray-300 rounded-lg">
+      <option value="">All Societies</option>
+    </select>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Invoice No</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Society</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Period</th>
+          <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Due Date</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Paid Date</th>
+          <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
+        </tr>
+      </thead>
+      <tbody id="invoices-body" class="divide-y divide-gray-100">
+        <tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Mark Paid Modal -->
+<div id="pay-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Record Payment</h3>
+    <div id="pay-invoice-info" class="text-sm text-gray-600 mb-4"></div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Amount (INR) *</label>
+        <input type="number" id="pay-amount" step="0.01" min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Payment Mode *</label>
+        <select id="pay-mode" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="UPI">UPI</option>
+          <option value="NEFT">NEFT</option>
+          <option value="CHEQUE">Cheque</option>
+          <option value="CASH">Cash</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Reference (UTR/Cheque No)</label>
+        <input type="text" id="pay-ref" placeholder="UTR or cheque number"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Notes</label>
+        <textarea id="pay-notes" rows="2" placeholder="Optional notes"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></textarea>
+      </div>
+    </div>
+    <div class="flex gap-3 justify-end mt-4">
+      <button onclick="closePayModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
+      <button onclick="submitPayment()" id="pay-btn" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentPayInvoiceId = null;
+
+function invoiceStatusBadge(status) {
+  const colors = {
+    'GENERATED': 'bg-blue-100 text-blue-700',
+    'PAID': 'bg-green-100 text-green-700',
+    'OVERDUE': 'bg-red-100 text-red-700',
+    'PARTIALLY_PAID': 'bg-amber-100 text-amber-700',
+    'WAIVED': 'bg-gray-100 text-gray-700',
+  };
+  const cls = colors[status] || 'bg-gray-100 text-gray-700';
+  return `<span class="text-xs px-2 py-0.5 rounded-full font-medium ${cls}">${status.replace('_', ' ')}</span>`;
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(amount);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+async function loadSummary() {
+  const resp = await apiFetch('/billing/summary');
+  if (!resp) return;
+  const data = await resp.json();
+  const s = data.summary;
+  document.getElementById('stat-monthly').textContent = formatCurrency(s.totalMonthlyRevenue);
+  document.getElementById('stat-outstanding').textContent = formatCurrency(s.outstandingAmount);
+  document.getElementById('stat-collected').textContent = formatCurrency(s.collectedThisMonth);
+  document.getElementById('stat-total-billed').textContent = formatCurrency(s.totalBilled);
+}
+
+async function loadSocieties() {
+  const resp = await apiFetch('/societies');
+  if (!resp) return;
+  const data = await resp.json();
+  const select = document.getElementById('filter-society');
+  (data.societies || []).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name;
+    select.appendChild(opt);
+  });
+}
+
+async function loadInvoices() {
+  const status = document.getElementById('filter-status').value;
+  const societyId = document.getElementById('filter-society').value;
+  let url = '/invoices?';
+  if (status) url += `status=${status}&`;
+  if (societyId) url += `societyId=${societyId}&`;
+
+  const resp = await apiFetch(url);
+  if (!resp) return;
+  const data = await resp.json();
+  const body = document.getElementById('invoices-body');
+
+  if (!data.invoices || data.invoices.length === 0) {
+    body.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">No invoices found</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.invoices.map(inv => `
+    <tr class="hover:bg-gray-50">
+      <td class="px-4 py-3 font-mono text-xs">${esc(inv.invoiceNo)}</td>
+      <td class="px-4 py-3">${inv.society ? esc(inv.society.name) : '-'}</td>
+      <td class="px-4 py-3">${esc(inv.billingPeriod)}</td>
+      <td class="px-4 py-3 text-right font-medium">${formatCurrency(inv.totalAmount)}</td>
+      <td class="px-4 py-3">${invoiceStatusBadge(inv.status)}</td>
+      <td class="px-4 py-3 text-xs">${formatDate(inv.dueDate)}</td>
+      <td class="px-4 py-3 text-xs">${formatDate(inv.paidDate)}</td>
+      <td class="px-4 py-3 text-center">
+        ${inv.status !== 'PAID' && inv.status !== 'WAIVED' ?
+          `<button onclick="openPayModal('${inv.id}', '${esc(inv.invoiceNo)}', ${inv.totalAmount}, ${inv.paidAmount})" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Mark Paid</button>`
+          : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openPayModal(invoiceId, invoiceNo, total, paid) {
+  currentPayInvoiceId = invoiceId;
+  document.getElementById('pay-invoice-info').innerHTML =
+    `<strong>${invoiceNo}</strong> &mdash; Total: ${formatCurrency(total)}, Paid: ${formatCurrency(paid)}, Due: ${formatCurrency(total - paid)}`;
+  document.getElementById('pay-amount').value = (total - paid).toFixed(2);
+  document.getElementById('pay-ref').value = '';
+  document.getElementById('pay-notes').value = '';
+  document.getElementById('pay-modal').classList.remove('hidden');
+}
+
+function closePayModal() {
+  document.getElementById('pay-modal').classList.add('hidden');
+  currentPayInvoiceId = null;
+}
+
+async function submitPayment() {
+  if (!currentPayInvoiceId) return;
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const resp = await apiFetch(`/invoices/${currentPayInvoiceId}/mark-paid`, {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: parseFloat(document.getElementById('pay-amount').value),
+        paymentMode: document.getElementById('pay-mode').value,
+        paymentRef: document.getElementById('pay-ref').value,
+        notes: document.getElementById('pay-notes').value,
+      }),
+    });
+    if (!resp.ok) { const d = await resp.json(); throw new Error(d.error); }
+    closePayModal();
+    loadInvoices();
+    loadSummary();
+  } catch (err) {
+    alert('Payment failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Record Payment';
+  }
+}
+
+async function runBilling() {
+  const btn = document.getElementById('run-billing-btn');
+  if (!confirm('Run billing for all eligible societies now?')) return;
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  try {
+    const resp = await apiFetch('/billing/run', { method: 'POST' });
+    if (!resp.ok) { const d = await resp.json(); throw new Error(d.error); }
+    alert('Billing run completed successfully.');
+    loadInvoices();
+    loadSummary();
+  } catch (err) {
+    alert('Billing run failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run Billing Now';
+  }
+}
+
+(function() {
+  if (!requireAuth()) return;
+  loadSummary();
+  loadSocieties();
+  loadInvoices();
+})();
+</script>
+{{end}}

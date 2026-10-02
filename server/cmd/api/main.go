@@ -159,6 +159,11 @@ func main() {
 	worker := services.NewNotificationWorker(domainRepos.Notification, services.NewMockWhatsAppSender(), emailSender)
 	go worker.Run(ctx)
 
+	// Start billing scheduler (daily at midnight IST)
+	billingService := services.NewPlatformBillingService(db)
+	scheduler := services.NewBillingScheduler(billingService)
+	go scheduler.Start(ctx)
+
 	// Start server
 	go func() {
 		addr := ":" + cfg.Port

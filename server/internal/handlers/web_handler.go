@@ -26,6 +26,7 @@ func NewWebHandler(templateDir string) *WebHandler {
 		"login.html", "dashboard.html", "requests.html",
 		"request_detail.html", "societies.html",
 		"society_detail.html", "audit_log.html",
+		"invoices.html",
 	}
 	layoutFile := filepath.Join(templateDir, "layout.html")
 	for _, page := range pages {
@@ -85,4 +86,8 @@ func (h *WebHandler) SocietyDetailPage(c *gin.Context) {
 
 func (h *WebHandler) AuditLogPage(c *gin.Context) {
 	h.servePage(c, "audit_log.html", pageData{Title: "Audit Log", ActiveNav: "audit", ShowNav: true})
+}
+
+func (h *WebHandler) InvoicesPage(c *gin.Context) {
+	h.servePage(c, "invoices.html", pageData{Title: "Invoices", ActiveNav: "invoices", ShowNav: true})
 }

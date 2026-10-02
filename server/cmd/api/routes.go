@@ -52,6 +52,10 @@ func SetupRoutes(
 	platformService := services.NewPlatformService(platformRepo, jwtManager, db, platformEmailSender)
 	platformHandler := handlers.NewPlatformHandler(platformService)
 
+	// Platform billing
+	billingService := services.NewPlatformBillingService(db)
+	billingHandler := handlers.NewPlatformBillingHandler(billingService)
+
 	// Services
 	authService := services.NewAuthService(userRepo, jwtManager, db)
 	otpService := services.NewOTPService(database.DB)
@@ -159,6 +163,17 @@ func SetupRoutes(
 		platformProtected.POST("/societies/:id/activate", platformHandler.ActivateSociety)
 
 		platformProtected.GET("/audit-log", platformHandler.AuditLog)
+
+		// Billing
+		platformProtected.GET("/billing/configs", billingHandler.ListConfigs)
+		platformProtected.GET("/billing/configs/:id", billingHandler.GetConfig)
+		platformProtected.PUT("/billing/configs/:id", billingHandler.UpdateConfig)
+		platformProtected.GET("/invoices", billingHandler.ListInvoices)
+		platformProtected.GET("/invoices/:id", billingHandler.GetInvoice)
+		platformProtected.POST("/invoices/:id/mark-paid", billingHandler.MarkPaid)
+		platformProtected.POST("/billing/run", billingHandler.RunBilling)
+		platformProtected.GET("/billing/audits", billingHandler.ListAudits)
+		platformProtected.GET("/billing/summary", billingHandler.Summary)
 	}
 
 	// Registration routes (public)
@@ -648,6 +663,7 @@ func SetupRoutes(
 	r.GET("/platform/societies", webHandler.SocietiesPage)
 	r.GET("/platform/societies/:id", webHandler.SocietyDetailPage)
 	r.GET("/platform/audit-log", webHandler.AuditLogPage)
+	r.GET("/platform/invoices", webHandler.InvoicesPage)
 
 	// ─── Guard Patrol & Incidents ─────────────────────────────
 	{
