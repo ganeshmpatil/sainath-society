@@ -8,10 +8,7 @@ import '../../core/auth/auth_state.dart';
 import '../../core/i18n/app_localizations.dart';
 import '../../core/i18n/locale_cubit.dart';
 import '../../core/theme/app_colors.dart';
-import '../../shared/utils/date_format.dart';
-import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/shimmer_loading.dart';
-import '../../shared/widgets/status_badge.dart';
 
 class GrievanceDetailScreen extends StatefulWidget {
   final String id;
@@ -23,8 +20,11 @@ class GrievanceDetailScreen extends StatefulWidget {
 
 class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
   Map<String, dynamic>? _data;
+  List<Map<String, dynamic>> _messages = [];
   bool _loading = true;
-  final _commentCtrl = TextEditingController();
+  String? _error;
+  final _msgCtrl = TextEditingController();
+  bool _isInternal = false;
 
   @override
   void initState() {
@@ -34,22 +34,33 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
 
   @override
   void dispose() {
-    _commentCtrl.dispose();
+    _msgCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final res = await api.get('/grievances/${widget.id}');
       if (!mounted) return;
+      final data = res.data is Map<String, dynamic> ? res.data as Map<String, dynamic> : null;
+      final msgs = (data?['messages'] as List?)?.whereType<Map<String, dynamic>>().toList() ??
+          (data?['comments'] as List?)?.whereType<Map<String, dynamic>>().toList() ??
+          [];
       setState(() {
-        _data = res.data is Map<String, dynamic> ? res.data : null;
+        _data = data;
+        _messages = msgs;
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
     }
   }
 
@@ -66,12 +77,13 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     }
   }
 
-  Future<void> _addComment() async {
-    if (_commentCtrl.text.isEmpty) return;
+  Future<void> _sendMessage() async {
+    final text = _msgCtrl.text.trim();
+    if (text.isEmpty) return;
     try {
       await api.post('/grievances/${widget.id}/comments',
-          data: {'comment': _commentCtrl.text});
-      _commentCtrl.clear();
+          data: {'comment': text, 'isInternal': _isInternal});
+      _msgCtrl.clear();
       _load();
     } catch (e) {
       if (mounted) {
@@ -82,25 +94,64 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     }
   }
 
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'OPEN': return const Color(0xFFF97316);
+      case 'IN_PROGRESS': return const Color(0xFF3B82F6);
+      case 'RESOLVED': return const Color(0xFF10B981);
+      case 'CLOSED': return const Color(0xFF64748B);
+      default: return const Color(0xFF64748B);
+    }
+  }
+
+  String _statusLabel(AppLocalizations l, String? status) {
+    switch (status) {
+      case 'OPEN': return l.t('grievances.open');
+      case 'IN_PROGRESS': return l.t('grievances.inProgress');
+      case 'RESOLVED': return l.t('grievances.resolved');
+      case 'CLOSED': return l.t('grievances.closed');
+      default: return status ?? '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final isMr = context.watch<LocaleCubit>().isMarathi;
     final authState = context.watch<AuthBloc>().state;
     final isAdmin = authState is Authenticated && authState.user.isAdmin;
+    final currentUserId = authState is Authenticated ? authState.user.id : '';
 
-    return Scaffold(
-      body: SafeArea(
-        child: _loading
-            ? const ShimmerLoading()
-            : _data == null
-                ? Center(child: Text(l.t('common.error')))
-                : _buildContent(l, isMr, isAdmin),
-      ),
-    );
-  }
+    if (_loading) {
+      return Scaffold(
+        body: SafeArea(child: const ShimmerLoading()),
+      );
+    }
 
-  Widget _buildContent(AppLocalizations l, bool isMr, bool isAdmin) {
+    if (_error != null || _data == null) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: AppColors.urgent),
+                const SizedBox(height: 8),
+                Text(_error ?? l.t('common.error'),
+                    style: TextStyle(color: AppColors.textSecondary)),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _load,
+                  child: Text(l.t('common.retry'),
+                      style: TextStyle(color: AppColors.primary)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final g = _data!;
     final title = (isMr ? g['titleMr'] : null) ?? g['title'] ?? '';
     final desc = (isMr ? g['descriptionMr'] : null) ?? g['description'] ?? '';
@@ -108,256 +159,318 @@ class _GrievanceDetailScreenState extends State<GrievanceDetailScreen> {
     final status = g['status'] ?? 'OPEN';
     final ticket = g['ticketNo'] ?? '';
     final category = g['category'] ?? '';
-    final date = g['createdAt'] ?? '';
+    final type = g['type'] as String?;
+    final sColor = _statusColor(status);
+    final isClosed = status == 'CLOSED';
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // App bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-                      onPressed: () => context.pop(),
+    String typeLabel(String? t) {
+      if (t == 'MAINTENANCE_REQUEST') return l.t('grievances.typeMaintenanceRequest');
+      return l.t('grievances.typeComplaint');
+    }
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(children: [
+              GestureDetector(
+                onTap: () => context.pop(),
+                child: Icon(Icons.arrow_back_ios_rounded, size: 20, color: AppColors.textSecondary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(ticket,
+                      style: TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w600,
+                        color: AppColors.textTertiary, fontFamily: 'monospace',
+                      )),
+                  Text(title,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                ]),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: sColor.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(_statusLabel(l, status),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: sColor)),
+              ),
+            ]),
+          ),
+
+          // Ticket info card
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (desc.isNotEmpty)
+                  Text(desc, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const SizedBox(height: 6),
+                Wrap(spacing: 8, runSpacing: 4, children: [
+                  _InfoChip(category, Icons.category_rounded),
+                  _InfoChip(priority, Icons.flag_rounded),
+                  if (type != null)
+                    _InfoChip(typeLabel(type), Icons.label_rounded),
+                  if (g['flatNo'] != null)
+                    _InfoChip('${g['flatNo']}', Icons.home_rounded),
+                ]),
+                // Admin status actions
+                if (isAdmin && !isClosed) ...[
+                  const SizedBox(height: 8),
+                  Wrap(spacing: 6, children: [
+                    if (status == 'OPEN')
+                      _SmallAction(l.t('grievances.markInProgress'),
+                          const Color(0xFF3B82F6), () => _updateStatus('IN_PROGRESS')),
+                    if (status == 'IN_PROGRESS')
+                      _SmallAction(l.t('grievances.markResolved'),
+                          const Color(0xFF10B981), () => _updateStatus('RESOLVED')),
+                    if (status != 'CLOSED')
+                      _SmallAction(l.t('grievances.closeTicket'),
+                          const Color(0xFF64748B), () => _updateStatus('CLOSED')),
+                  ]),
+                ],
+              ]),
+            ),
+          ),
+
+          // Chat messages
+          Expanded(
+            child: _messages.isEmpty
+                ? Center(
+                    child: Text(l.t('common.noRecords'),
+                        style: TextStyle(color: AppColors.textTertiary)),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    itemCount: _messages.length,
+                    itemBuilder: (ctx, i) {
+                      final msg = _messages[i];
+                      final senderId = msg['authorId'] ?? msg['senderId'] ?? '';
+                      final isMe = senderId == currentUserId;
+                      final isInternalNote = msg['isInternal'] == true;
+                      final body = msg['comment'] ?? msg['body'] ?? '';
+                      final senderName = msg['authorName'] ?? msg['senderName'] ?? '';
+                      final senderRole = msg['authorRole'] ?? msg['senderRole'] ?? '';
+                      final createdAt = DateTime.tryParse(msg['createdAt'] ?? '');
+
+                      return Align(
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(ctx).size.width * 0.75),
+                          decoration: BoxDecoration(
+                            color: isInternalNote
+                                ? const Color(0xFFFEF3C7)
+                                : isMe
+                                    ? AppColors.primary.withAlpha(20)
+                                    : AppColors.surface,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isInternalNote
+                                  ? const Color(0xFFF59E0B).withAlpha(60)
+                                  : AppColors.border,
+                            ),
+                          ),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(children: [
+                                  Text(
+                                    senderName,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: isMe ? AppColors.primary : AppColors.textTertiary,
+                                    ),
+                                  ),
+                                  if (senderRole == 'ADMIN') ...[
+                                    const SizedBox(width: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text('Admin',
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ),
+                                  ],
+                                  if (isInternalNote) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.lock_rounded,
+                                        size: 10, color: const Color(0xFFF59E0B)),
+                                    Text(' Internal',
+                                        style: TextStyle(
+                                            fontSize: 8,
+                                            color: const Color(0xFFF59E0B))),
+                                  ],
+                                ]),
+                                const SizedBox(height: 4),
+                                Text(body,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: isInternalNote
+                                          ? const Color(0xFF92400E)
+                                          : AppColors.textPrimary,
+                                    )),
+                                if (createdAt != null)
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Text(
+                                      '${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                          fontSize: 9, color: AppColors.textTertiary),
+                                    ),
+                                  ),
+                              ]),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+
+          // Message input
+          if (!isClosed)
+            Container(
+              padding: EdgeInsets.fromLTRB(
+                  16, 8, 16, MediaQuery.of(context).viewInsets.bottom > 0 ? 8 : 24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                if (isAdmin)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(children: [
+                      GestureDetector(
+                        onTap: () => setState(() => _isInternal = !_isInternal),
+                        child: Row(children: [
+                          Icon(
+                            _isInternal ? Icons.lock_rounded : Icons.lock_open_rounded,
+                            size: 14,
+                            color: _isInternal
+                                ? const Color(0xFFF59E0B)
+                                : AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isInternal
+                                ? l.t('grievances.internalNote')
+                                : l.t('grievances.publicReply'),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: _isInternal
+                                  ? const Color(0xFFF59E0B)
+                                  : AppColors.textTertiary,
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                  ),
+                Row(children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _msgCtrl,
+                      decoration: InputDecoration(
+                        hintText: l.t('grievances.typeMessage'),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        isDense: true,
+                      ),
+                      maxLines: 3,
+                      minLines: 1,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(ticket, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                        Text(l.t('grievances.detail'),
-                            style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Badges
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    StatusBadge.priority(priority),
-                    StatusBadge.status(status),
-                    StatusBadge(label: category, color: AppColors.primary),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Title + Description
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
-                    Text(desc, style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.6)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Raised by info
-              GlassCard(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      width: 44, height: 44,
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Center(
-                        child: Text(
-                          _initials(g['raisedBy']?['name'] ?? ''),
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
-                        ),
-                      ),
+                      child: const Icon(Icons.send_rounded,
+                          size: 20, color: Colors.white),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(g['raisedBy']?['name'] ?? '',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          Text(
-                            '${l.t('grievances.raisedBy')} • ${_formatDate(date)}',
-                            style: TextStyle(fontSize: 11, color: AppColors.textTertiary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(indent: 16, endIndent: 16),
-
-              // Status timeline
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l.t('grievances.statusTimeline'),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 14),
-                    _timelineStep(l.t('grievances.created'), _formatDate(date), true),
-                    if (status == 'IN_PROGRESS' || status == 'RESOLVED' || status == 'CLOSED')
-                      _timelineStep(l.t('grievances.inProgress'), '', true),
-                    if (status == 'RESOLVED' || status == 'CLOSED')
-                      _timelineStep(l.t('grievances.resolved'), '', true),
-                    if (status != 'RESOLVED' && status != 'CLOSED')
-                      _timelineStep(l.t('grievances.awaitingAction'), '', false, isLast: true),
-                  ],
-                ),
-              ),
-
-              // Admin actions
-              if (isAdmin && status != 'RESOLVED' && status != 'CLOSED') ...[
-                const Divider(indent: 16, endIndent: 16),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.t('grievances.adminActions'),
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _actionBtn(
-                              l.t('grievances.markInProgress'),
-                              AppColors.secondary,
-                              () => _updateStatus('IN_PROGRESS'),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _actionBtn(
-                              l.t('grievances.markResolved'),
-                              AppColors.resolved,
-                              () => _updateStatus('RESOLVED'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
-                ),
-              ],
-
-              // Comment input
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _commentCtrl,
-                        decoration: InputDecoration(
-                          hintText: l.t('grievances.addComment'),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: _addComment,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.send_rounded, size: 18, color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _timelineStep(String title, String sub, bool completed, {bool isLast = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: completed ? AppColors.open : AppColors.borderLight,
-                border: completed ? null : Border.all(color: AppColors.borderLight, width: 2),
-              ),
+                ]),
+              ]),
             ),
-            if (!isLast)
-              Container(width: 2, height: 30, color: AppColors.border),
-          ],
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: completed ? FontWeight.w600 : FontWeight.w500,
-                  color: completed ? AppColors.textPrimary : AppColors.textTertiary,
-                )),
-            if (sub.isNotEmpty)
-              Text(sub, style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _actionBtn(String label, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: color.withAlpha(25),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withAlpha(60)),
-        ),
-        child: Center(
-          child: Text(label,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
-        ),
+        ]),
       ),
     );
   }
 
-  String _initials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    if (parts.isNotEmpty && parts[0].isNotEmpty) return parts[0][0].toUpperCase();
-    return '?';
-  }
+}
 
-  String _formatDate(String iso) => formatTimeAgo(iso);
+class _InfoChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  const _InfoChip(this.label, this.icon);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withAlpha(10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 12, color: AppColors.textTertiary),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+      ]),
+    );
+  }
+}
+
+class _SmallAction extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _SmallAction(this.label, this.color, this.onTap);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withAlpha(60)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w600, color: color)),
+      ),
+    );
+  }
 }

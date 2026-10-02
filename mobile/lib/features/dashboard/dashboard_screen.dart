@@ -215,7 +215,7 @@ class _DashboardViewState extends State<_DashboardView> {
 }
 
 class _QuickActionsGrid extends StatelessWidget {
-  final _actions = const [
+  static const _actions = [
     _QA(Icons.campaign_rounded, 'nav.notices', '/notices', Color(0x30EF4444)),
     _QA(Icons.report_problem_rounded, 'nav.grievances', '/grievances', Color(0x30F97316)),
     _QA(Icons.account_balance_wallet_rounded, 'nav.finance', '/finance', Color(0x3010B981)),
@@ -228,6 +228,9 @@ class _QuickActionsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final authState = context.watch<AuthBloc>().state;
+    final isAdmin = authState is Authenticated && authState.user.isAdmin;
+    final visible = _actions.where((a) => !a.adminOnly || isAdmin).toList();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GridView.count(
@@ -237,7 +240,7 @@ class _QuickActionsGrid extends StatelessWidget {
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         childAspectRatio: 0.85,
-        children: _actions.map((a) {
+        children: visible.map((a) {
           return GestureDetector(
             onTap: () => context.push(a.route),
             child: Container(
@@ -281,7 +284,8 @@ class _QA {
   final String labelKey;
   final String route;
   final Color color;
-  const _QA(this.icon, this.labelKey, this.route, this.color);
+  final bool adminOnly;
+  const _QA(this.icon, this.labelKey, this.route, this.color, {this.adminOnly = false});
   Color get iconColor => color.withAlpha(255);
 }
 

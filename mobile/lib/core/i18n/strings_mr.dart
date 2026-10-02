@@ -150,6 +150,16 @@ const Map<String, String> stringsMr = {
   'grievances.detail': 'तक्रार तपशील',
   'grievances.created': 'तयार केली',
   'grievances.awaitingAction': 'कारवाईची प्रतीक्षा...',
+  'grievances.typeComplaint': 'तक्रार',
+  'grievances.typeMaintenanceRequest': 'देखभाल विनंती',
+  'grievances.type': 'प्रकार',
+  'grievances.plumbing': 'प्लंबिंग',
+  'grievances.electrical': 'विद्युत',
+  'grievances.general': 'सामान्य',
+  'grievances.typeMessage': 'संदेश टाइप करा...',
+  'grievances.internalNote': 'अंतर्गत टीप',
+  'grievances.publicReply': 'सार्वजनिक उत्तर',
+  'grievances.closeTicket': 'बंद करा',
 
   // Notices
   'notices.title': 'सूचना',
@@ -290,6 +300,9 @@ const Map<String, String> stringsMr = {
   'tasks.todo': 'करायचे',
   'tasks.inProgress': 'प्रगतीत',
   'tasks.done': 'पूर्ण',
+  'tasks.personalTasks': 'माझी कामे',
+  'tasks.committeeTasks': 'समिती कार्ये',
+  'tasks.addCommitteeTask': 'समिती कार्य जोडा',
 
   // Move In/Out
   'moveInOut.title': 'स्थलांतर नोंद',

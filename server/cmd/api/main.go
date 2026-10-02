@@ -164,6 +164,10 @@ func main() {
 	scheduler := services.NewBillingScheduler(billingService)
 	go scheduler.Start(ctx)
 
+	// Start task reminder scheduler (daily at 00:05 IST)
+	taskReminderScheduler := services.NewTaskReminderScheduler(db, notifier)
+	go taskReminderScheduler.Start(ctx)
+
 	// Start server
 	go func() {
 		addr := ":" + cfg.Port

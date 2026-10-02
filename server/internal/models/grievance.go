@@ -36,7 +36,18 @@ const (
 	CategoryCleanliness GrievanceCategory = "CLEANLINESS"
 	CategoryWater       GrievanceCategory = "WATER"
 	CategoryElectricity GrievanceCategory = "ELECTRICITY"
+	CategoryPlumbing    GrievanceCategory = "PLUMBING"
+	CategoryElectrical  GrievanceCategory = "ELECTRICAL"
+	CategoryGeneral     GrievanceCategory = "GENERAL"
 	CategoryOther       GrievanceCategory = "OTHER"
+)
+
+// GrievanceType distinguishes complaints from maintenance requests.
+type GrievanceType string
+
+const (
+	GrievanceTypeComplaint          GrievanceType = "COMPLAINT"
+	GrievanceTypeMaintenanceRequest GrievanceType = "MAINTENANCE_REQUEST"
 )
 
 // Grievance represents a complaint/request raised by a member.
@@ -53,6 +64,8 @@ type Grievance struct {
 	Category GrievanceCategory `gorm:"type:varchar(30);not null" json:"category"`
 	Priority GrievancePriority `gorm:"type:varchar(10);not null;default:'MEDIUM'" json:"priority"`
 	Status   GrievanceStatus   `gorm:"type:varchar(20);not null;default:'OPEN'" json:"status"`
+	Type     GrievanceType     `gorm:"type:varchar(30);not null;default:'COMPLAINT'" json:"type"`
+	FlatNo   string            `gorm:"type:varchar(20)" json:"flatNo,omitempty"`
 
 	// Ownership fields — used for ACL
 	RaisedByMemberID uuid.UUID  `gorm:"type:uuid;not null;index" json:"raisedByMemberId"`
@@ -66,6 +79,7 @@ type Grievance struct {
 	Resolution     string     `gorm:"type:text" json:"resolution,omitempty"`
 	ResolvedByID   *uuid.UUID `gorm:"type:uuid" json:"resolvedById,omitempty"`
 	ResolvedAt     *time.Time `json:"resolvedAt,omitempty"`
+	ClosedAt       *time.Time `json:"closedAt,omitempty"`
 
 	// Attachments
 	AttachmentURLs string `gorm:"type:text" json:"attachmentUrls,omitempty"` // CSV of URLs
@@ -95,6 +109,8 @@ type GrievanceComment struct {
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	GrievanceID  uuid.UUID `gorm:"type:uuid;not null;index" json:"grievanceId"`
 	AuthorID     uuid.UUID `gorm:"type:uuid;not null" json:"authorId"`
+	AuthorName   string    `gorm:"type:varchar(100)" json:"authorName,omitempty"`
+	AuthorRole   string    `gorm:"type:varchar(10)" json:"authorRole,omitempty"` // MEMBER or ADMIN
 	Comment      string    `gorm:"type:text;not null" json:"comment"`
 	IsInternal   bool      `gorm:"default:false" json:"isInternal"` // internal admin notes
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"createdAt"`

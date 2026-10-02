@@ -933,6 +933,7 @@ class _FVS extends State<_FV> {
                 )),
               ]),
             )),
+          if (isAdmin) ...[
             // Row 4: Balance Sheet, Receipts & Payments
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
@@ -950,7 +951,7 @@ class _FVS extends State<_FV> {
                 )),
               ]),
             )),
-            // Row 5: Vendor Master
+            // Row 5: Vendor Master, Expense Dashboard
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Row(children: [
@@ -984,6 +985,7 @@ class _FVS extends State<_FV> {
                 )),
               ]),
             )),
+          ],
           if (isAdmin)
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

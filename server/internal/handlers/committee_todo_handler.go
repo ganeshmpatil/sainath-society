@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,14 +13,16 @@ import (
 	"aangan/internal/middleware"
 	"aangan/internal/models"
 	"aangan/internal/repositories"
+	"aangan/internal/services"
 )
 
 type CommitteeTodoHandler struct {
-	repo *repositories.CommitteeTodoRepository
+	repo     *repositories.CommitteeTodoRepository
+	notifier *services.Notifier
 }
 
-func NewCommitteeTodoHandler(repo *repositories.CommitteeTodoRepository) *CommitteeTodoHandler {
-	return &CommitteeTodoHandler{repo: repo}
+func NewCommitteeTodoHandler(repo *repositories.CommitteeTodoRepository, notifier *services.Notifier) *CommitteeTodoHandler {
+	return &CommitteeTodoHandler{repo: repo, notifier: notifier}
 }
 
 type createCommitteeTodoReq struct {
@@ -78,6 +81,15 @@ func (h *CommitteeTodoHandler) Create(c *gin.Context) {
 		writeRepoError(c, err)
 		return
 	}
+
+	// Notify committee members about the new todo
+	go h.notifier.NotifyAdmins(
+		"New Committee Task: "+ct.Title,
+		fmt.Sprintf("A new committee task \"%s\" (Category: %s) has been added with due date %s.", ct.Title, ct.Category, ct.DueDate.Format("02 Jan 2006")),
+		fmt.Sprintf("नवीन समिती कार्य \"%s\" (प्रवर्ग: %s) %s या तारखेसाठी जोडले आहे.", ct.Title, ct.Category, ct.DueDate.Format("02 Jan 2006")),
+		"COMMITTEE_TODO_CREATED", "committee_todo", &ct.ID,
+	)
+
 	c.JSON(http.StatusCreated, ct)
 }
 

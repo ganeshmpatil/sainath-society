@@ -25,12 +25,13 @@ func NewGrievanceHandler(repo *repositories.GrievanceRepository, notifRepo *repo
 }
 
 type createGrievanceReq struct {
-	Title         string                    `json:"title" binding:"required,max=200"`
-	TitleMr       string                    `json:"titleMr,omitempty"`
-	Description   string                    `json:"description" binding:"required"`
-	DescriptionMr string                    `json:"descriptionMr,omitempty"`
-	Category      models.GrievanceCategory  `json:"category" binding:"required"`
-	Priority      models.GrievancePriority  `json:"priority,omitempty"`
+	Title         string                   `json:"title" binding:"required,max=200"`
+	TitleMr       string                   `json:"titleMr,omitempty"`
+	Description   string                   `json:"description" binding:"required"`
+	DescriptionMr string                   `json:"descriptionMr,omitempty"`
+	Category      models.GrievanceCategory `json:"category" binding:"required"`
+	Priority      models.GrievancePriority `json:"priority,omitempty"`
+	Type          models.GrievanceType     `json:"type,omitempty"`
 }
 
 // Create a new grievance. Row ownership is set by the repo from ActorContext.
@@ -49,6 +50,7 @@ func (h *GrievanceHandler) Create(c *gin.Context) {
 		DescriptionMr: req.DescriptionMr,
 		Category:      req.Category,
 		Priority:      req.Priority,
+		Type:          req.Type,
 	}
 	if g.Priority == "" {
 		g.Priority = models.PriorityMedium
@@ -75,7 +77,19 @@ func (h *GrievanceHandler) List(c *gin.Context) {
 		status = &gs
 	}
 
-	rows, err := h.repo.List(actor, status)
+	var category *models.GrievanceCategory
+	if cat := c.Query("category"); cat != "" {
+		gc := models.GrievanceCategory(cat)
+		category = &gc
+	}
+
+	var gType *models.GrievanceType
+	if t := c.Query("type"); t != "" {
+		gt := models.GrievanceType(t)
+		gType = &gt
+	}
+
+	rows, err := h.repo.List(actor, status, category, gType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "LIST_FAILED"})
 		return
@@ -152,11 +166,51 @@ func (h *GrievanceHandler) AddComment(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
-	if err := h.repo.AddComment(actor, id, req.Comment, req.IsInternal); err != nil {
+	comment, err := h.repo.AddComment(actor, id, req.Comment, req.IsInternal)
+	if err != nil {
 		writeRepoError(c, err)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Comment added"})
+	c.JSON(http.StatusCreated, comment)
+}
+
+// Stats returns counts of grievances grouped by status.
+func (h *GrievanceHandler) Stats(c *gin.Context) {
+	stats, err := h.repo.Stats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "STATS_FAILED"})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
+
+type grievanceAssignReq struct {
+	AssigneeID string `json:"assigneeId" binding:"required"`
+}
+
+// Assign sets the committee member handling a grievance. Admin only.
+func (h *GrievanceHandler) Assign(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID", Code: "INVALID_ID"})
+		return
+	}
+	var req grievanceAssignReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+	assigneeID, err := uuid.Parse(req.AssigneeID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid assignee ID", Code: "INVALID_ID"})
+		return
+	}
+	actor := middleware.GetActor(c)
+	if err := h.repo.Assign(actor, id, assigneeID); err != nil {
+		writeRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Grievance assigned"})
 }
 
 // writeRepoError maps repository errors to HTTP responses.

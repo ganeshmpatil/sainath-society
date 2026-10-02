@@ -88,7 +88,7 @@ func SetupRoutes(
 	emergencyContactHandler := handlers.NewEmergencyContactHandler(domain.EmergencyContact, notifier)
 	pushHandler := handlers.NewPushHandler(domain.PushSubscription, vapidPublicKey)
 	watchmanHandler := handlers.NewWatchmanHandler(domain.Watchman)
-	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo)
+	committeeTodoHandler := handlers.NewCommitteeTodoHandler(domain.CommitteeTodo, notifier)
 	workflowHandler := handlers.NewWorkflowHandler(domain.Workflow, notifier)
 	billingStructureHandler := handlers.NewBillingStructureHandler(domain.BillingStructure)
 	paymentHandler := handlers.NewPaymentHandler(domain.Payment, domain.Bill, rzpKeyID, rzpKeySecret)
@@ -100,7 +100,8 @@ func SetupRoutes(
 	vendorPaymentHandler := handlers.NewVendorPaymentHandler(domain.VendorPayment)
 	visitorHandler := handlers.NewVisitorHandler(domain.Visitor, notifier)
 	budgetHandler := handlers.NewBudgetHandler(domain.Budget)
-	helpdeskHandler := handlers.NewHelpdeskHandler(domain.Helpdesk, notifier)
+	// helpdeskHandler removed — helpdesk merged into grievances module
+	_ = domain.Helpdesk // keep field reference to avoid unused-field lint
 	electionHandler := handlers.NewElectionHandler(domain.Election)
 	auditChecklistHandler := handlers.NewAuditChecklistHandler(domain.AuditChecklist)
 	analyticsHandler := handlers.NewAnalyticsHandler(db)
@@ -111,12 +112,14 @@ func SetupRoutes(
 	api.Use(middleware.SanitizeInput())
 
 	// Health check
-	api.GET("/health", func(c *gin.Context) {
+	healthHandler := func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "healthy",
 			"service": "aangan-api",
 		})
-	})
+	}
+	api.GET("/health", healthHandler)
+	api.HEAD("/health", healthHandler)
 
 	// App version check (public — no auth needed)
 	api.GET("/version", func(c *gin.Context) {
@@ -205,12 +208,15 @@ func SetupRoutes(
 	protected.Use(middleware.ActorContextMiddleware(db))
 	{
 		// Grievances — members see own; admins see all.
+		// Merged with helpdesk: supports complaints + maintenance requests.
 		g := protected.Group("/grievances")
 		g.POST("", grievanceHandler.Create)
 		g.GET("", grievanceHandler.List)
+		g.GET("/stats", grievanceHandler.Stats)
 		g.GET("/:id", grievanceHandler.GetByID)
 		g.PATCH("/:id/status", grievanceHandler.UpdateStatus)
 		g.POST("/:id/comments", grievanceHandler.AddComment)
+		g.PATCH("/:id/assign", grievanceHandler.Assign)
 
 		// Tasks — members see own; admins can assign to anyone.
 		t := protected.Group("/tasks")
@@ -597,17 +603,18 @@ func SetupRoutes(
 		bg.DELETE("/line-items/:itemId", budgetHandler.DeleteLineItem)
 	}
 
-	// ─── Helpdesk ─────────────────────────────────────────────
-	{
-		hd := protected.Group("/helpdesk")
-		hd.GET("", helpdeskHandler.List)
-		hd.GET("/stats", helpdeskHandler.Stats)
-		hd.GET("/:id", helpdeskHandler.GetByID)
-		hd.POST("", helpdeskHandler.Create)
-		hd.POST("/:id/messages", helpdeskHandler.AddMessage)
-		hd.PATCH("/:id/status", helpdeskHandler.UpdateStatus)
-		hd.PATCH("/:id/assign", helpdeskHandler.Assign)
-	}
+	// ─── Helpdesk (DEPRECATED — merged into /grievances) ─────
+	// Routes removed. Helpdesk model/repo/handler files kept for backward compat.
+	// {
+	// 	hd := protected.Group("/helpdesk")
+	// 	hd.GET("", helpdeskHandler.List)
+	// 	hd.GET("/stats", helpdeskHandler.Stats)
+	// 	hd.GET("/:id", helpdeskHandler.GetByID)
+	// 	hd.POST("", helpdeskHandler.Create)
+	// 	hd.POST("/:id/messages", helpdeskHandler.AddMessage)
+	// 	hd.PATCH("/:id/status", helpdeskHandler.UpdateStatus)
+	// 	hd.PATCH("/:id/assign", helpdeskHandler.Assign)
+	// }
 
 	// ─── Elections ─────────────────────────────────────────────
 	{

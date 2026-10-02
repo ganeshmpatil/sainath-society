@@ -150,6 +150,16 @@ const Map<String, String> stringsEn = {
   'grievances.detail': 'Grievance Details',
   'grievances.created': 'Created',
   'grievances.awaitingAction': 'Awaiting action...',
+  'grievances.typeComplaint': 'Complaint',
+  'grievances.typeMaintenanceRequest': 'Maintenance Request',
+  'grievances.type': 'Type',
+  'grievances.plumbing': 'Plumbing',
+  'grievances.electrical': 'Electrical',
+  'grievances.general': 'General',
+  'grievances.typeMessage': 'Type a message...',
+  'grievances.internalNote': 'Internal note',
+  'grievances.publicReply': 'Public reply',
+  'grievances.closeTicket': 'Close',
 
   // Notices
   'notices.title': 'Notices',
@@ -290,6 +300,9 @@ const Map<String, String> stringsEn = {
   'tasks.todo': 'To Do',
   'tasks.inProgress': 'In Progress',
   'tasks.done': 'Done',
+  'tasks.personalTasks': 'My Tasks',
+  'tasks.committeeTasks': 'Committee Tasks',
+  'tasks.addCommitteeTask': 'Add Committee Task',
 
   // Move In/Out
   'moveInOut.title': 'Move In/Out',

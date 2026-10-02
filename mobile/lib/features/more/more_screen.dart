@@ -17,31 +17,32 @@ class _Module {
   final String labelKey;
   final String route;
   final Color color;
-  const _Module(this.icon, this.labelKey, this.route, this.color);
+  final bool adminOnly;
+  const _Module(this.icon, this.labelKey, this.route, this.color, {this.adminOnly = false});
 }
 
 const _modules = [
+  // ── Visible to all ──
   _Module(Icons.door_front_door_rounded, 'nav.visitors', '/visitors', Color(0x30EF4444)),
-  _Module(Icons.people_rounded, 'nav.residents', '/residents', Color(0x303B82F6)),
   _Module(Icons.directions_car_rounded, 'nav.vehicles', '/vehicles', Color(0x3006B6D4)),
   _Module(Icons.groups_rounded, 'nav.meetings', '/meetings', Color(0x3010B981)),
   _Module(Icons.checklist_rounded, 'nav.tasks', '/tasks', Color(0x30F97316)),
   _Module(Icons.event_available_rounded, 'nav.hallBooking', '/hall-booking', Color(0x30EF4444)),
   _Module(Icons.lightbulb_rounded, 'nav.suggestions', '/suggestions', Color(0x30EAB308)),
-  _Module(Icons.swap_horiz_rounded, 'nav.moveInOut', '/move-in-out', Color(0x3010B981)),
   _Module(Icons.folder_shared_rounded, 'nav.memberDocs', '/member-documents', Color(0x30EF4444)),
-  _Module(Icons.calendar_month_rounded, 'nav.calendar', '/calendar', Color(0x303B82F6)),
   _Module(Icons.phone_in_talk_rounded, 'nav.importantCalls', '/important-calls', Color(0x30EF4444)),
-  _Module(Icons.account_tree_rounded, 'nav.workflows', '/workflows', Color(0x30A855F7)),
-  _Module(Icons.groups_3_rounded, 'staff.title', '/staff', Color(0x30F97316)),
-  _Module(Icons.verified_rounded, 'cert.title', '/certificates', Color(0x3010B981)),
-  _Module(Icons.description_rounded, 'amc.title', '/amc-contracts', Color(0x30EF4444)),
-  _Module(Icons.account_balance_rounded, 'nav.budget', '/budgets', Color(0x303B82F6)),
-  _Module(Icons.support_agent_rounded, 'nav.helpdesk', '/helpdesk', Color(0x30F97316)),
   _Module(Icons.how_to_vote_rounded, 'nav.elections', '/elections', Color(0x30A855F7)),
-  _Module(Icons.fact_check_rounded, 'nav.audit', '/audit', Color(0x3010B981)),
-  _Module(Icons.shield_rounded, 'nav.guardPatrol', '/guard-patrol', Color(0x30EF4444)),
-  _Module(Icons.insights_rounded, 'nav.analytics', '/analytics', Color(0x303B82F6)),
+  // ── Admin only ──
+  _Module(Icons.people_rounded, 'nav.residents', '/residents', Color(0x303B82F6)),
+  _Module(Icons.swap_horiz_rounded, 'nav.moveInOut', '/move-in-out', Color(0x3010B981), adminOnly: true),
+  _Module(Icons.account_tree_rounded, 'nav.workflows', '/workflows', Color(0x30A855F7), adminOnly: true),
+  _Module(Icons.groups_3_rounded, 'staff.title', '/staff', Color(0x30F97316), adminOnly: true),
+  _Module(Icons.verified_rounded, 'cert.title', '/certificates', Color(0x3010B981), adminOnly: true),
+  _Module(Icons.description_rounded, 'amc.title', '/amc-contracts', Color(0x30EF4444), adminOnly: true),
+  _Module(Icons.account_balance_rounded, 'nav.budget', '/budgets', Color(0x303B82F6), adminOnly: true),
+  _Module(Icons.fact_check_rounded, 'nav.audit', '/audit', Color(0x3010B981), adminOnly: true),
+  _Module(Icons.shield_rounded, 'nav.guardPatrol', '/guard-patrol', Color(0x30EF4444), adminOnly: true),
+  _Module(Icons.insights_rounded, 'nav.analytics', '/analytics', Color(0x303B82F6), adminOnly: true),
 ];
 
 class MoreScreen extends StatefulWidget {
@@ -61,9 +62,11 @@ class _MoreScreenState extends State<MoreScreen> {
     final authState = context.watch<AuthBloc>().state;
     final user = authState is Authenticated ? authState.user : null;
     final currentTheme = context.watch<ThemeCubit>().state;
+    final isAdmin = user?.isAdmin == true;
+    final roleFiltered = _modules.where((m) => !m.adminOnly || isAdmin).toList();
     final filtered = _search.isEmpty
-        ? _modules
-        : _modules.where((m) => l.t(m.labelKey).toLowerCase().contains(_search.toLowerCase())).toList();
+        ? roleFiltered
+        : roleFiltered.where((m) => l.t(m.labelKey).toLowerCase().contains(_search.toLowerCase())).toList();
 
     return Scaffold(
       body: SafeArea(

@@ -25,7 +25,6 @@ import '../features/residents/residents_screen.dart';
 import '../features/suggestions/suggestions_screen.dart';
 import '../features/tasks/tasks_screen.dart';
 import '../features/vehicles/vehicles_screen.dart';
-import '../features/calendar/calendar_screen.dart';
 import '../features/workflows/workflow_list_screen.dart';
 import '../features/workflows/workflow_detail_screen.dart';
 import '../features/finance/chart_of_accounts_screen.dart';
@@ -47,8 +46,6 @@ import '../features/amc/amc_screen.dart';
 import '../features/visitors/visitor_screen.dart';
 import '../features/budget/budget_screen.dart';
 import '../features/budget/budget_detail_screen.dart';
-import '../features/helpdesk/helpdesk_screen.dart';
-import '../features/helpdesk/helpdesk_detail_screen.dart';
 import '../features/election/election_screen.dart';
 import '../features/election/election_detail_screen.dart';
 import '../features/audit/audit_screen.dart';
@@ -166,7 +163,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
       GoRoute(path: '/suggestions', builder: (_, __) => const SuggestionsScreen()),
       GoRoute(path: '/move-in-out', builder: (_, __) => const MoveInOutScreen()),
       GoRoute(path: '/member-documents', builder: (_, __) => const MemberDocumentsScreen()),
-      GoRoute(path: '/calendar', builder: (_, __) => const CalendarScreen()),
       GoRoute(
         path: '/workflows',
         builder: (_, __) => const WorkflowListScreen(),
@@ -208,16 +204,6 @@ GoRouter buildRouter(AuthBloc authBloc) {
           GoRoute(
             path: ':id',
             builder: (_, state) => BudgetDetailScreen(id: state.pathParameters['id']!),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/helpdesk',
-        builder: (_, __) => const HelpdeskScreen(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            builder: (_, state) => HelpdeskDetailScreen(id: state.pathParameters['id']!),
           ),
         ],
       ),
