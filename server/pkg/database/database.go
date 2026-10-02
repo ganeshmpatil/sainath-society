@@ -222,53 +222,7 @@ func Seed(db *gorm.DB) error {
 	// Ensure default chart of accounts exists
 	ensureDefaultChartOfAccounts(db)
 
-	// Check if already seeded
-	var memberCount int64
-	db.Model(&models.Member{}).Count(&memberCount)
-	if memberCount > 0 {
-		log.Println("Database already seeded, skipping...")
-		return nil
-	}
-
-	// Create wings (assigned to default society)
-	wings := []models.Wing{
-		{SocietyID: DefaultSocietyID, Name: "A"},
-		{SocietyID: DefaultSocietyID, Name: "B"},
-		{SocietyID: DefaultSocietyID, Name: "C"},
-		{SocietyID: DefaultSocietyID, Name: "D"},
-		{SocietyID: DefaultSocietyID, Name: "E"},
-		{SocietyID: DefaultSocietyID, Name: "E1"},
-		{SocietyID: DefaultSocietyID, Name: "F"},
-	}
-	if err := db.Create(&wings).Error; err != nil {
-		return fmt.Errorf("failed to seed wings: %w", err)
-	}
-
-	// Create flats
-	flats := createFlats(wings)
-	if err := db.Create(&flats).Error; err != nil {
-		return fmt.Errorf("failed to seed flats: %w", err)
-	}
-
-	// Create admin members (committee)
-	adminMembers := createAdminMembers(flats)
-	if err := db.Create(&adminMembers).Error; err != nil {
-		return fmt.Errorf("failed to seed admin members: %w", err)
-	}
-
-	// Create regular members
-	regularMembers := createRegularMembers(flats, len(adminMembers))
-	if err := db.Create(&regularMembers).Error; err != nil {
-		return fmt.Errorf("failed to seed regular members: %w", err)
-	}
-
-	// Pre-register one admin user for initial access
-	if err := createInitialAdminUser(db, adminMembers[0]); err != nil {
-		return fmt.Errorf("failed to create initial admin user: %w", err)
-	}
-
-	log.Printf("Seeded %d admin members and %d regular members\n", len(adminMembers), len(regularMembers))
-	log.Println("Initial admin user created: chairman@aangan.com / Admin@123")
+	log.Println("Database already seeded, ensuring defaults...")
 	return nil
 }
 
