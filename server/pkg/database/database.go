@@ -193,13 +193,22 @@ func Migrate(db *gorm.DB) error {
 func Seed(db *gorm.DB) error {
 	log.Println("Seeding database...")
 
+	// Ensure platform admin exists (your login for the dashboard)
+	ensurePlatformAdmin(db)
+
+	// Check if the default society exists — if not, skip legacy seeding
+	// (society will be provisioned via the onboarding flow instead)
+	var societyCount int64
+	db.Model(&models.PlatformSociety{}).Where("id = ?", DefaultSocietyID).Count(&societyCount)
+	if societyCount == 0 {
+		log.Println("No default society found — skipping legacy seed (use onboarding to create a society)")
+		return nil
+	}
+
 	// Ensure all 7 wings exist (safe to run on already-seeded DBs)
 	if err := ensureWings(db); err != nil {
 		return fmt.Errorf("failed to ensure wings: %w", err)
 	}
-
-	// Ensure platform admin exists (your login for the dashboard)
-	ensurePlatformAdmin(db)
 
 	// Ensure default important contacts exist
 	ensureDefaultImportantContacts(db)
