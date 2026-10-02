@@ -119,6 +119,10 @@ class ApiClient {
     return _dio.get<List<int>>(path,
         options: Options(responseType: ResponseType.bytes));
   }
+
+  Future<void> download(String path, String savePath) async {
+    await _dio.download(path, savePath);
+  }
 }
 
 final api = ApiClient.instance;

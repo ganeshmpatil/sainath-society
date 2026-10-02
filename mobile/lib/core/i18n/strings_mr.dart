@@ -195,6 +195,7 @@ const Map<String, String> stringsMr = {
   'finance.sinkingFund': 'सिंकिंग फंड',
   'finance.markPaid': 'भरले म्हणून चिन्हांकित करा',
   'finance.pendingDues': 'थकबाकी',
+  'finance.downloadingHelp': 'मदत दस्तऐवज डाउनलोड होत आहे...',
 
   // Residents
   'residents.title': 'रहिवासी',

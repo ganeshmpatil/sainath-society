@@ -434,6 +434,13 @@ func SetupRoutes(
 		wf.GET("/:id/activities/:actId/attachments/:attId/download", workflowHandler.DownloadAttachment)
 		wf.GET("/:id/audit-log", workflowHandler.AuditLog)
 
+		// Finance help document (no cache).
+		protected.GET("/finance/help-doc", func(c *gin.Context) {
+			c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
+			c.Header("Pragma", "no-cache")
+			c.File("web/docs/finance-help.pdf")
+		})
+
 		// Finance: maintenance bill generation + dues.
 		fn := protected.Group("/finance")
 		fn.POST("/bills/generate", billHandler.Generate)

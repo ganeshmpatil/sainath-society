@@ -195,6 +195,7 @@ const Map<String, String> stringsEn = {
   'finance.sinkingFund': 'Sinking Fund',
   'finance.markPaid': 'Mark as Paid',
   'finance.pendingDues': 'Pending Dues',
+  'finance.downloadingHelp': 'Downloading help guide...',
 
   // Residents
   'residents.title': 'Residents',

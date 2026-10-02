@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_bloc.dart';
@@ -130,6 +133,30 @@ class _FVS extends State<_FV> {
   }
 
   void _onExternalWallet(ExternalWalletResponse response) {}
+
+  Future<void> _downloadHelpDoc(BuildContext ctx) async {
+    final l = AppLocalizations.of(ctx);
+    ScaffoldMessenger.of(ctx).showSnackBar(
+      SnackBar(content: Text(l.t('finance.downloadingHelp'))),
+    );
+    try {
+      final dir = await getTemporaryDirectory();
+      final filePath = '${dir.path}/finance-help.pdf';
+      // Always fetch fresh — no cache
+      await api.download('/finance/help-doc', filePath);
+      if (mounted) {
+        ScaffoldMessenger.of(ctx).hideCurrentSnackBar();
+        await OpenFilex.open(filePath);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(ctx).hideCurrentSnackBar();
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('${l.t('common.error')}: $e')),
+        );
+      }
+    }
+  }
 
   void _showPaymentOverlay(String message) {
     showDialog(
@@ -842,9 +869,22 @@ class _FVS extends State<_FV> {
       child: BlocBuilder<_FC, _FD>(builder: (context, state) {
         if (state.loading) return const ShimmerLoading(itemCount: 5);
         return CustomScrollView(slivers: [
-          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.t('finance.title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-            Text(l.t('finance.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Row(children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.t('finance.title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+              Text(l.t('finance.subtitle'), style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            ])),
+            GestureDetector(
+              onTap: () => _downloadHelpDoc(context),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(20),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.help_outline_rounded, size: 22, color: AppColors.primary),
+              ),
+            ),
           ]))),
 
           // Pending dues card
