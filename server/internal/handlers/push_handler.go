@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/dto/response"
+	"aangan/internal/middleware"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 type PushHandler struct {

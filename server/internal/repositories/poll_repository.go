@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 var ErrAlreadyVoted = errors.New("this flat has already voted on this poll")

@@ -11,14 +11,14 @@ import '../core/theme/theme_cubit.dart';
 import 'router.dart';
 import 'theme.dart';
 
-class SainathSocietyApp extends StatefulWidget {
-  const SainathSocietyApp({super.key});
+class AanganApp extends StatefulWidget {
+  const AanganApp({super.key});
 
   @override
-  State<SainathSocietyApp> createState() => _SainathSocietyAppState();
+  State<AanganApp> createState() => _AanganAppState();
 }
 
-class _SainathSocietyAppState extends State<SainathSocietyApp> {
+class _AanganAppState extends State<AanganApp> {
   late final GoRouter _router;
 
   @override
@@ -42,7 +42,7 @@ class _SainathSocietyAppState extends State<SainathSocietyApp> {
     AppColors.applyTheme(themeType);
 
     return MaterialApp.router(
-      title: 'Sainath Society',
+      title: 'Aangan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.forType(themeType),
       locale: locale,

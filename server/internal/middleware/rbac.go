@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/models"
+	"aangan/internal/dto/response"
+	"aangan/internal/models"
 )
 
 // DataScope represents the scope of data access

@@ -20,7 +20,7 @@ class PushNotificationService {
   static const _channel = AndroidNotificationChannel(
     'society_notifications',
     'Society Notifications',
-    description: 'Notifications from Sainath Society',
+    description: 'Notifications from Aangan',
     importance: Importance.high,
   );
 

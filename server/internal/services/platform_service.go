@@ -15,9 +15,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
-	"sainath-society/pkg/jwt"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
+	"aangan/pkg/jwt"
 )
 
 var (
@@ -325,10 +325,10 @@ func (s *PlatformService) sendWelcomeEmail(req *models.PlatformOnboardingRequest
 	if s.emailSender == nil {
 		return
 	}
-	subject := fmt.Sprintf("Welcome to Society Mitra - %s is now live!", society.Name)
+	subject := fmt.Sprintf("Welcome to Angaan - %s is now live!", society.Name)
 	body := WrapInEmailTemplate(subject, fmt.Sprintf(`
 		<p>Dear %s,</p>
-		<p>Your society <strong>%s</strong> has been approved and is now live on Society Mitra!</p>
+		<p>Your society <strong>%s</strong> has been approved and is now live on Angaan!</p>
 		<h3>Your Login Credentials</h3>
 		<table style="border-collapse:collapse;margin:16px 0">
 			<tr><td style="padding:8px 16px;background:#f3f4f6;font-weight:bold">Email</td><td style="padding:8px 16px">%s</td></tr>

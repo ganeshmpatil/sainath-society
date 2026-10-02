@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 // WhatsAppSender is the minimal contract implemented by a real WhatsApp
@@ -120,7 +120,7 @@ func (w *NotificationWorker) dispatchEmail(ctx context.Context, n *models.Notifi
 	}
 	subject := n.Subject
 	if subject == "" {
-		subject = "Sainath Society Notification"
+		subject = "Aangan Notification"
 	}
 	htmlBody := WrapInEmailTemplate(subject, body)
 	ref, err := w.email.Send(ctx, email, subject, htmlBody)

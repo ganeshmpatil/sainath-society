@@ -9,8 +9,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"sainath-society/internal/config"
-	"sainath-society/internal/models"
+	"aangan/internal/config"
+	"aangan/internal/models"
 )
 
 var DB *gorm.DB
@@ -52,6 +52,12 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 // Migrate runs database migrations
 func Migrate(db *gorm.DB) error {
 	log.Println("Running database migrations...")
+
+	// Pre-migration: add society_id as nullable and backfill existing rows
+	// so that AutoMigrate's NOT NULL constraint doesn't fail on existing data.
+	if err := preBackfillSocietyID(db); err != nil {
+		return fmt.Errorf("pre-backfill society_id failed: %w", err)
+	}
 
 	// Phase 0: Platform-level tables (no society_id)
 	err := db.AutoMigrate(
@@ -253,7 +259,7 @@ func Seed(db *gorm.DB) error {
 	}
 
 	log.Printf("Seeded %d admin members and %d regular members\n", len(adminMembers), len(regularMembers))
-	log.Println("Initial admin user created: chairman@sainath.com / Admin@123")
+	log.Println("Initial admin user created: chairman@aangan.com / Admin@123")
 	return nil
 }
 
@@ -366,7 +372,7 @@ func createInitialAdminUser(db *gorm.DB, chairman models.Member) error {
 
 	user := &models.User{
 		SocietyID:    DefaultSocietyID,
-		Email:        "chairman@sainath.com",
+		Email:        "chairman@aangan.com",
 		Mobile:       chairman.Mobile,
 		PasswordHash: passwordHash,
 		MemberID:     chairman.ID,
@@ -407,12 +413,12 @@ func ensureSocietyBankConfig(db *gorm.DB) {
 		return
 	}
 	cfg := &models.SocietyBankConfig{
-		AccountName:   "New Sainath Apartment CHS Ltd",
+		AccountName:   "Aangan Housing Society",
 		AccountNumber: "920020043210987",
 		BankName:      "State Bank of India",
 		BranchName:    "Bhandup West, Mumbai",
 		IFSC:          "SBIN0001234",
-		UpiID:         "sainathsociety@sbi",
+		UpiID:         "aangan@sbi",
 		IsActive:      true,
 	}
 	if err := db.Create(cfg).Error; err != nil {
@@ -449,7 +455,7 @@ func ensureDefaultImportantContacts(db *gorm.DB) {
 	}
 }
 
-// ensureDefaultBillingStructure seeds the standard billing structure for Sainath Society.
+// ensureDefaultBillingStructure seeds the standard billing structure for Aangan.
 func ensureDefaultBillingStructure(db *gorm.DB) {
 	var count int64
 	db.Model(&models.BillingStructure{}).Where("is_active = ?", true).Count(&count)

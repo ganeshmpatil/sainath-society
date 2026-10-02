@@ -1,4 +1,4 @@
-# Sainath Society - Technology Specifications
+# Aangan - Technology Specifications
 
 ## Architecture Overview
 
@@ -288,7 +288,7 @@ temporal/
 # temporal-config.yaml
 temporal:
   host: localhost:7233
-  namespace: sainath-society
+  namespace: aangan
   task_queue: society-tasks
   worker_count: 4
 
@@ -519,7 +519,7 @@ plugins:
     config:
       origins:
         - http://localhost:5173
-        - https://sainath-society.com
+        - https://aangan.com
       methods:
         - GET
         - POST
@@ -592,7 +592,7 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=sainath_society
+      - DB_NAME=aangan
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - TEMPORAL_HOST=temporal:7233
@@ -617,7 +617,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=sainath_society
+      - POSTGRES_DB=aangan
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
@@ -802,7 +802,7 @@ ENV=development
 # Database
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=sainath_society
+DB_NAME=aangan
 DB_USER=postgres
 DB_PASSWORD=secret
 DB_SSL_MODE=disable
@@ -814,7 +814,7 @@ JWT_REFRESH_EXPIRY=168h
 
 # Temporal
 TEMPORAL_HOST=localhost:7233
-TEMPORAL_NAMESPACE=sainath-society
+TEMPORAL_NAMESPACE=aangan
 TEMPORAL_TASK_QUEUE=society-tasks
 
 # Kong
@@ -826,7 +826,7 @@ KONG_ADMIN_URL=http://localhost:8001
 ```env
 VITE_API_URL=http://localhost:8000/api/v1
 VITE_WS_URL=ws://localhost:8000
-VITE_APP_NAME=Sainath Society
+VITE_APP_NAME=Aangan
 ```
 
 ---

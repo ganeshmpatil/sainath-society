@@ -26,7 +26,7 @@ void main() async {
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => AuthBloc()..add(const AuthCheckRequested())),
       ],
-      child: const SainathSocietyApp(),
+      child: const AanganApp(),
     ),
   );
 }

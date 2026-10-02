@@ -334,7 +334,7 @@ class _FVS extends State<_FV> {
         'key': data['razorpayKeyId'],
         'amount': data['amount'],
         'currency': data['currency'],
-        'name': 'New Sainath Apartment CHS',
+        'name': 'Aangan Housing Society',
         'description': data['description'],
         'order_id': data['razorpayOrderId'],
         'prefill': {'contact': '', 'email': ''},

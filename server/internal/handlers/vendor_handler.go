@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/middleware"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 type VendorHandler struct {

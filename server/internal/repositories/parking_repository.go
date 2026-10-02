@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 var ErrSlotAlreadyAllocated = errors.New("parking slot is already allocated")

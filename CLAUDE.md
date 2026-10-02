@@ -1,10 +1,11 @@
-# Sainath Society / सोसायटी मित्र
+# Aangan / अंगण
 
-Society management app for New Sainath Apartment, Bhandup (W), Mumbai — 87 residents, 7 wings.
+Society management app — multi-tenant platform for housing societies.
 
 ## Stack
 - **Server:** Go + Gin + GORM → `server/` (deployed on Render, auto-deploys on push to main)
 - **Mobile:** Flutter + BLoC + GoRouter + Dio → `mobile/` (APK via GitHub Releases)
+- **PWA:** Flutter Web build served at `/app/` from Go server (iOS install via Add to Home Screen)
 - **DB:** Neon PostgreSQL, tables prefixed `soc_mitra_*`, auth tables unprefixed
 
 ## Key Rules
@@ -19,6 +20,10 @@ Society management app for New Sainath Apartment, Bhandup (W), Mumbai — 87 res
 # Build APK
 cd mobile && flutter build apk --release
 
+# Build PWA
+cd mobile && flutter build web --release --base-href "/app/"
+cp -r build/web/* ../server/web/pwa/
+
 # Publish APK (Release ID: 338755778)
 # Delete old asset then upload via GitHub API with token from ~/.git-credentials
 
@@ -27,6 +32,6 @@ PGPASSWORD='npg_DN5WbV9UjkMZ' psql "postgresql://neondb_owner:npg_DN5WbV9UjkMZ@e
 ```
 
 ## Login
-- Pattern: `firstname.lastname@sainath.com` / `Welcome1`
+- Pattern: `firstname.lastname@aangan.com` / `Welcome1`
 - Admin login: `ganesh.patil.31@gmail.com`
 - 4 admins: Ganesh, Kattika, Kanade, Supugade

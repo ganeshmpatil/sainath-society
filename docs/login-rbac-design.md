@@ -946,7 +946,7 @@ POST   /api/v1/auth/reset          # Reset password (future)
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│                    SAINATH SOCIETY                          │
+│                    AANGAN                          │
 │                    ─────────────────                        │
 │                                                             │
 │                  ┌─────────────────────┐                    │
@@ -1046,13 +1046,13 @@ POST   /api/v1/auth/reset          # Reset password (future)
 ```sql
 -- Admin users (committee members)
 INSERT INTO users (email, phone, password_hash, name, role, designation) VALUES
-('chairman@sainath.com', '9876543210', '$2a$12$...', 'Rajesh Kumar', 'ADMIN', 'Chairman'),
-('secretary@sainath.com', '9876543211', '$2a$12$...', 'Priya Sharma', 'ADMIN', 'Secretary'),
-('treasurer@sainath.com', '9876543212', '$2a$12$...', 'Amit Patel', 'ADMIN', 'Treasurer'),
-('member1@sainath.com', '9876543213', '$2a$12$...', 'Vikram Singh', 'ADMIN', 'Committee Member'),
-('member2@sainath.com', '9876543214', '$2a$12$...', 'Meera Joshi', 'ADMIN', 'Committee Member'),
-('member3@sainath.com', '9876543215', '$2a$12$...', 'Karan Mehta', 'ADMIN', 'Committee Member'),
-('member4@sainath.com', '9876543216', '$2a$12$...', 'Anjali Reddy', 'ADMIN', 'Committee Member');
+('chairman@aangan.com', '9876543210', '$2a$12$...', 'Rajesh Kumar', 'ADMIN', 'Chairman'),
+('secretary@aangan.com', '9876543211', '$2a$12$...', 'Priya Sharma', 'ADMIN', 'Secretary'),
+('treasurer@aangan.com', '9876543212', '$2a$12$...', 'Amit Patel', 'ADMIN', 'Treasurer'),
+('member1@aangan.com', '9876543213', '$2a$12$...', 'Vikram Singh', 'ADMIN', 'Committee Member'),
+('member2@aangan.com', '9876543214', '$2a$12$...', 'Meera Joshi', 'ADMIN', 'Committee Member'),
+('member3@aangan.com', '9876543215', '$2a$12$...', 'Karan Mehta', 'ADMIN', 'Committee Member'),
+('member4@aangan.com', '9876543216', '$2a$12$...', 'Anjali Reddy', 'ADMIN', 'Committee Member');
 
 -- Regular members (100 users for flats A-101 to C-310)
 -- Generated programmatically

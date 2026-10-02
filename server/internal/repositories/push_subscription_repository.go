@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 type PushSubscriptionRepository struct {

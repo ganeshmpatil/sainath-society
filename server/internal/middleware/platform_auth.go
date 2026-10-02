@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/response"
+	"aangan/internal/dto/response"
 )
 
 // PlatformAdminOnly ensures the JWT has role "PLATFORM_ADMIN".

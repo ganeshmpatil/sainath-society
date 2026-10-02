@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 // MemberRepository handles CRUD for the Member registry. Note this is

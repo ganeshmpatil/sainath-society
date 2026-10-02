@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/dto/request"
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/services"
+	"aangan/internal/dto/request"
+	"aangan/internal/dto/response"
+	"aangan/internal/services"
 )
 
 // AuthHandler handles authentication endpoints

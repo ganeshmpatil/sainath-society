@@ -8,17 +8,21 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
-	"sainath-society/internal/config"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/repositories"
-	"sainath-society/internal/repository"
-	"sainath-society/internal/services"
-	"sainath-society/pkg/database"
-	"sainath-society/pkg/jwt"
+	"aangan/internal/config"
+	"aangan/internal/middleware"
+	"aangan/internal/repositories"
+	"aangan/internal/repository"
+	"aangan/internal/services"
+	"aangan/pkg/database"
+	"aangan/pkg/jwt"
 )
 
 func main() {
+	// Load .env file (ignore error if not present, e.g. production)
+	_ = godotenv.Load()
+
 	// Load configuration
 	cfg := config.Load()
 

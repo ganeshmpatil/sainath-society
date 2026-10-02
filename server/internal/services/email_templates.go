@@ -25,13 +25,13 @@ func WrapInEmailTemplate(subject, bodyContent string) string {
     <div class="card">
       <div class="header">
         <h1>%s</h1>
-        <div class="subtitle">Sainath Society / सोसायटी मित्र</div>
+        <div class="subtitle">Angaan / अंगण</div>
       </div>
       <div class="content">
         %s
       </div>
       <div class="footer">
-        This is an automated notification from Sainath Society Management.<br>
+        This is an automated notification from Aangan Society Management.<br>
         हा साईनाथ सोसायटी व्यवस्थापनाचा स्वयंचलित संदेश आहे.
       </div>
     </div>

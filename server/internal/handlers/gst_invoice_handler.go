@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/dto/response"
+	"aangan/internal/middleware"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 type GSTInvoiceHandler struct {
@@ -52,7 +52,7 @@ func (h *GSTInvoiceHandler) GetInvoice(c *gin.Context) {
 	// Load society settings
 	gstin := h.getSetting(models.SettingGSTIN, "")
 	pan := h.getSetting(models.SettingPAN, "")
-	societyName := h.getSetting(models.SettingSocietyName, "New Sainath Apartment CHS Ltd.")
+	societyName := h.getSetting(models.SettingSocietyName, "Aangan Housing Society.")
 	societyAddr := h.getSetting(models.SettingSocietyAddr, "Bhandup (W), Mumbai - 400078")
 	sacCode := h.getSetting(models.SettingSACCode, "9972")
 	gstRateStr := h.getSetting(models.SettingGSTRate, "18")

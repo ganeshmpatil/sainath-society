@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/dto/response"
+	"aangan/internal/dto/response"
 )
 
 // TenantMiddleware ensures every protected request has a valid society context.

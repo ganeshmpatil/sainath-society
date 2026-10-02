@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 var (

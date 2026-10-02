@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/pkg/jwt"
+	"aangan/internal/dto/response"
+	"aangan/pkg/jwt"
 )
 
 // AuthMiddleware validates JWT tokens

@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/repositories"
+	"aangan/internal/dto/response"
+	"aangan/internal/middleware"
+	"aangan/internal/repositories"
 )
 
 type FinancialReportHandler struct {

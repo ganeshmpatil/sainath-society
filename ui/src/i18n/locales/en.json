@@ -52,7 +52,7 @@
     "saved": "Saved successfully"
   },
   "app": {
-    "name": "SAINATH",
+    "name": "AANGAN",
     "tagline": "Society Management Portal",
     "footer": "Secured by Quantum Encryption v2.0"
   },
@@ -75,7 +75,7 @@
     "newMember": "New member?",
     "registerHere": "Register here",
     "demo": "DEMO",
-    "demoCredentials": "Admin: chairman@sainath.com",
+    "demoCredentials": "Admin: chairman@aangan.com",
     "errors": {
       "invalidCredentials": "Invalid email or password. Please try again.",
       "accountLocked": "Account locked due to too many failed attempts. Try again in 30 minutes.",

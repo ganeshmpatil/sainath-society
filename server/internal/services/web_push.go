@@ -8,8 +8,8 @@ import (
 	webpush "github.com/SherClockHolmes/webpush-go"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 // PushPayload is the JSON sent to the service worker.

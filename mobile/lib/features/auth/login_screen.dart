@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'chairman@sainath.com',
+                      hintText: 'chairman@aangan.com',
                       prefixIcon:
                           Icon(Icons.email_outlined, size: 20, color: AppColors.textTertiary),
                     ),

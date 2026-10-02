@@ -7,11 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
-	"sainath-society/internal/services"
+	"aangan/internal/dto/response"
+	"aangan/internal/middleware"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
+	"aangan/internal/services"
 )
 
 type VisitorHandler struct {

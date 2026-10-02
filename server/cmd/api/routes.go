@@ -4,14 +4,35 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/handlers"
-	"sainath-society/internal/middleware"
-	"sainath-society/internal/repositories"
-	"sainath-society/internal/repository"
-	"sainath-society/internal/services"
-	"sainath-society/pkg/database"
-	"sainath-society/pkg/jwt"
+	"net/http"
+
+	"aangan/internal/handlers"
+	"aangan/internal/middleware"
+	"aangan/internal/repositories"
+	"aangan/internal/repository"
+	"aangan/internal/services"
+	"aangan/pkg/database"
+	"aangan/pkg/jwt"
 )
+
+// spaFileSystem wraps http.FileSystem to serve index.html for missing files,
+// enabling client-side SPA routing (e.g. Flutter GoRouter deep links).
+type spaFileSystem struct {
+	fs http.FileSystem
+}
+
+func (s *spaFileSystem) Open(name string) (http.File, error) {
+	f, err := s.fs.Open(name)
+	if err != nil {
+		// File not found → serve index.html (SPA fallback)
+		return s.fs.Open("/index.html")
+	}
+	return f, nil
+}
+
+func (s *spaFileSystem) Exists(prefix string, filepath string) bool {
+	return true // always claim we can handle it
+}
 
 // SetupRoutes configures all API routes
 func SetupRoutes(
@@ -88,7 +109,7 @@ func SetupRoutes(
 	api.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "healthy",
-			"service": "sainath-society-api",
+			"service": "aangan-api",
 		})
 	})
 
@@ -97,7 +118,7 @@ func SetupRoutes(
 		c.JSON(200, gin.H{
 			"latestVersion": "1.0.1",
 			"minVersion":    "1.0.0",
-			"downloadUrl":   "https://github.com/ganeshmpatil/sainath-society/releases/download/v1.0.0/sainath-society.apk",
+			"downloadUrl":   "https://github.com/ganeshmpatil/aangan/releases/download/v1.0.0/aangan.apk",
 			"releaseNotes":  "In-app update support added",
 			"releaseNotesMr": "अ\u200dॅपमध्ये अपडेट सुविधा जोडली",
 		})
@@ -644,4 +665,8 @@ func SetupRoutes(
 		patrol.POST("/incidents", guardPatrolHandler.CreateIncident)
 		patrol.PUT("/incidents/:id/status", guardPatrolHandler.UpdateIncidentStatus)
 	}
+
+	// ─── PWA (Flutter Web) served at /app/ ───────────────────
+	// Use NoRoute as SPA fallback: serve index.html for deep-links.
+	r.StaticFS("/app", &spaFileSystem{fs: http.Dir("web/pwa")})
 }

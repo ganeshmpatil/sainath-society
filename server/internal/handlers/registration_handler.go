@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"sainath-society/internal/dto/request"
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/services"
+	"aangan/internal/dto/request"
+	"aangan/internal/dto/response"
+	"aangan/internal/services"
 )
 
 // RegistrationHandler handles registration endpoints

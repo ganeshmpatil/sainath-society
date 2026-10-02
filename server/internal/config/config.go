@@ -55,7 +55,7 @@ func Load() *Config {
 		// Database
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBPort:     getEnv("DB_PORT", "5432"),
-		DBName:     getEnv("DB_NAME", "sainath_society"),
+		DBName:     getEnv("DB_NAME", "aangan"),
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
@@ -72,7 +72,7 @@ func Load() *Config {
 		// Web Push (VAPID)
 		VAPIDPublicKey:  getEnv("VAPID_PUBLIC_KEY", ""),
 		VAPIDPrivateKey: getEnv("VAPID_PRIVATE_KEY", ""),
-		VAPIDEmail:      getEnv("VAPID_EMAIL", "mailto:admin@sainath-society.com"),
+		VAPIDEmail:      getEnv("VAPID_EMAIL", "mailto:admin@aangan.app"),
 
 		// FCM
 		FCMServiceAccountJSON: getEnv("FCM_SERVICE_ACCOUNT_JSON", ""),

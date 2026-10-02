@@ -1,4 +1,4 @@
-# Sainath Society — Mobile (Flutter)
+# Aangan — Mobile (Flutter)
 
 Flutter app skeleton for **Android + iOS**, built in parallel to the web UI
 (`../ui`) and sharing the same Go backend (`../server`).

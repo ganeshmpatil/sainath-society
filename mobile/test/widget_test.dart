@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:sainath_society/app/app.dart';
-import 'package:sainath_society/core/auth/auth_bloc.dart';
-import 'package:sainath_society/core/i18n/locale_cubit.dart';
+import 'package:aangan/app/app.dart';
+import 'package:aangan/core/auth/auth_bloc.dart';
+import 'package:aangan/core/i18n/locale_cubit.dart';
 
 void main() {
   testWidgets('boots to login when unauthenticated', (tester) async {
@@ -15,7 +15,7 @@ void main() {
           BlocProvider(create: (_) => LocaleCubit()),
           BlocProvider(create: (_) => AuthBloc()),
         ],
-        child: const SainathSocietyApp(),
+        child: const AanganApp(),
       ),
     );
     await tester.pump();

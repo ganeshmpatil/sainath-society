@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/dto/response"
+	"aangan/internal/dto/response"
 )
 
 type AnalyticsHandler struct {

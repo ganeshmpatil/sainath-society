@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
 var ErrSlotUnavailable = errors.New("hall is already booked for the requested slot")

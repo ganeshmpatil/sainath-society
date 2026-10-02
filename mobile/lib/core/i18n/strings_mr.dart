@@ -1,6 +1,6 @@
 const Map<String, String> stringsMr = {
-  'app.name': 'साईनाथ सोसायटी',
-  'app.tagline': 'सोसायटी मित्र',
+  'app.name': 'अंगण',
+  'app.tagline': 'तुमची सोसायटी, एकत्र जोडलेली',
 
   // Common
   'common.login': 'लॉगिन',

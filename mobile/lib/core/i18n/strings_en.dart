@@ -1,6 +1,6 @@
 const Map<String, String> stringsEn = {
-  'app.name': 'Sainath Society',
-  'app.tagline': 'Society Mitra',
+  'app.name': 'Aangan',
+  'app.tagline': 'Your Society, Connected',
 
   // Common
   'common.login': 'Login',

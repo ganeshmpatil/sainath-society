@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/models"
-	"sainath-society/internal/services"
+	"aangan/internal/dto/response"
+	"aangan/internal/models"
+	"aangan/internal/services"
 )
 
 type PlatformHandler struct {

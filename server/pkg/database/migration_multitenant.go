@@ -6,12 +6,95 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/models"
+	"aangan/internal/models"
 )
 
-// DefaultSocietyID is the UUID assigned to the existing Sainath Society data
+// DefaultSocietyID is the UUID assigned to the existing Aangan data
 // during the multi-tenancy migration. All pre-existing rows get this value.
 var DefaultSocietyID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+
+// preBackfillSocietyID adds society_id as a nullable column (if missing) and
+// backfills existing rows BEFORE AutoMigrate runs, so the NOT NULL constraint
+// doesn't fail on pre-existing data.
+func preBackfillSocietyID(db *gorm.DB) error {
+	// Ensure default society exists first (needed for backfill FK)
+	if err := ensureDefaultSociety(db); err != nil {
+		return err
+	}
+
+	// All tables that may have existing rows needing society_id backfill.
+	// Must match the list in backfillSocietyID.
+	tables := []string{
+		"wings", "flats", "members", "users",
+		"soc_mitra_grievances", "soc_mitra_grievance_comments",
+		"soc_mitra_vehicles", "soc_mitra_notices",
+		"soc_mitra_events", "soc_mitra_event_rsvps",
+		"soc_mitra_tenants", "soc_mitra_tenant_movements",
+		"soc_mitra_financial_transactions",
+		"soc_mitra_bylaws", "soc_mitra_bylaw_amendment_logs",
+		"soc_mitra_meetings", "soc_mitra_meeting_attendees",
+		"soc_mitra_meeting_action_items", "soc_mitra_meeting_documents",
+		"soc_mitra_tasks",
+		"soc_mitra_documents", "soc_mitra_document_access_grants", "soc_mitra_document_audit_logs",
+		"soc_mitra_notifications", "soc_mitra_notification_templates",
+		"soc_mitra_polls", "soc_mitra_poll_options", "soc_mitra_poll_votes",
+		"soc_mitra_hall_bookings", "soc_mitra_inventory_items",
+		"soc_mitra_suggestions", "soc_mitra_suggestion_upvotes",
+		"soc_mitra_parking_slots", "soc_mitra_maintenance_bills",
+		"emergency_contacts", "push_subscriptions",
+		"soc_mitra_member_documents", "soc_mitra_watchmen",
+		"soc_mitra_committee_todos", "soc_mitra_member_photos",
+		"soc_mitra_workflows", "soc_mitra_workflow_activities",
+		"soc_mitra_workflow_activity_comments", "soc_mitra_workflow_activity_attachments",
+		"soc_mitra_workflow_audit_logs",
+		"soc_mitra_payment_orders", "soc_mitra_society_bank_config",
+		"soc_mitra_billing_structures", "soc_mitra_charge_heads", "soc_mitra_bill_line_items",
+		"soc_mitra_account_heads",
+		"soc_mitra_journal_entries", "soc_mitra_journal_lines",
+		"soc_mitra_vendors", "soc_mitra_vendor_payments",
+		"soc_mitra_bill_payments", "soc_mitra_flat_charge_overrides",
+		"soc_mitra_society_settings",
+		"soc_mitra_staff", "soc_mitra_staff_attendance", "soc_mitra_staff_salary_payments",
+		"soc_mitra_certificates",
+		"soc_mitra_amc_contracts", "soc_mitra_service_logs",
+		"soc_mitra_visitors", "soc_mitra_frequent_visitors",
+		"soc_mitra_budgets", "soc_mitra_budget_line_items",
+		"soc_mitra_helpdesk_tickets", "soc_mitra_helpdesk_messages",
+		"soc_mitra_elections", "soc_mitra_election_positions",
+		"soc_mitra_election_candidates", "soc_mitra_election_votes",
+		"soc_mitra_audit_checklists", "soc_mitra_audit_checklist_items",
+		"soc_mitra_patrol_checkpoints", "soc_mitra_patrol_rounds",
+		"soc_mitra_patrol_scans", "soc_mitra_patrol_incidents",
+		"soc_mitra_member_ownerships", "soc_mitra_housing_documents",
+	}
+	for _, table := range tables {
+		// Check if table exists
+		var tableExists int64
+		db.Raw(`SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = ?`, table).Scan(&tableExists)
+		if tableExists == 0 {
+			continue
+		}
+		// Check if society_id column exists
+		var colExists int64
+		db.Raw(`SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = ? AND column_name = 'society_id'`, table).Scan(&colExists)
+		if colExists == 0 {
+			// Add column as nullable first
+			if err := db.Exec(`ALTER TABLE "` + table + `" ADD COLUMN society_id uuid`).Error; err != nil {
+				log.Printf("pre-backfill: failed to add society_id to %s: %v", table, err)
+				continue
+			}
+			log.Printf("pre-backfill: added society_id column to %s", table)
+		}
+		// Backfill any NULL rows
+		result := db.Exec(`UPDATE "`+table+`" SET society_id = ? WHERE society_id IS NULL`, DefaultSocietyID)
+		if result.Error != nil {
+			log.Printf("pre-backfill: failed to backfill %s: %v", table, result.Error)
+		} else if result.RowsAffected > 0 {
+			log.Printf("pre-backfill: backfilled %d rows in %s", result.RowsAffected, table)
+		}
+	}
+	return nil
+}
 
 // MigrateMultiTenancy runs the one-time migration to:
 // 1. Create the default society in platform_societies
@@ -54,10 +137,10 @@ func ensureDefaultSociety(db *gorm.DB) error {
 
 	society := &models.PlatformSociety{
 		ID:                 DefaultSocietyID,
-		Name:               "New Sainath Apartment CHS Ltd",
+		Name:               "Aangan Housing Society",
 		NameMr:             "न्यू सई नाथ अपार्टमेंट सहकारी गृहनिर्माण संस्था",
 		RegistrationNumber: "BOM/HSG/0001",
-		Slug:               "sainath-apt-bhandup",
+		Slug:               "aangan-bhandup",
 		Address:            "Bhandup (W), Mumbai",
 		City:               "Mumbai",
 		PinCode:            "400078",
@@ -101,8 +184,8 @@ func backfillSocietyID(db *gorm.DB) error {
 		"soc_mitra_suggestions", "soc_mitra_suggestion_upvotes",
 		"soc_mitra_parking_slots",
 		"soc_mitra_maintenance_bills",
-		"soc_mitra_emergency_contacts",
-		"soc_mitra_push_subscriptions",
+		"emergency_contacts",
+		"push_subscriptions",
 		"soc_mitra_member_documents",
 		"soc_mitra_watchmen",
 		"soc_mitra_committee_todos",
@@ -217,7 +300,7 @@ func enableRLS(db *gorm.DB) error {
 		"soc_mitra_hall_bookings", "soc_mitra_inventory_items",
 		"soc_mitra_suggestions", "soc_mitra_suggestion_upvotes",
 		"soc_mitra_parking_slots", "soc_mitra_maintenance_bills",
-		"soc_mitra_emergency_contacts", "soc_mitra_push_subscriptions",
+		"emergency_contacts", "push_subscriptions",
 		"soc_mitra_member_documents", "soc_mitra_watchmen",
 		"soc_mitra_committee_todos", "soc_mitra_member_photos",
 		"soc_mitra_workflows", "soc_mitra_workflow_activities",

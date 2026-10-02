@@ -68,7 +68,7 @@ func (m *Manager) GenerateTokenPair(userID uuid.UUID, email, role, societyID, fl
 			ExpiresAt: jwt.NewNumericDate(accessExpiry),
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
-			Issuer:    "sainath-society",
+			Issuer:    "aangan",
 			Subject:   userID.String(),
 		},
 	}
@@ -83,7 +83,7 @@ func (m *Manager) GenerateTokenPair(userID uuid.UUID, email, role, societyID, fl
 	refreshClaims := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(refreshExpiry),
 		IssuedAt:  jwt.NewNumericDate(now),
-		Issuer:    "sainath-society",
+		Issuer:    "aangan",
 		Subject:   userID.String(),
 	}
 

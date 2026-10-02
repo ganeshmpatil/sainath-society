@@ -16,7 +16,7 @@ import (
 	jwtgo "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
-	"sainath-society/internal/repositories"
+	"aangan/internal/repositories"
 )
 
 // FCMService sends push notifications to Android/iOS devices via FCM HTTP v1 API.

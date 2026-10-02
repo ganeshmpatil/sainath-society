@@ -11,10 +11,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repository"
-	"sainath-society/pkg/jwt"
+	"aangan/internal/dto/response"
+	"aangan/internal/models"
+	"aangan/internal/repository"
+	"aangan/pkg/jwt"
 )
 
 var (

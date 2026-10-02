@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 // Notifier provides fire-and-forget helpers to enqueue email + WhatsApp

@@ -1,4 +1,4 @@
-# Sainath Society - Backend Implementation Plan (10 Days)
+# Aangan - Backend Implementation Plan (10 Days)
 
 ## Tech Stack
 - **Runtime**: Node.js with Express.js

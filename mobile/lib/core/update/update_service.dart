@@ -107,7 +107,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
 
     try {
       final dir = await getTemporaryDirectory();
-      final filePath = '${dir.path}/sainath-society-update.apk';
+      final filePath = '${dir.path}/aangan-update.apk';
 
       await Dio().download(
         widget.url,

@@ -223,7 +223,7 @@ class _SocietyRegistrationScreenState
                       _field(
                         controller: _societyName,
                         label: l.t('onboarding.societyName'),
-                        hint: 'New Sainath CHS Ltd.',
+                        hint: 'Aangan CHS Ltd.',
                         validator: _required,
                       ),
                       _field(

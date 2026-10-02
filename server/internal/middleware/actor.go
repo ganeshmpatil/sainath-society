@@ -7,9 +7,9 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"sainath-society/internal/dto/response"
-	"sainath-society/internal/models"
-	"sainath-society/internal/repositories"
+	"aangan/internal/dto/response"
+	"aangan/internal/models"
+	"aangan/internal/repositories"
 )
 
 const actorContextKey = "actorContext"
