@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -84,7 +85,9 @@ func (r *MemberRepository) Update(actor *ActorContext, id uuid.UUID, patch map[s
 		userPatch["mobile"] = v
 	}
 	if len(userPatch) > 0 {
-		r.db.Model(&models.User{}).Where("member_id = ?", id).Updates(userPatch)
+		if err := r.db.Model(&models.User{}).Where("member_id = ?", id).Updates(userPatch).Error; err != nil {
+			return fmt.Errorf("sync user record failed: %w", err)
+		}
 	}
 	return nil
 }

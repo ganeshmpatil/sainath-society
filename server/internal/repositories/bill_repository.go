@@ -120,7 +120,9 @@ func (r *BillRepository) GenerateForPeriod(actor *ActorContext, req BillGenerati
 			lineItems[i].BillID = bill.ID
 		}
 		if len(lineItems) > 0 {
-			r.db.Create(&lineItems)
+			if err := r.db.Create(&lineItems).Error; err != nil {
+				return created, skipped, fmt.Errorf("bill line items failed: %w", err)
+			}
 		}
 
 		created++

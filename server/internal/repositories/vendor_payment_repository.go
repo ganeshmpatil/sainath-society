@@ -120,7 +120,9 @@ func (r *VendorPaymentRepository) Create(actor *ActorContext, vp *models.VendorP
 				return fmt.Errorf("journal entry failed: %w", err)
 			}
 			vp.JournalEntryID = &entry.ID
-			tx.Model(vp).Update("journal_entry_id", entry.ID)
+			if err := tx.Model(vp).Update("journal_entry_id", entry.ID).Error; err != nil {
+				return fmt.Errorf("link journal entry failed: %w", err)
+			}
 		}
 
 		return nil

@@ -199,13 +199,17 @@ func (r *StaffRepository) BulkMarkAttendance(actor *ActorContext, date time.Time
 		records[i].MarkedByID = actor.MemberID
 		var existing models.StaffAttendance
 		if err := r.db.Where("staff_id = ? AND date = ?", records[i].StaffID, date).First(&existing).Error; err == nil {
-			r.db.Model(&existing).Updates(map[string]interface{}{
+			if err := r.db.Model(&existing).Updates(map[string]interface{}{
 				"status":  records[i].Status,
 				"in_time": records[i].InTime,
 				"out_time": records[i].OutTime,
-			})
+			}).Error; err != nil {
+				return marked, fmt.Errorf("update attendance failed: %w", err)
+			}
 		} else {
-			r.db.Create(&records[i])
+			if err := r.db.Create(&records[i]).Error; err != nil {
+				return marked, fmt.Errorf("create attendance failed: %w", err)
+			}
 		}
 		marked++
 	}

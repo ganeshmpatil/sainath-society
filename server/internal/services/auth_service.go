@@ -80,7 +80,7 @@ func (s *AuthService) Login(ctx context.Context, email, password, clientIP strin
 	// Get flat info
 	flatID := ""
 	flatNumber := ""
-	if member.Flat != nil {
+	if member.Flat != nil && member.FlatID != nil {
 		flatID = member.FlatID.String()
 		flatNumber = member.Flat.FlatNumber
 	}
@@ -177,7 +177,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*r
 	// Get flat info
 	flatID := ""
 	flatNumber := ""
-	if member.Flat != nil {
+	if member.Flat != nil && member.FlatID != nil {
 		flatID = member.FlatID.String()
 		flatNumber = member.Flat.FlatNumber
 	}
@@ -233,7 +233,7 @@ func (s *AuthService) GetCurrentUser(ctx context.Context, userID uuid.UUID) (*re
 
 	flatID := ""
 	flatNumber := ""
-	if member.Flat != nil {
+	if member.Flat != nil && member.FlatID != nil {
 		flatID = member.FlatID.String()
 		flatNumber = member.Flat.FlatNumber
 	}

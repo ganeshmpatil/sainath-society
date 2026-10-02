@@ -207,7 +207,10 @@ func (h *PaymentHandler) ListPayments(c *gin.Context) {
 
 func (h *PaymentHandler) createRazorpayOrder(amountPaise int64, receipt, notes string) (map[string]interface{}, error) {
 	body := fmt.Sprintf(`{"amount":%d,"currency":"INR","receipt":"%s","notes":{"billId":"%s"}}`, amountPaise, receipt, notes)
-	req, _ := http.NewRequest("POST", "https://api.razorpay.com/v1/orders", nil)
+	req, err := http.NewRequest("POST", "https://api.razorpay.com/v1/orders", nil)
+	if err != nil {
+		return nil, fmt.Errorf("create request failed: %w", err)
+	}
 	req.SetBasicAuth(h.rzpKeyID, h.rzpSecret)
 	req.Header.Set("Content-Type", "application/json")
 	req.Body = io.NopCloser(
