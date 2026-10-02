@@ -55,6 +55,7 @@ import '../features/audit/audit_screen.dart';
 import '../features/audit/audit_detail_screen.dart';
 import '../features/guard_patrol/guard_patrol_screen.dart';
 import '../features/analytics/analytics_screen.dart';
+import '../features/onboarding/society_registration_screen.dart';
 import '../shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -69,9 +70,10 @@ GoRouter buildRouter(AuthBloc authBloc) {
       final authState = authBloc.state;
       final isLoggedIn = authState is Authenticated;
       final goingToAuth = state.matchedLocation == '/login';
+      final goingToRegister = state.matchedLocation == '/register-society';
       final goingToChangePassword = state.matchedLocation == '/change-password';
 
-      if (!isLoggedIn && !goingToAuth) return '/login';
+      if (!isLoggedIn && !goingToAuth && !goingToRegister) return '/login';
       if (isLoggedIn && goingToAuth) return '/';
 
       // Force password change redirect
@@ -83,6 +85,7 @@ GoRouter buildRouter(AuthBloc authBloc) {
     },
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/register-society', builder: (_, __) => const SocietyRegistrationScreen()),
       GoRoute(
         path: '/change-password',
         builder: (_, state) => ChangePasswordScreen(

@@ -28,14 +28,19 @@ var (
 type AuthService struct {
 	userRepo   *repository.UserRepository
 	jwtManager *jwt.Manager
+	db         *gorm.DB
 }
 
 // NewAuthService creates a new auth service
-func NewAuthService(userRepo *repository.UserRepository, jwtManager *jwt.Manager) *AuthService {
-	return &AuthService{
+func NewAuthService(userRepo *repository.UserRepository, jwtManager *jwt.Manager, db ...*gorm.DB) *AuthService {
+	s := &AuthService{
 		userRepo:   userRepo,
 		jwtManager: jwtManager,
 	}
+	if len(db) > 0 {
+		s.db = db[0]
+	}
+	return s
 }
 
 // Login authenticates a user and returns tokens
@@ -85,8 +90,10 @@ func (s *AuthService) Login(ctx context.Context, email, password, clientIP strin
 
 	// Society context for multi-tenancy
 	societyID := ""
+	societyName := ""
 	if member.SocietyID != uuid.Nil {
 		societyID = member.SocietyID.String()
+		societyName = s.lookupSocietyName(ctx, member.SocietyID)
 	}
 
 	// Generate tokens
@@ -128,6 +135,8 @@ func (s *AuthService) Login(ctx context.Context, email, password, clientIP strin
 			Designation:        member.Designation,
 			FlatID:             flatID,
 			FlatNumber:         flatNumber,
+			SocietyID:          societyID,
+			SocietyName:        societyName,
 			Permissions:        permissions,
 			IsActive:           user.IsActive,
 			MustChangePassword: user.MustChangePassword,
@@ -229,6 +238,13 @@ func (s *AuthService) GetCurrentUser(ctx context.Context, userID uuid.UUID) (*re
 		flatNumber = member.Flat.FlatNumber
 	}
 
+	societyID := ""
+	societyName := ""
+	if member.SocietyID != uuid.Nil {
+		societyID = member.SocietyID.String()
+		societyName = s.lookupSocietyName(ctx, member.SocietyID)
+	}
+
 	permissions := models.GetPermissionsForRole(member.Role)
 
 	return &response.UserResponse{
@@ -240,6 +256,8 @@ func (s *AuthService) GetCurrentUser(ctx context.Context, userID uuid.UUID) (*re
 		Designation:        member.Designation,
 		FlatID:             flatID,
 		FlatNumber:         flatNumber,
+		SocietyID:          societyID,
+		SocietyName:        societyName,
 		Permissions:        permissions,
 		IsActive:           user.IsActive,
 		MustChangePassword: user.MustChangePassword,
@@ -311,6 +329,20 @@ func (s *AuthService) FindUserByMemberID(ctx context.Context, memberID uuid.UUID
 
 // avoid unused-import error if gorm is not referenced elsewhere in additions
 var _ = gorm.ErrRecordNotFound
+
+// lookupSocietyName fetches the society name from platform_societies table.
+func (s *AuthService) lookupSocietyName(ctx context.Context, societyID uuid.UUID) string {
+	if s.db == nil {
+		return ""
+	}
+	var name string
+	s.db.WithContext(ctx).
+		Table("platform_societies").
+		Select("name").
+		Where("id = ?", societyID).
+		Scan(&name)
+	return name
+}
 
 // hashToken creates SHA256 hash of token
 func hashToken(token string) string {

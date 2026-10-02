@@ -84,6 +84,11 @@ class _DashboardViewState extends State<_DashboardView> {
                               user?.name ?? '',
                               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                             ),
+                            if (user?.societyName.isNotEmpty == true)
+                              Text(
+                                user!.societyName,
+                                style: TextStyle(fontSize: 11, color: AppColors.textTertiary),
+                              ),
                           ],
                         ),
                       ),

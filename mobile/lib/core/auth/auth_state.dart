@@ -9,6 +9,8 @@ class UserInfo extends Equatable {
   final String designation;
   final String flatId;
   final String flatNumber;
+  final String societyId;
+  final String societyName;
   final bool isActive;
   final bool mustChangePassword;
   final List<String> permissions;
@@ -22,6 +24,8 @@ class UserInfo extends Equatable {
     required this.designation,
     required this.flatId,
     required this.flatNumber,
+    required this.societyId,
+    required this.societyName,
     required this.isActive,
     required this.mustChangePassword,
     required this.permissions,
@@ -39,6 +43,8 @@ class UserInfo extends Equatable {
       designation: json['designation'] ?? '',
       flatId: json['flatId'] ?? '',
       flatNumber: json['flatNumber'] ?? '',
+      societyId: json['societyId'] ?? '',
+      societyName: json['societyName'] ?? '',
       isActive: json['isActive'] ?? true,
       mustChangePassword: json['mustChangePassword'] ?? false,
       permissions: List<String>.from(json['permissions'] ?? []),
@@ -46,7 +52,7 @@ class UserInfo extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, email, role, flatNumber, mustChangePassword];
+  List<Object?> get props => [id, name, email, role, flatNumber, societyId, mustChangePassword];
 }
 
 sealed class AuthState extends Equatable {

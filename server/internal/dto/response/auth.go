@@ -12,6 +12,8 @@ type UserResponse struct {
 	Designation        string   `json:"designation,omitempty"`
 	FlatID             string   `json:"flatId,omitempty"`
 	FlatNumber         string   `json:"flatNumber,omitempty"`
+	SocietyID          string   `json:"societyId,omitempty"`
+	SocietyName        string   `json:"societyName,omitempty"`
 	Permissions        []string `json:"permissions"`
 	IsActive           bool     `json:"isActive"`
 	MustChangePassword bool     `json:"mustChangePassword"`

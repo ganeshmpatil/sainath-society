@@ -32,7 +32,7 @@ func SetupRoutes(
 	platformHandler := handlers.NewPlatformHandler(platformService)
 
 	// Services
-	authService := services.NewAuthService(userRepo, jwtManager)
+	authService := services.NewAuthService(userRepo, jwtManager, db)
 	otpService := services.NewOTPService(database.DB)
 	registrationService := services.NewRegistrationService(database.DB, otpService)
 

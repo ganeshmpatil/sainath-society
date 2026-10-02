@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -176,6 +177,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _submit,
                       );
                     },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Register society link
+                  RichText(
+                    text: TextSpan(
+                      text: l.t('onboarding.loginPrompt'),
+                      style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      children: [
+                        TextSpan(
+                          text: ' ${l.t('onboarding.registerLink')}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push('/register-society'),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
