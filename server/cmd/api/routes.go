@@ -26,7 +26,9 @@ func SetupRoutes(
 ) {
 	// Platform services (no society context)
 	platformRepo := repositories.NewPlatformRepository(db)
-	platformService := services.NewPlatformService(platformRepo, jwtManager)
+	// Build email sender for platform service (reuse the one from main if available)
+	var platformEmailSender services.EmailSender = services.NewMockEmailSender()
+	platformService := services.NewPlatformService(platformRepo, jwtManager, db, platformEmailSender)
 	platformHandler := handlers.NewPlatformHandler(platformService)
 
 	// Services

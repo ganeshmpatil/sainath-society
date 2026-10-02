@@ -152,16 +152,23 @@ func (h *PlatformHandler) ApproveRequest(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&body)
 
-	society, err := h.svc.ApproveRequest(id, adminID, body.Notes)
+	result, err := h.svc.ApproveRequest(id, adminID, body.Notes)
 	if err != nil {
 		if errors.Is(err, services.ErrRequestNotPending) {
 			c.JSON(http.StatusConflict, response.ErrorResponse{Error: err.Error(), Code: "NOT_PENDING"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to approve", Code: "INTERNAL_ERROR"})
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error(), Code: "PROVISIONING_FAILED"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"society": society, "message": "Society approved and provisioned"})
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Society approved and provisioned",
+		"society":      result.Society,
+		"admin":        result.Admin,
+		"wingsCreated": result.Wings,
+		"flatsCreated": result.Flats,
+		"tempPassword": result.TempPass,
+	})
 }
 
 func (h *PlatformHandler) RejectRequest(c *gin.Context) {
