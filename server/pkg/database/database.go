@@ -192,6 +192,9 @@ func Seed(db *gorm.DB) error {
 		return fmt.Errorf("failed to ensure wings: %w", err)
 	}
 
+	// Ensure platform admin exists (your login for the dashboard)
+	ensurePlatformAdmin(db)
+
 	// Ensure default important contacts exist
 	ensureDefaultImportantContacts(db)
 
@@ -485,5 +488,26 @@ func ensureDefaultBillingStructure(db *gorm.DB) {
 		log.Printf("Failed to seed charge heads: %v", err)
 	} else {
 		log.Printf("Seeded billing structure '%s' with %d charge heads", bs.Name, len(heads))
+	}
+}
+
+// ensurePlatformAdmin creates the initial platform admin for dashboard access.
+func ensurePlatformAdmin(db *gorm.DB) {
+	var count int64
+	db.Model(&models.PlatformAdmin{}).Count(&count)
+	if count > 0 {
+		return
+	}
+
+	admin := &models.PlatformAdmin{
+		Name:         "Ganesh Patil",
+		Email:        "ganesh.patil.31@gmail.com",
+		PasswordHash: hashPassword("Platform@123"),
+		IsActive:     true,
+	}
+	if err := db.Create(admin).Error; err != nil {
+		log.Printf("Failed to seed platform admin: %v", err)
+	} else {
+		log.Printf("Seeded platform admin: %s / Platform@123", admin.Email)
 	}
 }

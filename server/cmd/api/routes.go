@@ -24,6 +24,11 @@ func SetupRoutes(
 	vapidPublicKey string,
 	rzpKeyID, rzpKeySecret string,
 ) {
+	// Platform services (no society context)
+	platformRepo := repositories.NewPlatformRepository(db)
+	platformService := services.NewPlatformService(platformRepo, jwtManager)
+	platformHandler := handlers.NewPlatformHandler(platformService)
+
 	// Services
 	authService := services.NewAuthService(userRepo, jwtManager)
 	otpService := services.NewOTPService(database.DB)
@@ -101,6 +106,35 @@ func SetupRoutes(
 	{
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/refresh", authHandler.RefreshToken)
+	}
+
+	// ─── Platform Admin Routes ───────────────────────────────────────────
+	// Public: platform admin login + society onboarding submission
+	platform := api.Group("/platform")
+	{
+		platform.POST("/auth/login", platformHandler.Login)
+		platform.POST("/onboarding/submit", platformHandler.SubmitRequest)
+	}
+	// Protected: platform admin dashboard (requires PLATFORM_ADMIN role)
+	platformProtected := api.Group("/platform")
+	platformProtected.Use(middleware.AuthMiddleware(jwtManager))
+	platformProtected.Use(middleware.PlatformAdminOnly())
+	{
+		platformProtected.GET("/auth/me", platformHandler.GetMe)
+		platformProtected.GET("/dashboard", platformHandler.Dashboard)
+
+		platformProtected.GET("/requests", platformHandler.ListRequests)
+		platformProtected.GET("/requests/:id", platformHandler.GetRequest)
+		platformProtected.POST("/requests/:id/approve", platformHandler.ApproveRequest)
+		platformProtected.POST("/requests/:id/reject", platformHandler.RejectRequest)
+		platformProtected.POST("/requests/:id/info", platformHandler.RequestMoreInfo)
+
+		platformProtected.GET("/societies", platformHandler.ListSocieties)
+		platformProtected.GET("/societies/:id", platformHandler.GetSociety)
+		platformProtected.POST("/societies/:id/suspend", platformHandler.SuspendSociety)
+		platformProtected.POST("/societies/:id/activate", platformHandler.ActivateSociety)
+
+		platformProtected.GET("/audit-log", platformHandler.AuditLog)
 	}
 
 	// Registration routes (public)
