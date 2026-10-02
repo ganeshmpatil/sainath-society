@@ -15,9 +15,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   api.init();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Initialize Firebase (wrapped in try-catch for devices without Google Play Services)
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (_) {
+    // Firebase not available — app works without push notifications
+  }
 
   runApp(
     MultiBlocProvider(

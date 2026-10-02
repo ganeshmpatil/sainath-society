@@ -13,9 +13,10 @@ class PushNotificationService {
   PushNotificationService._();
   static final instance = PushNotificationService._();
 
-  final _messaging = FirebaseMessaging.instance;
+  FirebaseMessaging? _messaging;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   String? _fcmToken;
+  bool _firebaseAvailable = false;
 
   static const _channel = AndroidNotificationChannel(
     'society_notifications',
@@ -26,6 +27,14 @@ class PushNotificationService {
 
   /// Initialize Firebase + notification channels. Call after Firebase.initializeApp().
   Future<void> init() async {
+    try {
+      _messaging = FirebaseMessaging.instance;
+      _firebaseAvailable = true;
+    } catch (_) {
+      debugPrint('Firebase not available — push notifications disabled');
+      return;
+    }
+
     // Create Android notification channel
     await _localNotifications
         .resolvePlatformSpecificImplementation<
@@ -40,7 +49,7 @@ class PushNotificationService {
     );
 
     // Request permission (Android 13+)
-    final settings = await _messaging.requestPermission(
+    final settings = await _messaging!.requestPermission(
       alert: true,
       badge: true,
       sound: true,
@@ -52,13 +61,13 @@ class PushNotificationService {
     }
 
     // Get FCM token and register with server
-    _fcmToken = await _messaging.getToken();
+    _fcmToken = await _messaging!.getToken();
     if (_fcmToken != null) {
       await _registerToken(_fcmToken!);
     }
 
     // Listen for token refresh
-    _messaging.onTokenRefresh.listen((token) {
+    _messaging!.onTokenRefresh.listen((token) {
       _fcmToken = token;
       _registerToken(token);
     });
@@ -70,7 +79,7 @@ class PushNotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
 
     // Check if app was opened from a terminated state notification
-    final initialMessage = await _messaging.getInitialMessage();
+    final initialMessage = await _messaging!.getInitialMessage();
     if (initialMessage != null) {
       _handleMessageTap(initialMessage);
     }
@@ -92,6 +101,7 @@ class PushNotificationService {
 
   /// Unregister token on logout.
   Future<void> unregister() async {
+    if (!_firebaseAvailable) return;
     if (_fcmToken != null) {
       try {
         await api.post('/push/unregister-device', data: {'token': _fcmToken});

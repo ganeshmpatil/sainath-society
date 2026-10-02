@@ -1,4 +1,4 @@
-package com.sainathsociety.sainath_society
+package com.aangansociety.aangan_society
 
 import io.flutter.embedding.android.FlutterActivity
 
