@@ -25,7 +25,10 @@ class DashboardData extends Equatable {
   });
 
   @override
-  List<Object?> get props => [memberCount, flatCount, grievanceCount, pendingAmount];
+  List<Object?> get props => [
+    memberCount, flatCount, grievanceCount, pendingAmount,
+    unpaidCount, recentNotices, activeGrievances, upcomingEvents,
+  ];
 }
 
 sealed class DashboardState extends Equatable {

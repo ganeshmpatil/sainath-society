@@ -63,7 +63,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         message = (e.response!.data as Map)['error']?.toString() ?? message;
       }
       emit(AuthError(message));
-      emit(const Unauthenticated());
     }
   }
 

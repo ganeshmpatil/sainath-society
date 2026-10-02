@@ -52,7 +52,11 @@ class UserInfo extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, email, role, flatNumber, societyId, mustChangePassword];
+  List<Object?> get props => [
+    id, name, email, phone, role, designation,
+    flatId, flatNumber, societyId, societyName,
+    isActive, mustChangePassword, permissions,
+  ];
 }
 
 sealed class AuthState extends Equatable {

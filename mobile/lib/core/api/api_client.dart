@@ -28,14 +28,23 @@ class ApiClient {
       onError: (error, handler) async {
         if (error.response?.statusCode == 401 && _accessToken != null) {
           // Try refresh — use shared future to avoid concurrent refresh calls
-          try {
-            final refreshed = await _doRefresh();
-            if (refreshed) {
-              error.requestOptions.headers['Authorization'] = 'Bearer $_accessToken';
+          final refreshed = await _doRefresh();
+          if (refreshed) {
+            error.requestOptions.headers['Authorization'] = 'Bearer $_accessToken';
+            try {
               final response = await _dio.fetch(error.requestOptions);
               return handler.resolve(response);
+            } catch (retryError) {
+              return handler.next(retryError is DioException
+                  ? retryError
+                  : DioException(requestOptions: error.requestOptions, error: retryError));
             }
-          } catch (_) {}
+          }
+          // Refresh failed — clear tokens so AuthBloc detects logout
+          _accessToken = null;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('access_token');
+          await prefs.remove('refresh_token');
         }
         handler.next(error);
       },
