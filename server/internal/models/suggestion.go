@@ -20,6 +20,7 @@ const (
 // Suggestion is a member-raised idea for society improvement.
 // Visible to everyone; each member can upvote once.
 type Suggestion struct {
+	TenantScope
 	ID          uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string           `gorm:"type:varchar(300);not null" json:"title"`
 	TitleMr     string           `gorm:"type:varchar(300)" json:"titleMr,omitempty"`
@@ -53,6 +54,7 @@ func (Suggestion) TableName() string { return "soc_mitra_suggestions" }
 
 // SuggestionUpvote tracks who upvoted what (one row per member per suggestion).
 type SuggestionUpvote struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	SuggestionID uuid.UUID `gorm:"type:uuid;not null;index;uniqueIndex:uq_suggestion_member" json:"suggestionId"`
 	MemberID     uuid.UUID `gorm:"type:uuid;not null;index;uniqueIndex:uq_suggestion_member" json:"memberId"`

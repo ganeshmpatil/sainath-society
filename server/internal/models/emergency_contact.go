@@ -19,6 +19,7 @@ const (
 
 // EmergencyContact stores important phone numbers visible to all members.
 type EmergencyContact struct {
+	TenantScope
 	ID         uuid.UUID       `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name       string          `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr     string          `gorm:"type:varchar(100)" json:"nameMr,omitempty"`

@@ -11,8 +11,9 @@ import (
 // Members must complete registration to create login credentials
 type Member struct {
 	ID        uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	SocietyID uuid.UUID  `gorm:"type:uuid;not null;index:idx_society_id;uniqueIndex:idx_society_member_mobile" json:"societyId"`
 	Name      string     `gorm:"type:varchar(100);not null" json:"name"`
-	Mobile    string     `gorm:"type:varchar(15);uniqueIndex;not null" json:"mobile"`
+	Mobile    string     `gorm:"type:varchar(15);not null;uniqueIndex:idx_society_member_mobile" json:"mobile"`
 	Email     string     `gorm:"type:varchar(100)" json:"email,omitempty"`
 	FlatID    *uuid.UUID `gorm:"type:uuid" json:"flatId,omitempty"`
 	Role      Role       `gorm:"type:varchar(20);not null;default:'MEMBER'" json:"role"`

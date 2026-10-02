@@ -29,6 +29,7 @@ const (
 
 // Event represents an upcoming society event (open to all members).
 type Event struct {
+	TenantScope
 	ID          uuid.UUID   `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string      `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr     string      `gorm:"type:varchar(200)" json:"titleMr,omitempty"`
@@ -73,6 +74,7 @@ const (
 
 // EventRSVP captures attendee confirmation
 type EventRSVP struct {
+	TenantScope
 	ID         uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	EventID    uuid.UUID  `gorm:"type:uuid;not null;index;uniqueIndex:uq_event_member" json:"eventId"`
 	MemberID   uuid.UUID  `gorm:"type:uuid;not null;index;uniqueIndex:uq_event_member" json:"memberId"`

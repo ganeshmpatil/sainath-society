@@ -83,11 +83,18 @@ func (s *AuthService) Login(ctx context.Context, email, password, clientIP strin
 	// Get permissions
 	permissions := models.GetPermissionsForRole(member.Role)
 
+	// Society context for multi-tenancy
+	societyID := ""
+	if member.SocietyID != uuid.Nil {
+		societyID = member.SocietyID.String()
+	}
+
 	// Generate tokens
 	tokenPair, err := s.jwtManager.GenerateTokenPair(
 		user.ID,
 		user.Email,
 		string(member.Role),
+		societyID,
 		flatID,
 		flatNumber,
 		permissions,
@@ -169,11 +176,18 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*r
 	// Get permissions
 	permissions := models.GetPermissionsForRole(member.Role)
 
+	// Society context for multi-tenancy
+	societyID := ""
+	if member.SocietyID != uuid.Nil {
+		societyID = member.SocietyID.String()
+	}
+
 	// Generate new token pair (token rotation)
 	tokenPair, err := s.jwtManager.GenerateTokenPair(
 		user.ID,
 		user.Email,
 		string(member.Role),
+		societyID,
 		flatID,
 		flatNumber,
 		permissions,

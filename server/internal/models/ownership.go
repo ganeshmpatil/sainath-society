@@ -20,6 +20,7 @@ const (
 // MemberOwnership records a member's legal relationship to a flat.
 // One flat may have multiple ownership rows (owner + co-owners + nominees).
 type MemberOwnership struct {
+	TenantScope
 	ID            uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MemberID      uuid.UUID     `gorm:"type:uuid;not null;index" json:"memberId"`
 	FlatID        uuid.UUID     `gorm:"type:uuid;not null;index" json:"flatId"`
@@ -70,6 +71,7 @@ const (
 
 // HousingDocument stores uploaded documents linked to an ownership record
 type HousingDocument struct {
+	TenantScope
 	ID          uuid.UUID    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	OwnershipID uuid.UUID    `gorm:"type:uuid;not null;index" json:"ownershipId"`
 	DocType     DocumentType `gorm:"type:varchar(40);not null" json:"docType"`

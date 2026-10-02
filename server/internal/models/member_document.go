@@ -25,6 +25,7 @@ const (
 // data directly in the database. Each member sees only their own documents;
 // admins can view all.
 type MemberDocument struct {
+	TenantScope
 	ID       uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MemberID uuid.UUID     `gorm:"type:uuid;not null;index" json:"memberId"`
 	FlatID   *uuid.UUID    `gorm:"type:uuid;index" json:"flatId,omitempty"`

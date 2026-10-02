@@ -52,6 +52,7 @@ const (
 // FinancialTransaction records a single money movement.
 // Row-level access: MemberID == actor (own transactions) + ADMIN (all).
 type FinancialTransaction struct {
+	TenantScope
 	ID         uuid.UUID            `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ReceiptNo  string               `gorm:"type:varchar(30);uniqueIndex" json:"receiptNo,omitempty"`
 

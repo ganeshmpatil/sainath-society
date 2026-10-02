@@ -21,6 +21,7 @@ const (
 // InventoryItem represents a society asset (chairs, tables, gym equipment,
 // gardening tools etc). All members can view the list; only admins mutate it.
 type InventoryItem struct {
+	TenantScope
 	ID          uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name        string        `gorm:"type:varchar(200);not null" json:"name"`
 	NameMr      string        `gorm:"type:varchar(200)" json:"nameMr,omitempty"`

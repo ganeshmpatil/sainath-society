@@ -32,6 +32,7 @@ const (
 
 // Visitor represents a visitor entry at the society gate.
 type Visitor struct {
+	TenantScope
 	ID          uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name        string        `gorm:"type:varchar(100);not null" json:"name"`
 	Phone       string        `gorm:"type:varchar(15)" json:"phone,omitempty"`
@@ -66,6 +67,7 @@ func (Visitor) TableName() string { return "soc_mitra_visitors" }
 
 // FrequentVisitor is a pre-approved recurring visitor (maid, cook, driver, etc.).
 type FrequentVisitor struct {
+	TenantScope
 	ID          uuid.UUID   `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name        string      `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr      string      `gorm:"type:varchar(100)" json:"nameMr,omitempty"`

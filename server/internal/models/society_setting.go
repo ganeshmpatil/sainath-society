@@ -10,6 +10,7 @@ import (
 // SocietySetting stores key-value configuration for the society.
 // Used for GST details, bank info, and other configurable values.
 type SocietySetting struct {
+	TenantScope
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Key       string    `gorm:"type:varchar(50);not null;uniqueIndex" json:"key"`
 	Value     string    `gorm:"type:text;not null" json:"value"`

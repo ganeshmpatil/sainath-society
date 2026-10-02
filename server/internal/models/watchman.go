@@ -10,6 +10,7 @@ import (
 // Watchman represents a security guard assigned to the society.
 // Admin-only create/update/delete; all members can read.
 type Watchman struct {
+	TenantScope
 	ID            uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name          string    `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr        string    `gorm:"type:varchar(100)" json:"nameMr,omitempty"`

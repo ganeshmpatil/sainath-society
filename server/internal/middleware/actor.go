@@ -48,14 +48,28 @@ func ActorContextMiddleware(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Parse society ID from JWT claims
+		societyID := uuid.Nil
+		if sid := c.GetString("userSocietyID"); sid != "" {
+			if parsed, err := uuid.Parse(sid); err == nil {
+				societyID = parsed
+			}
+		}
+
 		actor := &repositories.ActorContext{
-			UserID:   user.ID,
-			MemberID: user.MemberID,
-			Role:     models.Role(c.GetString("userRole")),
+			UserID:    user.ID,
+			MemberID:  user.MemberID,
+			SocietyID: societyID,
+			Role:      models.Role(c.GetString("userRole")),
 		}
 		if user.Member != nil && user.Member.FlatID != nil {
 			flatID := *user.Member.FlatID
 			actor.FlatID = &flatID
+		}
+
+		// Set PostgreSQL session variable for RLS defense-in-depth
+		if societyID != uuid.Nil {
+			db.Exec("SET LOCAL app.current_society_id = ?", societyID.String())
 		}
 
 		c.Set(actorContextKey, actor)

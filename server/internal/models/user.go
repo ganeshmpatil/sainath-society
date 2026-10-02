@@ -18,12 +18,13 @@ const (
 // User represents login credentials for a registered member
 type User struct {
 	ID           uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	Email        string     `gorm:"type:varchar(255);uniqueIndex;not null" json:"email"`
-	Mobile       string     `gorm:"type:varchar(15);uniqueIndex;not null" json:"mobile"`
+	SocietyID    uuid.UUID  `gorm:"type:uuid;not null;index:idx_society_id;uniqueIndex:idx_society_user_email;uniqueIndex:idx_society_user_mobile;uniqueIndex:idx_society_user_member" json:"societyId"`
+	Email        string     `gorm:"type:varchar(255);not null;uniqueIndex:idx_society_user_email" json:"email"`
+	Mobile       string     `gorm:"type:varchar(15);not null;uniqueIndex:idx_society_user_mobile" json:"mobile"`
 	PasswordHash string     `gorm:"type:varchar(255);not null" json:"-"`
 
 	// Link to pre-registered member
-	MemberID     uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex" json:"memberId"`
+	MemberID     uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_society_user_member" json:"memberId"`
 
 	IsActive     bool       `gorm:"default:true" json:"isActive"`
 

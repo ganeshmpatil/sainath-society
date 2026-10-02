@@ -43,6 +43,7 @@ const (
 
 // HelpdeskTicket represents a helpdesk / internal messaging ticket.
 type HelpdeskTicket struct {
+	TenantScope
 	ID           uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	TicketNo     string           `gorm:"type:varchar(10);uniqueIndex;not null" json:"ticketNo"`
 	Subject      string           `gorm:"type:varchar(200);not null" json:"subject"`
@@ -73,6 +74,7 @@ func (HelpdeskTicket) TableName() string { return "soc_mitra_helpdesk_tickets" }
 
 // HelpdeskMessage is a single message/note within a ticket thread.
 type HelpdeskMessage struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	TicketID   uuid.UUID `gorm:"type:uuid;not null;index" json:"ticketId"`
 	SenderID   uuid.UUID `gorm:"type:uuid;not null" json:"senderId"`

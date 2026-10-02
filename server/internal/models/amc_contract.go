@@ -35,6 +35,7 @@ const (
 
 // AMCContract represents a vendor service contract (Annual Maintenance Contract).
 type AMCContract struct {
+	TenantScope
 	ID             uuid.UUID         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	VendorID       uuid.UUID         `gorm:"type:uuid;not null;index" json:"vendorId"`
 	ServiceType    ServiceType       `gorm:"type:varchar(30);not null" json:"serviceType"`
@@ -65,6 +66,7 @@ func (AMCContract) TableName() string { return "soc_mitra_amc_contracts" }
 
 // ServiceLog records each service visit under a contract.
 type ServiceLog struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ContractID uuid.UUID `gorm:"type:uuid;not null;index" json:"contractId"`
 	ServiceDate time.Time `gorm:"not null" json:"serviceDate"`

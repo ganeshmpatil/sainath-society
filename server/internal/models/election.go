@@ -30,6 +30,7 @@ const (
 
 // Election represents a society committee election.
 type Election struct {
+	TenantScope
 	ID                  uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title               string         `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr             string         `gorm:"type:varchar(200)" json:"titleMr,omitempty"`
@@ -60,6 +61,7 @@ func (Election) TableName() string { return "soc_mitra_elections" }
 
 // ElectionPosition represents a position being contested in an election.
 type ElectionPosition struct {
+	TenantScope
 	ID            uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ElectionID    uuid.UUID `gorm:"type:uuid;not null;index" json:"electionId"`
 	Title         string    `gorm:"type:varchar(100);not null" json:"title"`
@@ -80,6 +82,7 @@ func (ElectionPosition) TableName() string { return "soc_mitra_election_position
 
 // ElectionCandidate represents a member standing for a position.
 type ElectionCandidate struct {
+	TenantScope
 	ID           uuid.UUID       `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ElectionID   uuid.UUID       `gorm:"type:uuid;not null;index" json:"electionId"`
 	PositionID   uuid.UUID       `gorm:"type:uuid;not null;index" json:"positionId"`
@@ -103,6 +106,7 @@ func (ElectionCandidate) TableName() string { return "soc_mitra_election_candida
 
 // ElectionVote represents a single vote cast by a member for a candidate.
 type ElectionVote struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ElectionID  uuid.UUID `gorm:"type:uuid;not null;index" json:"electionId"`
 	PositionID  uuid.UUID `gorm:"type:uuid;not null;index" json:"positionId"`

@@ -21,6 +21,7 @@ const (
 // BillingStructure defines the template for monthly bill generation.
 // Only one structure should be active at a time.
 type BillingStructure struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name         string    `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr       string    `gorm:"type:varchar(100)" json:"nameMr,omitempty"`
@@ -47,6 +48,7 @@ func (BillingStructure) TableName() string { return "soc_mitra_billing_structure
 // ChargeHead is a single line-item type within a billing structure
 // (e.g., Maintenance @ ₹3/sqft, Water @ ₹200 fixed).
 type ChargeHead struct {
+	TenantScope
 	ID                 uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	BillingStructureID uuid.UUID  `gorm:"type:uuid;not null;index" json:"billingStructureId"`
 	Name               string     `gorm:"type:varchar(100);not null" json:"name"`
@@ -72,6 +74,7 @@ func (ChargeHead) TableName() string { return "soc_mitra_charge_heads" }
 
 // BillLineItem stores per-charge breakdown for a generated bill.
 type BillLineItem struct {
+	TenantScope
 	ID           uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	BillID       uuid.UUID  `gorm:"type:uuid;not null;index" json:"billId"`
 	ChargeHeadID *uuid.UUID `gorm:"type:uuid" json:"chargeHeadId,omitempty"` // null for arrears/interest

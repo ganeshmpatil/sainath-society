@@ -33,6 +33,7 @@ const (
 // Workflow is a structured plan with ordered activities.
 // When IsTemplate is true it acts as a reusable blueprint.
 type Workflow struct {
+	TenantScope
 	ID            uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title         string           `gorm:"type:varchar(300);not null" json:"title"`
 	TitleMr       string           `gorm:"type:varchar(300)" json:"titleMr,omitempty"`
@@ -92,6 +93,7 @@ const (
 
 // WorkflowActivity is a single step within a workflow.
 type WorkflowActivity struct {
+	TenantScope
 	ID            uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	WorkflowID    uuid.UUID      `gorm:"type:uuid;not null;index" json:"workflowId"`
 	Title         string         `gorm:"type:varchar(300);not null" json:"title"`
@@ -129,6 +131,7 @@ func (WorkflowActivity) TableName() string { return "soc_mitra_workflow_activiti
 // ─── Activity Comment ────────────────────────────────────────────
 
 type WorkflowActivityComment struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ActivityID uuid.UUID `gorm:"type:uuid;not null;index" json:"activityId"`
 	MemberID   uuid.UUID `gorm:"type:uuid;not null" json:"memberId"`
@@ -149,6 +152,7 @@ func (WorkflowActivityComment) TableName() string { return "soc_mitra_workflow_a
 // ─── Activity Attachment ─────────────────────────────────────────
 
 type WorkflowActivityAttachment struct {
+	TenantScope
 	ID             uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ActivityID     uuid.UUID `gorm:"type:uuid;not null;index" json:"activityId"`
 	FileName       string    `gorm:"type:varchar(255);not null" json:"fileName"`
@@ -175,6 +179,7 @@ func (WorkflowActivityAttachment) TableName() string {
 // ─── Audit Log ───────────────────────────────────────────────────
 
 type WorkflowAuditLog struct {
+	TenantScope
 	ID          uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	WorkflowID  uuid.UUID  `gorm:"type:uuid;not null;index" json:"workflowId"`
 	ActivityID  *uuid.UUID `gorm:"type:uuid;index" json:"activityId,omitempty"`

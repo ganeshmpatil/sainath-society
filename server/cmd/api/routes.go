@@ -122,11 +122,13 @@ func SetupRoutes(
 		authProtected.POST("/admin-reset-password", authHandler.AdminResetPassword)
 	}
 
-	// Protected soc_mitra_* routes — every route below passes through both
-	// AuthMiddleware (JWT validation) and ActorContextMiddleware (builds the
-	// ActorContext used by repositories for row-level ACL).
+	// Protected soc_mitra_* routes — every route below passes through:
+	// 1. AuthMiddleware (JWT validation)
+	// 2. TenantMiddleware (ensures society context exists in token)
+	// 3. ActorContextMiddleware (builds ActorContext with SocietyID for row-level ACL + sets RLS session var)
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware(jwtManager))
+	protected.Use(middleware.TenantMiddleware(db))
 	protected.Use(middleware.ActorContextMiddleware(db))
 	{
 		// Grievances — members see own; admins see all.

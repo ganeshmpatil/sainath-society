@@ -11,6 +11,7 @@ import (
 // When present, the bill generator uses the override rate instead of the default.
 // Setting Exempt=true skips the charge entirely for this flat.
 type FlatChargeOverride struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	FlatID       uuid.UUID `gorm:"type:uuid;not null;index:idx_flat_charge,unique" json:"flatId"`
 	ChargeHeadID uuid.UUID `gorm:"type:uuid;not null;index:idx_flat_charge,unique" json:"chargeHeadId"`

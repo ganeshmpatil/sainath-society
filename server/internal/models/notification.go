@@ -30,6 +30,7 @@ const (
 // Notification is an outbound alert targeted at a specific member
 // (used for WhatsApp, SMS, Email, push, in-app).
 type Notification struct {
+	TenantScope
 	ID          uuid.UUID           `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	RecipientID uuid.UUID           `gorm:"type:uuid;not null;index" json:"recipientId"`
 	Channel     NotificationChannel `gorm:"type:varchar(20);not null" json:"channel"`
@@ -70,6 +71,7 @@ func (Notification) TableName() string { return "soc_mitra_notifications" }
 
 // NotificationTemplate holds reusable templated message bodies (EN + MR).
 type NotificationTemplate struct {
+	TenantScope
 	ID          uuid.UUID           `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Code        string              `gorm:"type:varchar(50);uniqueIndex;not null" json:"code"` // e.g. "TASK_REMINDER"
 	Channel     NotificationChannel `gorm:"type:varchar(20);not null" json:"channel"`

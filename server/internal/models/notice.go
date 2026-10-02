@@ -20,6 +20,7 @@ const (
 
 // Notice is a society-wide broadcast readable by all members.
 type Notice struct {
+	TenantScope
 	ID           uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title        string         `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr      string         `gorm:"type:varchar(200)" json:"titleMr,omitempty"`

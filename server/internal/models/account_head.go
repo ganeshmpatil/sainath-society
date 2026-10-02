@@ -20,6 +20,7 @@ const (
 // AccountHead represents a single node in the Chart of Accounts.
 // Supports a tree structure via ParentID for grouping (e.g. Assets → Bank Accounts → SBI Savings).
 type AccountHead struct {
+	TenantScope
 	ID       uuid.UUID   `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Code     string      `gorm:"type:varchar(20);uniqueIndex;not null" json:"code"`
 	Name     string      `gorm:"type:varchar(150);not null" json:"name"`

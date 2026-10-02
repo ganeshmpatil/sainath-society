@@ -10,7 +10,8 @@ import (
 // Wing represents a building wing
 type Wing struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	Name      string    `gorm:"type:varchar(10);not null;uniqueIndex" json:"name"`
+	SocietyID uuid.UUID `gorm:"type:uuid;not null;index:idx_society_id;uniqueIndex:idx_society_wing_name" json:"societyId"`
+	Name      string    `gorm:"type:varchar(10);not null;uniqueIndex:idx_society_wing_name" json:"name"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
@@ -22,7 +23,8 @@ func (Wing) TableName() string {
 // Flat represents a residential unit
 type Flat struct {
 	ID           uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	FlatNumber   string     `gorm:"type:varchar(20);not null;uniqueIndex" json:"flatNumber"`
+	SocietyID    uuid.UUID  `gorm:"type:uuid;not null;index:idx_society_id;uniqueIndex:idx_society_flat_number" json:"societyId"`
+	FlatNumber   string     `gorm:"type:varchar(20);not null;uniqueIndex:idx_society_flat_number" json:"flatNumber"`
 	WingID       *uuid.UUID `gorm:"type:uuid" json:"wingId,omitempty"`
 	Floor        int        `gorm:"not null" json:"floor"`
 	AreaSqft     float64    `gorm:"type:decimal(10,2)" json:"areaSqft"`

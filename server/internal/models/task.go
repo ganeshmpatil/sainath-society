@@ -39,6 +39,7 @@ const (
 // Task is a pending to-do owned by a society member or admin.
 // Row-level access: OwnerMemberID + AssignedByID + ADMIN.
 type Task struct {
+	TenantScope
 	ID          uuid.UUID    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string       `gorm:"type:varchar(300);not null" json:"title"`
 	TitleMr     string       `gorm:"type:varchar(300)" json:"titleMr,omitempty"`

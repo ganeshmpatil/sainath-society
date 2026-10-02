@@ -10,6 +10,7 @@ import (
 // ByLaw represents a single rule/clause in the society bylaws.
 // Visible to all members (PUBLIC); editable only by admins.
 type ByLaw struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Section      string    `gorm:"type:varchar(20);not null;index" json:"section"` // e.g. "3.2.1"
 	Title        string    `gorm:"type:varchar(300);not null" json:"title"`
@@ -40,6 +41,7 @@ func (ByLaw) TableName() string { return "soc_mitra_bylaws" }
 
 // ByLawAmendmentLog keeps a historical trail of amendments for audit.
 type ByLawAmendmentLog struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ByLawID    uuid.UUID `gorm:"type:uuid;not null;index" json:"bylawId"`
 	OldContent string    `gorm:"type:text" json:"oldContent"`

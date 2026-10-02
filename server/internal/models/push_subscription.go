@@ -10,6 +10,7 @@ import (
 // PushSubscription stores a push subscription for a member's device.
 // Platform distinguishes web push (VAPID) from mobile push (FCM).
 type PushSubscription struct {
+	TenantScope
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MemberID  uuid.UUID `gorm:"type:uuid;not null;index" json:"memberId"`
 	Platform  string    `gorm:"type:varchar(10);not null;default:'web'" json:"platform"` // "web" or "fcm"

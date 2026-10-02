@@ -20,6 +20,7 @@ const (
 // MaintenanceBill is a monthly/quarterly bill raised per flat.
 // Unique on (flat_id, billing_period) so duplicate generation is impossible.
 type MaintenanceBill struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	BillNo      string    `gorm:"type:varchar(30);uniqueIndex;not null" json:"billNo"`
 

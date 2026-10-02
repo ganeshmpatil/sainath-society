@@ -28,6 +28,7 @@ const (
 
 // Meeting captures a society meeting with attendees, MoM and action items.
 type Meeting struct {
+	TenantScope
 	ID          uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string        `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr     string        `gorm:"type:varchar(200)" json:"titleMr,omitempty"`
@@ -83,6 +84,7 @@ const (
 
 // MeetingAttendee records attendance for each member
 type MeetingAttendee struct {
+	TenantScope
 	ID        uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MeetingID uuid.UUID        `gorm:"type:uuid;not null;index;uniqueIndex:uq_meeting_member" json:"meetingId"`
 	MemberID  uuid.UUID        `gorm:"type:uuid;not null;index;uniqueIndex:uq_meeting_member" json:"memberId"`
@@ -109,6 +111,7 @@ const (
 
 // MeetingActionItem is a to-do generated from a meeting; links to the Task system.
 type MeetingActionItem struct {
+	TenantScope
 	ID           uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MeetingID    uuid.UUID        `gorm:"type:uuid;not null;index" json:"meetingId"`
 	Title        string           `gorm:"type:varchar(300);not null" json:"title"`
@@ -128,6 +131,7 @@ func (MeetingActionItem) TableName() string { return "soc_mitra_meeting_action_i
 
 // MeetingDocument links documents to a meeting (agenda PDF, presentations, signed MoM)
 type MeetingDocument struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	MeetingID  uuid.UUID `gorm:"type:uuid;not null;index" json:"meetingId"`
 	DocumentID uuid.UUID `gorm:"type:uuid;not null;index" json:"documentId"`

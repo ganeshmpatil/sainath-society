@@ -20,6 +20,7 @@ const (
 // ParkingSlot represents a physical parking space in the society.
 // AllocatedTo* fields are nullable: a slot may be unassigned.
 type ParkingSlot struct {
+	TenantScope
 	ID          uuid.UUID       `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	SlotNumber  string          `gorm:"type:varchar(20);uniqueIndex;not null" json:"slotNumber"`
 	SlotType    ParkingSlotType `gorm:"type:varchar(20);not null" json:"slotType"`

@@ -31,6 +31,7 @@ const (
 
 // Staff represents a society-employed worker.
 type Staff struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name         string    `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr       string    `gorm:"type:varchar(100)" json:"nameMr,omitempty"`
@@ -65,6 +66,7 @@ func (Staff) TableName() string { return "soc_mitra_staff" }
 
 // StaffAttendance records daily attendance.
 type StaffAttendance struct {
+	TenantScope
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	StaffID   uuid.UUID `gorm:"type:uuid;not null;index:idx_staff_date,unique" json:"staffId"`
 	Date      time.Time `gorm:"type:date;not null;index:idx_staff_date,unique" json:"date"`
@@ -89,6 +91,7 @@ func (StaffAttendance) TableName() string { return "soc_mitra_staff_attendance" 
 
 // StaffSalaryPayment records monthly salary disbursement.
 type StaffSalaryPayment struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	StaffID     uuid.UUID `gorm:"type:uuid;not null;index" json:"staffId"`
 	Month       string    `gorm:"type:varchar(7);not null" json:"month"` // 2026-09

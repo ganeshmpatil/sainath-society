@@ -28,6 +28,7 @@ const (
 // BillPayment tracks each individual payment made against a maintenance bill.
 // A bill can have multiple payments (partial payments).
 type BillPayment struct {
+	TenantScope
 	ID     uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	BillID uuid.UUID `gorm:"type:uuid;not null;index" json:"billId"`
 

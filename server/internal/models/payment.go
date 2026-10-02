@@ -20,6 +20,7 @@ const (
 
 // PaymentOrder tracks a Razorpay order linked to a maintenance bill.
 type PaymentOrder struct {
+	TenantScope
 	ID uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 
 	BillID   uuid.UUID `gorm:"type:uuid;not null;index" json:"billId"`
@@ -55,6 +56,7 @@ func (PaymentOrder) TableName() string { return "soc_mitra_payment_orders" }
 
 // SocietyBankConfig stores society bank details (displayed on payment screens).
 type SocietyBankConfig struct {
+	TenantScope
 	ID            uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	AccountName   string    `gorm:"type:varchar(200);not null" json:"accountName"`
 	AccountNumber string    `gorm:"type:varchar(20);not null" json:"accountNumber"`

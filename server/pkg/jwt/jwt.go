@@ -18,6 +18,7 @@ type Claims struct {
 	UserID      uuid.UUID `json:"sub"`
 	Email       string    `json:"email"`
 	Role        string    `json:"role"`
+	SocietyID   string    `json:"societyId,omitempty"`
 	FlatID      string    `json:"flatId,omitempty"`
 	FlatNumber  string    `json:"flatNumber,omitempty"`
 	Permissions []string  `json:"permissions"`
@@ -49,7 +50,7 @@ func NewManager(secret string, accessExpiry, refreshExpiry time.Duration) *Manag
 }
 
 // GenerateTokenPair generates access and refresh tokens
-func (m *Manager) GenerateTokenPair(userID uuid.UUID, email, role, flatID, flatNumber string, permissions []string) (*TokenPair, error) {
+func (m *Manager) GenerateTokenPair(userID uuid.UUID, email, role, societyID, flatID, flatNumber string, permissions []string) (*TokenPair, error) {
 	now := time.Now()
 	accessExpiry := now.Add(m.accessExpiry)
 	refreshExpiry := now.Add(m.refreshExpiry)
@@ -59,6 +60,7 @@ func (m *Manager) GenerateTokenPair(userID uuid.UUID, email, role, flatID, flatN
 		UserID:      userID,
 		Email:       email,
 		Role:        role,
+		SocietyID:   societyID,
 		FlatID:      flatID,
 		FlatNumber:  flatNumber,
 		Permissions: permissions,

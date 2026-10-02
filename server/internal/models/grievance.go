@@ -42,6 +42,7 @@ const (
 // Grievance represents a complaint/request raised by a member.
 // Row-level access: owner (RaisedByMemberID) + ADMIN role.
 type Grievance struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	TicketNo    string    `gorm:"type:varchar(20);uniqueIndex;not null" json:"ticketNo"`
 	Title       string    `gorm:"type:varchar(200);not null" json:"title"`
@@ -90,6 +91,7 @@ func (Grievance) TableName() string { return "soc_mitra_grievances" }
 
 // GrievanceComment holds audit trail and back-and-forth messages
 type GrievanceComment struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	GrievanceID  uuid.UUID `gorm:"type:uuid;not null;index" json:"grievanceId"`
 	AuthorID     uuid.UUID `gorm:"type:uuid;not null" json:"authorId"`

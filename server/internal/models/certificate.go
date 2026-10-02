@@ -26,6 +26,7 @@ const (
 
 // Certificate stores generated NOCs and No Dues certificates.
 type Certificate struct {
+	TenantScope
 	ID            uuid.UUID         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	CertNo        string            `gorm:"type:varchar(30);uniqueIndex;not null" json:"certNo"`
 	Type          CertificateType   `gorm:"type:varchar(20);not null" json:"type"`

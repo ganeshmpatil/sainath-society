@@ -28,6 +28,7 @@ const (
 // HallBooking represents a community hall reservation by a member.
 // Row-level access: BookedByMemberID + ADMIN.
 type HallBooking struct {
+	TenantScope
 	ID              uuid.UUID         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	BookedByMemberID uuid.UUID        `gorm:"type:uuid;not null;index" json:"bookedByMemberId"`
 	FlatID          *uuid.UUID        `gorm:"type:uuid;index" json:"flatId,omitempty"`

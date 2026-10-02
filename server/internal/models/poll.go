@@ -19,6 +19,7 @@ const (
 // Poll is a society-wide vote. One vote per flat is enforced via a unique
 // index on (poll_id, flat_id) in soc_mitra_poll_votes.
 type Poll struct {
+	TenantScope
 	ID          uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string     `gorm:"type:varchar(300);not null" json:"title"`
 	TitleMr     string     `gorm:"type:varchar(300)" json:"titleMr,omitempty"`
@@ -48,6 +49,7 @@ func (Poll) TableName() string { return "soc_mitra_polls" }
 
 // PollOption is a single choice within a poll.
 type PollOption struct {
+	TenantScope
 	ID       uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	PollID   uuid.UUID `gorm:"type:uuid;not null;index" json:"pollId"`
 	OptionText   string `gorm:"type:varchar(300);not null" json:"optionText"`
@@ -60,6 +62,7 @@ func (PollOption) TableName() string { return "soc_mitra_poll_options" }
 
 // PollVote records a single vote. One vote per flat per poll.
 type PollVote struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	PollID     uuid.UUID `gorm:"type:uuid;not null;index;uniqueIndex:uq_poll_flat" json:"pollId"`
 	FlatID     uuid.UUID `gorm:"type:uuid;not null;index;uniqueIndex:uq_poll_flat" json:"flatId"`

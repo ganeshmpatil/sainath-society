@@ -9,6 +9,7 @@ import (
 
 // VendorPayment records a payment to a vendor with TDS deduction.
 type VendorPayment struct {
+	TenantScope
 	ID          uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	VendorID    uuid.UUID  `gorm:"type:uuid;not null;index" json:"vendorId"`
 	PaymentDate time.Time  `gorm:"not null" json:"paymentDate"`

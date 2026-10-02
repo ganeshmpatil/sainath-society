@@ -45,6 +45,7 @@ const (
 // CommitteeTodo represents a time-bound administrative or compliance task
 // managed by the society committee. Visible to all, writable by admins only.
 type CommitteeTodo struct {
+	TenantScope
 	ID            uuid.UUID    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title         string       `gorm:"type:varchar(300);not null" json:"title"`
 	TitleMr       string       `gorm:"type:varchar(300)" json:"titleMr,omitempty"`

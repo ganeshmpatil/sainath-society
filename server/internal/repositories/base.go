@@ -20,17 +20,29 @@ var ErrNotFound = errors.New("resource not found")
 // It is the single source of truth used by every repository to decide row
 // visibility. Handlers/middleware must populate it from the JWT claims.
 type ActorContext struct {
-	UserID   uuid.UUID
-	MemberID uuid.UUID
-	Role     models.Role
-	FlatID   *uuid.UUID // flat the actor owns (if any)
+	UserID    uuid.UUID
+	MemberID  uuid.UUID
+	SocietyID uuid.UUID  // tenant key — every query MUST filter by this
+	Role      models.Role
+	FlatID    *uuid.UUID // flat the actor owns (if any)
 }
 
 // IsAdmin is a convenience helper.
 func (a *ActorContext) IsAdmin() bool { return a.Role == models.RoleAdmin }
 
-// ScopeOwnedOrAdmin attaches a WHERE clause that keeps the row only if the
-// actor is an admin OR the row's owner column matches the actor's MemberID.
+// scopeSociety adds the mandatory society_id filter. This is the first line
+// of defense for tenant isolation — called by every scope function below.
+func scopeSociety(q *gorm.DB, actor *ActorContext) *gorm.DB {
+	if actor == nil || actor.SocietyID == uuid.Nil {
+		return q.Where("1 = 0") // no tenant → zero rows
+	}
+	return q.Where("society_id = ?", actor.SocietyID)
+}
+
+// ScopeOwnedOrAdmin attaches a WHERE clause that:
+//  1. ALWAYS filters by society_id (tenant isolation), then
+//  2. Keeps the row only if the actor is an admin OR the row's owner column
+//     matches the actor's MemberID.
 //
 //   - ownerColumn is the snake_case DB column used for row-level ownership,
 //     e.g. "raised_by_member_id", "owner_member_id", "member_id".
@@ -43,9 +55,9 @@ func (a *ActorContext) IsAdmin() bool { return a.Role == models.RoleAdmin }
 //	q.Find(&rows)
 func ScopeOwnedOrAdmin(q *gorm.DB, actor *ActorContext, ownerColumn string) *gorm.DB {
 	if actor == nil {
-		// no actor → nothing is visible
 		return q.Where("1 = 0")
 	}
+	q = scopeSociety(q, actor)
 	if actor.IsAdmin() {
 		return q
 	}
@@ -54,10 +66,12 @@ func ScopeOwnedOrAdmin(q *gorm.DB, actor *ActorContext, ownerColumn string) *gor
 
 // ScopeFlatOrAdmin scopes rows where the flat_id matches the actor's flat
 // (for flat-scoped resources such as transactions for a flat, tenants, etc.).
+// Always filters by society_id first.
 func ScopeFlatOrAdmin(q *gorm.DB, actor *ActorContext, flatColumn string) *gorm.DB {
 	if actor == nil {
 		return q.Where("1 = 0")
 	}
+	q = scopeSociety(q, actor)
 	if actor.IsAdmin() {
 		return q
 	}
@@ -65,6 +79,12 @@ func ScopeFlatOrAdmin(q *gorm.DB, actor *ActorContext, flatColumn string) *gorm.
 		return q.Where("1 = 0")
 	}
 	return q.Where(flatColumn+" = ?", *actor.FlatID)
+}
+
+// ScopeBySociety returns all rows within the actor's society. Use this for
+// tables where every member sees all rows (e.g., wings, flats, notices, bylaws).
+func ScopeBySociety(q *gorm.DB, actor *ActorContext) *gorm.DB {
+	return scopeSociety(q, actor)
 }
 
 // AssertOwnerOrAdmin returns ErrForbidden if the actor is not an admin AND is
@@ -80,4 +100,12 @@ func AssertOwnerOrAdmin(actor *ActorContext, ownerID uuid.UUID) error {
 		return nil
 	}
 	return ErrForbidden
+}
+
+// SetTenantFields sets the SocietyID on any model that embeds TenantScope.
+// Repositories should call this in Create methods to stamp the tenant key.
+func SetTenantFields(actor *ActorContext, societyID *uuid.UUID) {
+	if actor != nil {
+		*societyID = actor.SocietyID
+	}
 }

@@ -60,6 +60,7 @@ const (
 
 // PatrolCheckpoint is a named scanning point within the society premises.
 type PatrolCheckpoint struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name        string    `gorm:"type:varchar(100);not null" json:"name"`
 	NameMr      string    `gorm:"type:varchar(100)" json:"nameMr,omitempty"`
@@ -90,6 +91,7 @@ func (PatrolCheckpoint) TableName() string { return "soc_mitra_patrol_checkpoint
 
 // PatrolRound represents one guard patrol shift.
 type PatrolRound struct {
+	TenantScope
 	ID                uuid.UUID         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	GuardName         string            `gorm:"type:varchar(100);not null" json:"guardName"`
 	ShiftType         PatrolShift       `gorm:"type:varchar(20);not null;default:'MORNING'" json:"shiftType"`
@@ -117,6 +119,7 @@ func (PatrolRound) TableName() string { return "soc_mitra_patrol_rounds" }
 
 // PatrolScan records when a guard scans a checkpoint during a round.
 type PatrolScan struct {
+	TenantScope
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	RoundID      uuid.UUID `gorm:"type:uuid;not null;index" json:"roundId"`
 	CheckpointID uuid.UUID `gorm:"type:uuid;not null;index" json:"checkpointId"`
@@ -140,6 +143,7 @@ func (PatrolScan) TableName() string { return "soc_mitra_patrol_scans" }
 
 // PatrolIncident records a security or maintenance incident.
 type PatrolIncident struct {
+	TenantScope
 	ID             uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title          string           `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr        string           `gorm:"type:varchar(200)" json:"titleMr,omitempty"`

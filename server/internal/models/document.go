@@ -37,6 +37,7 @@ const (
 // Row-level access is applied via Scope + OwnerMemberID + FlatID.
 // Admins always see everything; members see PUBLIC + their own (OwnerMemberID = actor) + their flat's docs.
 type Document struct {
+	TenantScope
 	ID          uuid.UUID        `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string           `gorm:"type:varchar(200);not null" json:"title"`
 	TitleMr     string           `gorm:"type:varchar(200)" json:"titleMr,omitempty"`
@@ -93,6 +94,7 @@ func (Document) TableName() string { return "soc_mitra_documents" }
 // DocumentAccess lets admins explicitly grant extra members access to a scoped doc
 // (overrides the default row-level ACL derived from Scope/OwnerMemberID/FlatID).
 type DocumentAccess struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	DocumentID uuid.UUID `gorm:"type:uuid;not null;index" json:"documentId"`
 	MemberID   uuid.UUID `gorm:"type:uuid;not null;index" json:"memberId"`
@@ -106,6 +108,7 @@ func (DocumentAccess) TableName() string { return "soc_mitra_document_access_gra
 
 // DocumentAuditLog tracks every view/download/edit for compliance
 type DocumentAuditLog struct {
+	TenantScope
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	DocumentID uuid.UUID `gorm:"type:uuid;not null;index" json:"documentId"`
 	ActorID    uuid.UUID `gorm:"type:uuid;not null;index" json:"actorId"`

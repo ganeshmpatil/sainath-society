@@ -9,6 +9,7 @@ import (
 
 // AuditChecklist represents an annual audit preparation checklist.
 type AuditChecklist struct {
+	TenantScope
 	ID            uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	FinancialYear string     `gorm:"type:varchar(9);not null;uniqueIndex" json:"financialYear"`
 	Title         string     `gorm:"type:varchar(200);not null" json:"title"`
@@ -34,6 +35,7 @@ func (AuditChecklist) TableName() string { return "soc_mitra_audit_checklists" }
 
 // AuditChecklistItem is a single item in the audit checklist.
 type AuditChecklistItem struct {
+	TenantScope
 	ID          uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	ChecklistID uuid.UUID  `gorm:"type:uuid;not null;index" json:"checklistId"`
 	Category    string     `gorm:"type:varchar(50);not null" json:"category"` // FINANCIAL, LEGAL, COMPLIANCE, DOCUMENTS, REGISTERS

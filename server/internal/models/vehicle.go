@@ -21,6 +21,7 @@ const (
 // Vehicle registered under a society member.
 // Row-level access: OwnerMemberID + ADMIN.
 type Vehicle struct {
+	TenantScope
 	ID                uuid.UUID   `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	OwnerMemberID     uuid.UUID   `gorm:"type:uuid;not null;index" json:"ownerMemberId"`
 	FlatID            *uuid.UUID  `gorm:"type:uuid;index" json:"flatId,omitempty"`

@@ -27,6 +27,7 @@ const (
 // Tenant represents a non-owner occupant of a flat.
 // Row-level access: flat's OwnerMemberID + ADMIN + the tenant themselves (if registered).
 type Tenant struct {
+	TenantScope
 	ID             uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	FlatID         uuid.UUID     `gorm:"type:uuid;not null;index" json:"flatId"`
 	OwnerMemberID  uuid.UUID     `gorm:"type:uuid;not null;index" json:"ownerMemberId"` // flat owner (landlord)
@@ -66,6 +67,7 @@ func (Tenant) TableName() string { return "soc_mitra_tenants" }
 
 // TenantMovement tracks physical move-in/move-out events for security and audit.
 type TenantMovement struct {
+	TenantScope
 	ID           uuid.UUID    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	TenantID     uuid.UUID    `gorm:"type:uuid;not null;index" json:"tenantId"`
 	FlatID       uuid.UUID    `gorm:"type:uuid;not null;index" json:"flatId"`

@@ -10,6 +10,7 @@ import (
 // JournalEntry represents a double-entry accounting transaction.
 // Every journal entry must have balanced debit and credit lines.
 type JournalEntry struct {
+	TenantScope
 	ID          uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	EntryNo     string    `gorm:"type:varchar(30);uniqueIndex;not null" json:"entryNo"`
 	EntryDate   time.Time `gorm:"not null" json:"entryDate"`
@@ -41,6 +42,7 @@ func (JournalEntry) TableName() string { return "soc_mitra_journal_entries" }
 
 // JournalLine is a single debit or credit line in a journal entry.
 type JournalLine struct {
+	TenantScope
 	ID             uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	JournalEntryID uuid.UUID `gorm:"type:uuid;not null;index" json:"journalEntryId"`
 	AccountHeadID  uuid.UUID `gorm:"type:uuid;not null;index" json:"accountHeadId"`

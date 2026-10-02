@@ -53,8 +53,19 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 func Migrate(db *gorm.DB) error {
 	log.Println("Running database migrations...")
 
-	// Order matters: tables with foreign keys must be migrated after their dependencies
+	// Phase 0: Platform-level tables (no society_id)
 	err := db.AutoMigrate(
+		&models.PlatformAdmin{},
+		&models.PlatformSociety{},
+		&models.PlatformOnboardingRequest{},
+		&models.PlatformAuditLog{},
+	)
+	if err != nil {
+		return fmt.Errorf("migration failed (phase 0 platform): %w", err)
+	}
+
+	// Order matters: tables with foreign keys must be migrated after their dependencies
+	err = db.AutoMigrate(
 		&models.Wing{},
 		&models.Flat{},
 		&models.Permission{},
@@ -163,6 +174,12 @@ func Migrate(db *gorm.DB) error {
 	}
 
 	log.Println("Database migrations completed")
+
+	// Multi-tenancy: backfill society_id, fix unique indexes, enable RLS
+	if err := MigrateMultiTenancy(db); err != nil {
+		return fmt.Errorf("multi-tenancy migration failed: %w", err)
+	}
+
 	return nil
 }
 
@@ -195,15 +212,15 @@ func Seed(db *gorm.DB) error {
 		return nil
 	}
 
-	// Create wings
+	// Create wings (assigned to default society)
 	wings := []models.Wing{
-		{Name: "A"},
-		{Name: "B"},
-		{Name: "C"},
-		{Name: "D"},
-		{Name: "E"},
-		{Name: "E1"},
-		{Name: "F"},
+		{SocietyID: DefaultSocietyID, Name: "A"},
+		{SocietyID: DefaultSocietyID, Name: "B"},
+		{SocietyID: DefaultSocietyID, Name: "C"},
+		{SocietyID: DefaultSocietyID, Name: "D"},
+		{SocietyID: DefaultSocietyID, Name: "E"},
+		{SocietyID: DefaultSocietyID, Name: "E1"},
+		{SocietyID: DefaultSocietyID, Name: "F"},
 	}
 	if err := db.Create(&wings).Error; err != nil {
 		return fmt.Errorf("failed to seed wings: %w", err)
@@ -261,6 +278,7 @@ func createFlats(wings []models.Wing) []models.Flat {
 				wingID := wing.ID
 				ownerIndex := flatNum % len(ownerNames)
 				flats = append(flats, models.Flat{
+					SocietyID:  DefaultSocietyID,
 					FlatNumber: fmt.Sprintf("%s-%d%02d", wing.Name, floor, unit),
 					WingID:     &wingID,
 					Floor:      floor,
@@ -296,6 +314,7 @@ func createAdminMembers(flats []models.Flat) []models.Member {
 	for _, data := range adminData {
 		flatID := flats[data.FlatIndex].ID
 		members = append(members, models.Member{
+			SocietyID:   DefaultSocietyID,
 			Name:        data.Name,
 			Mobile:      data.Mobile,
 			FlatID:      &flatID,
@@ -327,11 +346,12 @@ func createRegularMembers(flats []models.Flat, startIndex int) []models.Member {
 		flatID := flats[i].ID
 		nameIndex := (i - startIndex) % len(marathiNames)
 		members = append(members, models.Member{
-			Name:     marathiNames[nameIndex],
-			Mobile:   fmt.Sprintf("98765%05d", 43217+i-startIndex),
-			FlatID:   &flatID,
-			Role:     models.RoleMember,
-			IsActive: true,
+			SocietyID: DefaultSocietyID,
+			Name:      marathiNames[nameIndex],
+			Mobile:    fmt.Sprintf("98765%05d", 43217+i-startIndex),
+			FlatID:    &flatID,
+			Role:      models.RoleMember,
+			IsActive:  true,
 		})
 	}
 	return members
@@ -342,6 +362,7 @@ func createInitialAdminUser(db *gorm.DB, chairman models.Member) error {
 	passwordHash := hashPassword("Admin@123")
 
 	user := &models.User{
+		SocietyID:    DefaultSocietyID,
 		Email:        "chairman@sainath.com",
 		Mobile:       chairman.Mobile,
 		PasswordHash: passwordHash,
@@ -364,9 +385,9 @@ func ensureWings(db *gorm.DB) error {
 	allWings := []string{"A", "B", "C", "D", "E", "E1", "F"}
 	for _, name := range allWings {
 		var count int64
-		db.Model(&models.Wing{}).Where("name = ?", name).Count(&count)
+		db.Model(&models.Wing{}).Where("name = ? AND society_id = ?", name, DefaultSocietyID).Count(&count)
 		if count == 0 {
-			if err := db.Create(&models.Wing{Name: name}).Error; err != nil {
+			if err := db.Create(&models.Wing{SocietyID: DefaultSocietyID, Name: name}).Error; err != nil {
 				return err
 			}
 			log.Printf("Created missing wing: %s", name)
