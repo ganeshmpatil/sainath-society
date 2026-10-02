@@ -356,34 +356,37 @@ class _View extends StatelessWidget {
 
   void _nominate(BuildContext ctx, AppLocalizations l, String positionId) {
     String manifesto = '';
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
-          Text(l.t('election.nominate'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
-          TextField(onChanged: (v) => manifesto = v, maxLines: 3, decoration: InputDecoration(labelText: l.t('election.manifesto'))),
-          const SizedBox(height: 20),
-          GradientButton(label: l.t('election.submitNomination'), onPressed: () async {
-            try {
-              await api.post('/elections/${ctx.read<_Cu>().id}/nominate', data: {'positionId': positionId, 'manifesto': manifesto});
-              if (c.mounted) Navigator.pop(c);
-              if (ctx.mounted) ctx.read<_Cu>().load();
-            } catch (e) {
-              if (c.mounted) {
-                ScaffoldMessenger.of(c).showSnackBar(
-                  SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
-                );
-              }
-            }
-          }),
-        ]),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text(l.t('election.nominate'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              TextField(onChanged: (v) => manifesto = v, maxLines: 3, decoration: InputDecoration(labelText: l.t('election.manifesto'))),
+              const SizedBox(height: 20),
+              GradientButton(label: l.t('election.submitNomination'), onPressed: () async {
+                try {
+                  await api.post('/elections/${ctx.read<_Cu>().id}/nominate', data: {'positionId': positionId, 'manifesto': manifesto});
+                  if (c.mounted) Navigator.pop(c);
+                  if (ctx.mounted) ctx.read<_Cu>().load();
+                } catch (e) {
+                  if (c.mounted) {
+                    ScaffoldMessenger.of(c).showSnackBar(
+                      SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                    );
+                  }
+                }
+              }),
+            ]),
+          ),
+        ),
       ),
     );
   }
@@ -391,37 +394,40 @@ class _View extends StatelessWidget {
   void _addPosition(BuildContext ctx, AppLocalizations l) {
     String title = '';
     String titleMr = '';
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
-          Text(l.t('election.addPosition'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
-          TextField(onChanged: (v) => title = v, decoration: InputDecoration(labelText: l.t('election.positionTitle'))),
-          const SizedBox(height: 12),
-          TextField(onChanged: (v) => titleMr = v, decoration: InputDecoration(labelText: '${l.t('election.positionTitle')} (MR)')),
-          const SizedBox(height: 20),
-          GradientButton(label: l.t('common.save'), onPressed: () async {
-            if (title.isEmpty) return;
-            try {
-              await api.post('/elections/${ctx.read<_Cu>().id}/positions', data: {'title': title, 'titleMr': titleMr});
-              if (c.mounted) Navigator.pop(c);
-              if (ctx.mounted) ctx.read<_Cu>().load();
-            } catch (e) {
-              if (c.mounted) {
-                ScaffoldMessenger.of(c).showSnackBar(
-                  SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
-                );
-              }
-            }
-          }),
-        ]),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text(l.t('election.addPosition'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              TextField(onChanged: (v) => title = v, decoration: InputDecoration(labelText: l.t('election.positionTitle'))),
+              const SizedBox(height: 12),
+              TextField(onChanged: (v) => titleMr = v, decoration: InputDecoration(labelText: '${l.t('election.positionTitle')} (MR)')),
+              const SizedBox(height: 20),
+              GradientButton(label: l.t('common.save'), onPressed: () async {
+                if (title.isEmpty) return;
+                try {
+                  await api.post('/elections/${ctx.read<_Cu>().id}/positions', data: {'title': title, 'titleMr': titleMr});
+                  if (c.mounted) Navigator.pop(c);
+                  if (ctx.mounted) ctx.read<_Cu>().load();
+                } catch (e) {
+                  if (c.mounted) {
+                    ScaffoldMessenger.of(c).showSnackBar(
+                      SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? 'Request failed') : 'Request failed')),
+                    );
+                  }
+                }
+              }),
+            ]),
+          ),
+        ),
       ),
     );
   }

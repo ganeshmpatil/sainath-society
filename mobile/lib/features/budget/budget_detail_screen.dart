@@ -287,62 +287,65 @@ class _View extends StatelessWidget {
     String headNameMr = '';
     String amount = '';
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
-          Text(
-            category == 'INCOME' ? l.t('budget.addIncome') : l.t('budget.addExpense'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 16),
-          TextField(onChanged: (v) => headName = v, decoration: InputDecoration(labelText: l.t('budget.headName'))),
-          const SizedBox(height: 12),
-          TextField(onChanged: (v) => headNameMr = v, decoration: InputDecoration(labelText: '${l.t('budget.headName')} (MR)')),
-          const SizedBox(height: 12),
-          TextField(
-            onChanged: (v) => amount = v,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l.t('budget.amount'), prefixText: '\u20B9 '),
-          ),
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(child: OutlinedButton(
-              onPressed: () => Navigator.pop(c),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text(
+                category == 'INCOME' ? l.t('budget.addIncome') : l.t('budget.addExpense'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
-              child: Text(l.t('common.cancel')),
-            )),
-            const SizedBox(width: 12),
-            Expanded(child: GradientButton(label: l.t('common.save'), onPressed: () async {
-              if (headName.isEmpty || amount.isEmpty) return;
-              try {
-                await api.post('/budgets/${cubit.id}/line-items', data: {
-                  'category': category,
-                  'headName': headName,
-                  'headNameMr': headNameMr,
-                  'budgetedAmount': double.tryParse(amount) ?? 0,
-                });
-                if (c.mounted) Navigator.pop(c);
-                if (c.mounted) cubit.load();
-              } catch (e) {
-                if (c.mounted) {
-                  ScaffoldMessenger.of(c).showSnackBar(
-                    SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
-                  );
-                }
-              }
-            })),
-          ]),
-        ]),
+              const SizedBox(height: 16),
+              TextField(onChanged: (v) => headName = v, decoration: InputDecoration(labelText: l.t('budget.headName'))),
+              const SizedBox(height: 12),
+              TextField(onChanged: (v) => headNameMr = v, decoration: InputDecoration(labelText: '${l.t('budget.headName')} (MR)')),
+              const SizedBox(height: 12),
+              TextField(
+                onChanged: (v) => amount = v,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l.t('budget.amount'), prefixText: '\u20B9 '),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(c),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(l.t('common.cancel')),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: GradientButton(label: l.t('common.save'), onPressed: () async {
+                  if (headName.isEmpty || amount.isEmpty) return;
+                  try {
+                    await api.post('/budgets/${cubit.id}/line-items', data: {
+                      'category': category,
+                      'headName': headName,
+                      'headNameMr': headNameMr,
+                      'budgetedAmount': double.tryParse(amount) ?? 0,
+                    });
+                    if (c.mounted) Navigator.pop(c);
+                    if (c.mounted) cubit.load();
+                  } catch (e) {
+                    if (c.mounted) {
+                      ScaffoldMessenger.of(c).showSnackBar(
+                        SnackBar(content: Text(e is DioException ? (e.response?.data?['error'] ?? l.t('common.requestFailed')) : l.t('common.requestFailed'))),
+                      );
+                    }
+                  }
+                })),
+              ]),
+            ]),
+          ),
+        ),
       ),
     );
   }

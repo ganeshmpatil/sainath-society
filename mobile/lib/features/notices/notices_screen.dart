@@ -122,15 +122,17 @@ class _NoticesViewState extends State<_NoticesView> {
     String title = '', body = '', category = 'GENERAL';
     PlatformFile? pickedFile;
 
-    showModalBottomSheet(
-      context: parentContext, isScrollControlled: true, backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => StatefulBuilder(
+    showDialog(
+      context: parentContext,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
         builder: (context, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-            const SizedBox(height: 20),
             Text(l.t('notices.newNotice'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 20),
             TextField(onChanged: (v) => title = v, decoration: InputDecoration(labelText: l.t('grievances.subject'))),
@@ -207,7 +209,7 @@ class _NoticesViewState extends State<_NoticesView> {
             ]),
           ])),
         ),
-      ),
+      )),
     );
   }
 }

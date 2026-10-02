@@ -615,42 +615,38 @@ class _TasksViewState extends State<_TasksView> {
 
   void _showFabMenu(BuildContext context, bool isAdmin) {
     final l = AppLocalizations.of(context);
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Center(
-            child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: AppColors.borderLight,
-                    borderRadius: BorderRadius.circular(4))),
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              ListTile(
+                leading: Icon(Icons.checklist_rounded, color: AppColors.primary),
+                title: Text(l.t('tasks.newTask')),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showCreateTaskSheet(context);
+                },
+              ),
+              if (isAdmin)
+                ListTile(
+                  leading:
+                      Icon(Icons.event_note_rounded, color: AppColors.primary),
+                  title: Text(l.t('tasks.addCommitteeTask')),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showAddTodo(context);
+                  },
+                ),
+            ]),
           ),
-          const SizedBox(height: 20),
-          ListTile(
-            leading: Icon(Icons.checklist_rounded, color: AppColors.primary),
-            title: Text(l.t('tasks.newTask')),
-            onTap: () {
-              Navigator.pop(ctx);
-              _showCreateTaskSheet(context);
-            },
-          ),
-          if (isAdmin)
-            ListTile(
-              leading:
-                  Icon(Icons.event_note_rounded, color: AppColors.primary),
-              title: Text(l.t('tasks.addCommitteeTask')),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showAddTodo(context);
-              },
-            ),
-        ]),
+        ),
       ),
     );
   }
@@ -666,32 +662,22 @@ class _TasksViewState extends State<_TasksView> {
 
     final priorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
-    showModalBottomSheet(
+    showDialog(
       context: parentContext,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-              20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                        color: AppColors.borderLight,
-                        borderRadius: BorderRadius.circular(4)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(l.t('tasks.newTask'),
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (context, setSheetState) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.t('tasks.newTask'),
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 20),
@@ -819,6 +805,7 @@ class _TasksViewState extends State<_TasksView> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -846,31 +833,22 @@ class _TasksViewState extends State<_TasksView> {
       'GENERAL'
     ];
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(
-        builder: (c, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-              20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                          color: AppColors.borderLight,
-                          borderRadius: BorderRadius.circular(4))),
-                ),
-                const SizedBox(height: 20),
-                Text(l.t('calendar.addTodo'),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (c, setSheetState) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.t('calendar.addTodo'),
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 20),
@@ -1003,6 +981,7 @@ class _TasksViewState extends State<_TasksView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

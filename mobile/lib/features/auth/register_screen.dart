@@ -76,17 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(l.t('register.verifyMembership'),
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
-                _label(l.t('register.wingTower')),
-                const SizedBox(height: 6),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(hintText: l.t('register.selectWing')),
-                  items: ['A', 'B', 'C', 'D', 'E', 'E1', 'F']
-                      .map((w) => DropdownMenuItem(value: w, child: Text('Wing $w')))
-                      .toList(),
-                  onChanged: (_) {},
-                  dropdownColor: AppColors.surface,
-                ),
-                const SizedBox(height: 16),
                 _label(l.t('flatDetails.flatNumber')),
                 const SizedBox(height: 6),
                 TextField(

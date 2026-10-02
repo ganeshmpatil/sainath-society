@@ -99,21 +99,20 @@ class _BodyState extends State<_Body> {
     String role = 'SECURITY';
     String staffType = 'PERMANENT';
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
-        builder: (ctx2, setSheetState) => Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 20,
-              bottom: MediaQuery.of(ctx2).viewInsets.bottom + 20),
-          child: SingleChildScrollView(child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: Container(width: 40, height: 4,
-                  decoration: BoxDecoration(color: AppColors.textTertiary, borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 16),
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (ctx2, setSheetState) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(l.t('staff.addStaff'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 16),
               TextField(controller: nameCtl, decoration: InputDecoration(labelText: l.t('staff.name'), border: const OutlineInputBorder())),
@@ -178,6 +177,7 @@ class _BodyState extends State<_Body> {
           )),
         ),
       ),
+    ),
     );
   }
 
@@ -192,18 +192,17 @@ class _BodyState extends State<_Body> {
       statusMap[s['id']] = 'PRESENT';
     }
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
-        builder: (ctx2, setSheetState) => Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 20,
-              bottom: MediaQuery.of(ctx2).viewInsets.bottom + 20),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Center(child: Container(width: 40, height: 4,
-                decoration: BoxDecoration(color: AppColors.textTertiary, borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 16),
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (ctx2, setSheetState) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
             Row(children: [
               Expanded(child: Text('${l.t('staff.attendance')} — $today', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
             ]),
@@ -262,6 +261,7 @@ class _BodyState extends State<_Body> {
           ]),
         ),
       ),
+    ),
     );
   }
 

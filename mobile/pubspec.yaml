@@ -1,7 +1,7 @@
 name: aangan
 description: "Aangan / अंगण — society management mobile app"
 publish_to: 'none'
-version: 1.0.1+2
+version: 1.0.2+2003
 
 environment:
   sdk: ^3.11.4

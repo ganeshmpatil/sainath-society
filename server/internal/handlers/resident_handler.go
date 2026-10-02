@@ -29,6 +29,7 @@ type createResidentReq struct {
 	Name        string      `json:"name" binding:"required"`
 	Mobile      string      `json:"mobile" binding:"required"`
 	FlatID      *uuid.UUID  `json:"flatId,omitempty"`
+	FlatNo      string      `json:"flatNo,omitempty"`
 	Role        models.Role `json:"role,omitempty"`
 	Designation string      `json:"designation,omitempty"`
 }
@@ -40,8 +41,18 @@ func (h *ResidentHandler) Create(c *gin.Context) {
 		return
 	}
 	actor := middleware.GetActor(c)
+
+	// If flatNo provided but no flatId, look up the flat by number
+	flatID := req.FlatID
+	if flatID == nil && req.FlatNo != "" {
+		var flat models.Flat
+		if err := h.db.Where("flat_number = ?", req.FlatNo).First(&flat).Error; err == nil {
+			flatID = &flat.ID
+		}
+	}
+
 	m := &models.Member{
-		Name: req.Name, Mobile: req.Mobile, FlatID: req.FlatID,
+		Name: req.Name, Mobile: req.Mobile, FlatID: flatID,
 		Role: req.Role, Designation: req.Designation,
 	}
 	if m.Role == "" {

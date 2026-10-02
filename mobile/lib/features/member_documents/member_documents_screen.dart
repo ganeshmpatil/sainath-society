@@ -83,13 +83,14 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
     final l = AppLocalizations.of(context);
 
     // Pick document type first
-    final selectedType = await showModalBottomSheet<_DocTypeInfo>(
+    final selectedType = await showDialog<_DocTypeInfo>(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -139,6 +140,7 @@ class _MemberDocumentsScreenState extends State<MemberDocumentsScreen> {
             ),
             const SizedBox(height: 8),
           ],
+        ),
         ),
       ),
     );

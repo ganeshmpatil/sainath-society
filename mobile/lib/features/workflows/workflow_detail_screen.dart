@@ -414,22 +414,16 @@ class _WorkflowDetailScreenState extends State<WorkflowDetailScreen> {
       },
     ];
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => Padding(
-        padding: const EdgeInsets.all(16),
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Center(
-              child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(2)))),
-          const SizedBox(height: 12),
           Text(l.t('workflows.pickComponent'),
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
@@ -487,6 +481,7 @@ class _WorkflowDetailScreenState extends State<WorkflowDetailScreen> {
           const SizedBox(height: 8),
         ]),
       ),
+      ),
     );
   }
 
@@ -500,31 +495,23 @@ class _WorkflowDetailScreenState extends State<WorkflowDetailScreen> {
     DateTime? dueDate;
     String? assigneeId;
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
           builder: (sheetCtx, setSheetState) {
-        final compColor = _compColor(componentType);
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-              16, 16, 16, MediaQuery.of(sheetCtx).viewInsets.bottom + 16),
+          final compColor = _compColor(componentType);
+          return Padding(
+          padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(
               child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Center(
-                    child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: AppColors.border,
-                            borderRadius: BorderRadius.circular(2)))),
-                const SizedBox(height: 16),
                 // Component type badge
                 Row(children: [
                   Container(
@@ -632,8 +619,9 @@ class _WorkflowDetailScreenState extends State<WorkflowDetailScreen> {
                   )),
                 ]),
               ])),
-        );
-      }),
+          );
+        }),
+        ),
     );
   }
 

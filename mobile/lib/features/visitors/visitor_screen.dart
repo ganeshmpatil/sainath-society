@@ -216,16 +216,16 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
       'OTHER': l.t('visitor.typeOther'),
     };
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(l.t('visitor.addVisitor'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           // Visitor type chips
@@ -326,6 +326,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
           ]),
         ])),
       )),
+    ),
     );
   }
 }
@@ -673,16 +674,16 @@ class _FrequentTab extends StatelessWidget {
     String? selectedFlatId = userFlatId;
     String selectedFlatNo = userFlatNo;
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(l.t('visitor.addFrequent'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           TextField(onChanged: (v) => name = v, decoration: InputDecoration(labelText: l.t('visitor.name'))),
@@ -731,6 +732,7 @@ class _FrequentTab extends StatelessWidget {
           ]),
         ])),
       )),
+    ),
     );
   }
 

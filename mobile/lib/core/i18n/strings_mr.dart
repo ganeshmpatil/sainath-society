@@ -203,6 +203,19 @@ const Map<String, String> stringsMr = {
   'residents.allWings': 'सर्व विंग',
   'residents.wing': 'विंग',
   'residents.members': 'सदस्य',
+  'residents.addResident': 'रहिवासी जोडा',
+  'residents.name': 'नाव',
+  'residents.mobile': 'मोबाईल',
+  'residents.email': 'ईमेल',
+  'residents.flat': 'फ्लॅट',
+  'residents.selectFlat': 'फ्लॅट निवडा',
+  'residents.role': 'भूमिका',
+  'residents.roleMember': 'सदस्य',
+  'residents.roleAdmin': 'प्रशासक',
+  'residents.designation': 'पदनाम',
+  'residents.floor': 'मजला',
+  'residents.flatNumber': 'फ्लॅट क्र.',
+  'residents.addSuccess': 'रहिवासी यशस्वीरित्या जोडला',
 
 
   // Vehicles

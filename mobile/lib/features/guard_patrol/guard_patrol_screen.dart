@@ -301,16 +301,16 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
     String guardName = '';
     String shiftType = 'MORNING';
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
           Text(l.t('patrol.startRound'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           TextField(
@@ -356,6 +356,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
             })),
           ]),
         ]),
+        ),
       )),
     );
   }
@@ -366,16 +367,16 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
     String nameMr = '';
     String location = '';
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
           Text(l.t('patrol.addCheckpoint'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           TextField(onChanged: (v) => name = v, decoration: InputDecoration(labelText: l.t('patrol.checkpoint'))),
@@ -407,6 +408,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
             })),
           ]),
         ]),
+        ),
       ),
     );
   }
@@ -428,16 +430,17 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
       'OTHER': l.t('visitor.typeOther'),
     };
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => SingleChildScrollView(
+        child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(l.t('patrol.reportIncident'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Text(l.t('patrol.incidentType'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
@@ -506,8 +509,11 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               }
             })),
           ]),
-        ])),
-      )),
+        ]),
+        ),
+      ),
+      ),
+      ),
     );
   }
 
@@ -516,16 +522,16 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
     String status = 'INVESTIGATING';
     String notes = '';
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
           Text(l.t('common.updateStatus'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Wrap(spacing: 6, runSpacing: 6, children: [
@@ -566,7 +572,9 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
             })),
           ]),
         ]),
-      )),
+        ),
+      ),
+      ),
     );
   }
 }

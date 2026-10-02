@@ -180,22 +180,16 @@ class _WFListViewState extends State<_WFListView> {
   // ─── New Workflow — choose template or blank ─────────────────
 
   void _showNewWorkflowSheet(BuildContext ctx, AppLocalizations l) {
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => Padding(
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Center(
-              child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(2)))),
-          const SizedBox(height: 16),
           Text(l.t('workflows.create'),
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -228,6 +222,7 @@ class _WFListViewState extends State<_WFListView> {
           const SizedBox(height: 16),
         ]),
       ),
+      ),
     );
   }
 
@@ -241,29 +236,17 @@ class _WFListViewState extends State<_WFListView> {
           [];
       if (!ctx.mounted) return;
 
-      showModalBottomSheet(
+      showDialog(
         context: ctx,
-        isScrollControlled: true,
-        backgroundColor: AppColors.surface,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        builder: (sheetCtx) => DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          maxChildSize: 0.9,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (_, scrollCtrl) => Column(children: [
+        barrierDismissible: true,
+        builder: (sheetCtx) => Dialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
               child: Column(children: [
-                Center(
-                    child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: AppColors.border,
-                            borderRadius: BorderRadius.circular(2)))),
-                const SizedBox(height: 12),
                 Row(children: [
                   Text(l.t('workflows.templates'),
                       style: const TextStyle(
@@ -305,42 +288,46 @@ class _WFListViewState extends State<_WFListView> {
                 const SizedBox(height: 8),
               ]),
             ),
-            Expanded(
+            Flexible(
               child: templates.isEmpty
                   ? Center(
-                      child: Column(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                        Icon(Icons.auto_awesome_rounded,
-                            size: 48, color: AppColors.textTertiary),
-                        const SizedBox(height: 12),
-                        Text(l.t('workflows.noTemplates'),
-                            style:
-                                TextStyle(color: AppColors.textTertiary)),
-                        const SizedBox(height: 12),
-                        TextButton.icon(
-                          onPressed: () async {
-                            try {
-                              await api.post('/workflows/seed-templates',
-                                  data: {});
-                              if (sheetCtx.mounted) {
-                                Navigator.pop(sheetCtx);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            l.t('workflows.seeded'))));
-                                _showTemplatePicker(ctx, l);
-                              }
-                            } catch (_) {}
-                          },
-                          icon: Icon(Icons.download_rounded,
-                              size: 18, color: AppColors.primary),
-                          label: Text(l.t('workflows.seedTemplates'),
-                              style: TextStyle(color: AppColors.primary)),
+                            Icon(Icons.auto_awesome_rounded,
+                                size: 48, color: AppColors.textTertiary),
+                            const SizedBox(height: 12),
+                            Text(l.t('workflows.noTemplates'),
+                                style:
+                                    TextStyle(color: AppColors.textTertiary)),
+                            const SizedBox(height: 12),
+                            TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await api.post('/workflows/seed-templates',
+                                      data: {});
+                                  if (sheetCtx.mounted) {
+                                    Navigator.pop(sheetCtx);
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                l.t('workflows.seeded'))));
+                                    _showTemplatePicker(ctx, l);
+                                  }
+                                } catch (_) {}
+                              },
+                              icon: Icon(Icons.download_rounded,
+                                  size: 18, color: AppColors.primary),
+                              label: Text(l.t('workflows.seedTemplates'),
+                                  style: TextStyle(color: AppColors.primary)),
+                            ),
+                          ],
                         ),
-                      ]))
+                      ))
                   : ListView.builder(
-                      controller: scrollCtrl,
+                      shrinkWrap: true,
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       itemCount: templates.length,
                       itemBuilder: (_, i) => _TemplateCard(
@@ -364,28 +351,21 @@ class _WFListViewState extends State<_WFListView> {
         TextEditingController(text: '${tmpl['title']} ${DateTime.now().year}');
     DateTime? targetDate;
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
-          builder: (sheetCtx, setSheetState) => Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16,
-                    MediaQuery.of(sheetCtx).viewInsets.bottom + 16),
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (sheetCtx, setSheetState) => SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.all(20),
                 child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                          child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                  color: AppColors.border,
-                                  borderRadius: BorderRadius.circular(2)))),
-                      const SizedBox(height: 16),
                       Text(l.t('workflows.useTemplate'),
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w700)),
@@ -459,7 +439,9 @@ class _WFListViewState extends State<_WFListView> {
                         )),
                       ]),
                     ]),
-              )),
+            ),
+          )),
+        ),
     );
   }
 
@@ -472,30 +454,22 @@ class _WFListViewState extends State<_WFListView> {
     String category = 'GENERAL';
     DateTime? targetDate;
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
           builder: (sheetCtx, setSheetState) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-              16, 16, 16, MediaQuery.of(sheetCtx).viewInsets.bottom + 16),
+          return Padding(
+          padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(
               child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Center(
-                    child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: AppColors.border,
-                            borderRadius: BorderRadius.circular(2)))),
-                const SizedBox(height: 16),
                 Text(l.t('workflows.create'),
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700)),
@@ -593,8 +567,9 @@ class _WFListViewState extends State<_WFListView> {
                   )),
                 ]),
               ])),
-        );
-      }),
+          );
+        }),
+        ),
     );
   }
 }

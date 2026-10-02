@@ -108,31 +108,21 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
     String? selectedMemberId;
     DateTime? dueDate;
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-              20, 12, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                        color: AppColors.borderLight,
-                        borderRadius: BorderRadius.circular(4)),
-                  ),
-                ),
-                const SizedBox(height: 20),
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (ctx, setSheetState) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 Text(l.t('meetings.addActionItem'),
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700)),
@@ -263,6 +253,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

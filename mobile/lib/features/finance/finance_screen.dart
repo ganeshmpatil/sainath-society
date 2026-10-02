@@ -239,16 +239,16 @@ class _FVS extends State<_FV> {
     final flat = bill['flat'];
     final flatNumber = flat?['flatNumber'] ?? '';
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Center(child: Container(width: 40, height: 4,
-              decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 24),
           Container(
             width: 56, height: 56,
             decoration: BoxDecoration(
@@ -306,6 +306,7 @@ class _FVS extends State<_FV> {
           ]),
         ]),
       ),
+      ),
     );
   }
 
@@ -355,19 +356,27 @@ class _FVS extends State<_FV> {
       final cfg = res.data?['bankConfig'];
       if (cfg == null || !mounted) return;
       final l = AppLocalizations.of(context);
-      showModalBottomSheet(context: context, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        builder: (_) => Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(l.t('payment.bankDetails'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
-          _bankRow(l.t('payment.accountName'), cfg['accountName']),
-          _bankRow(l.t('payment.accountNumber'), cfg['accountNumber']),
-          _bankRow(l.t('payment.bankName'), cfg['bankName']),
-          _bankRow(l.t('payment.branch'), cfg['branchName']),
-          _bankRow(l.t('payment.ifsc'), cfg['ifsc']),
-          if (cfg['upiId'] != null && cfg['upiId'].toString().isNotEmpty)
-            _bankRow(l.t('payment.upi'), cfg['upiId']),
-          const SizedBox(height: 16),
-        ])));
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => Dialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: Padding(padding: const EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l.t('payment.bankDetails'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 16),
+            _bankRow(l.t('payment.accountName'), cfg['accountName']),
+            _bankRow(l.t('payment.accountNumber'), cfg['accountNumber']),
+            _bankRow(l.t('payment.bankName'), cfg['bankName']),
+            _bankRow(l.t('payment.branch'), cfg['branchName']),
+            _bankRow(l.t('payment.ifsc'), cfg['ifsc']),
+            if (cfg['upiId'] != null && cfg['upiId'].toString().isNotEmpty)
+              _bankRow(l.t('payment.upi'), cfg['upiId']),
+            const SizedBox(height: 16),
+          ])),
+        ),
+      );
     } catch (_) {}
   }
 
@@ -394,24 +403,19 @@ class _FVS extends State<_FV> {
     final flatNumber = flat?['flatNumber'] ?? '';
     final memberName = member?['name'] ?? '';
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.65,
-        maxChildSize: 0.9,
-        builder: (_, scrollCtrl) => ListView(
-          controller: scrollCtrl,
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      barrierDismissible: true,
+      builder: (_) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(child: Container(
-              width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
-            )),
 
             // Header card
             Container(
@@ -640,6 +644,7 @@ class _FVS extends State<_FV> {
 
             const SizedBox(height: 16),
           ],
+          ),
         ),
       ),
     );
@@ -657,24 +662,21 @@ class _FVS extends State<_FV> {
     String mode = 'UPI';
     bool submitting = false;
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
-        builder: (ctx2, setSheetState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
-            bottom: MediaQuery.of(ctx2).viewInsets.bottom + 20,
-          ),
-          child: SingleChildScrollView(child: Column(
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+        builder: (ctx2, setSheetState) => SingleChildScrollView(
+          child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(child: Container(width: 40, height: 4,
-                  decoration: BoxDecoration(color: AppColors.textTertiary, borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 16),
               Text(l.t('payment.recordPayment'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text('${l.t('finance.balanceDue')}: \u20B9${due.toStringAsFixed(0)}',
@@ -768,7 +770,9 @@ class _FVS extends State<_FV> {
                     : Text(l.t('payment.recordPayment')),
               )),
             ],
-          )),
+          ),
+        ),
+        ),
         ),
       ),
     );

@@ -271,34 +271,22 @@ class _GrievancesViewState extends State<_GrievancesView> {
       }
     }
 
-    showModalBottomSheet(
+    showDialog(
       context: parentContext,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
           builder: (context, setState) {
             return Padding(
-              padding: EdgeInsets.fromLTRB(
-                  20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+              padding: const EdgeInsets.all(20),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40, height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.borderLight,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     Text(l.t('grievances.newGrievance'),
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 16),
@@ -431,8 +419,8 @@ class _GrievancesViewState extends State<_GrievancesView> {
               ),
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 

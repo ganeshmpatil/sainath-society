@@ -220,10 +220,14 @@ class _BsView extends StatelessWidget {
       if (!context.mounted) return;
       final isMr = context.read<LocaleCubit>().isMarathi;
 
-      showModalBottomSheet(
+      showDialog(
         context: context,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        builder: (_) => Padding(
+        barrierDismissible: true,
+        builder: (_) => Dialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Bill Preview (1200 sqft)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
@@ -244,6 +248,7 @@ class _BsView extends StatelessWidget {
             ]),
             const SizedBox(height: 8),
           ]),
+          ),
         ),
       );
     } catch (_) {}
@@ -282,13 +287,16 @@ class _BsView extends StatelessWidget {
     String calcMethod = 'FIXED';
     final l = AppLocalizations.of(context);
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => StatefulBuilder(
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
         builder: (ctx, setState) => Padding(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+          padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(l.t('billing.addCharge'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
@@ -336,6 +344,7 @@ class _BsView extends StatelessWidget {
               )),
             ]),
           ]),
+        ),
         ),
       ),
     );

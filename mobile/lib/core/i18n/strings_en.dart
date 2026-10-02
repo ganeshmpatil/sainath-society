@@ -203,6 +203,19 @@ const Map<String, String> stringsEn = {
   'residents.allWings': 'All Wings',
   'residents.wing': 'Wing',
   'residents.members': 'members',
+  'residents.addResident': 'Add Resident',
+  'residents.name': 'Name',
+  'residents.mobile': 'Mobile',
+  'residents.email': 'Email',
+  'residents.flat': 'Flat',
+  'residents.selectFlat': 'Select flat',
+  'residents.role': 'Role',
+  'residents.roleMember': 'Member',
+  'residents.roleAdmin': 'Admin',
+  'residents.designation': 'Designation',
+  'residents.floor': 'Floor',
+  'residents.flatNumber': 'Flat No',
+  'residents.addSuccess': 'Resident added successfully',
 
 
   // Vehicles

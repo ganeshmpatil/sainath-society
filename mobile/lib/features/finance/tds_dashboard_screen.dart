@@ -251,12 +251,15 @@ class _View extends StatelessWidget {
     final l = AppLocalizations.of(ctx);
     final cubit = ctx.read<_TdsCubit>();
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => _RecordPaymentSheet(l: l, cubit: cubit),
+      barrierDismissible: true,
+      builder: (_) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: _RecordPaymentSheet(l: l, cubit: cubit),
+      ),
     );
   }
 }
@@ -314,29 +317,13 @@ class _RecordPaymentSheetState extends State<_RecordPaymentSheet> {
   @override
   Widget build(BuildContext context) {
     final l = widget.l;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
+    return SingleChildScrollView(
+      child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.textTertiary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             Text(l.t('tds.recordPayment'),
                 style:
                     TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),

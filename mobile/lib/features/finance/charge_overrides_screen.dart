@@ -110,21 +110,21 @@ class _Body extends StatelessWidget {
     final reasonCtl = TextEditingController();
     bool exempt = false;
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => StatefulBuilder(
-        builder: (ctx2, setSheetState) => Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 20,
-              bottom: MediaQuery.of(ctx2).viewInsets.bottom + 20),
-          child: SingleChildScrollView(child: Column(
+      barrierDismissible: true,
+      builder: (sheetCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+        builder: (ctx2, setSheetState) => SingleChildScrollView(
+          child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(child: Container(width: 40, height: 4,
-                  decoration: BoxDecoration(color: AppColors.textTertiary, borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 16),
               Text(l.t('override.addTitle'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 16),
 
@@ -205,7 +205,9 @@ class _Body extends StatelessWidget {
                 child: Text(l.t('common.save')),
               )),
             ],
-          )),
+          ),
+        ),
+        ),
         ),
       ),
     );

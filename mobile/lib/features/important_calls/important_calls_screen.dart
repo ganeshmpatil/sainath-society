@@ -276,16 +276,17 @@ class _View extends StatelessWidget {
       'OTHER': (l.t('sos.typeOther'), Icons.warning_rounded, const Color(0xFF64748B)),
     };
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => SingleChildScrollView(
+        child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
           Row(children: [
             const Icon(Icons.sos_rounded, size: 28, color: Color(0xFFEF4444)),
             const SizedBox(width: 10),
@@ -364,6 +365,8 @@ class _View extends StatelessWidget {
             ),
           ),
         ]),
+        ),
+      ),
       )),
     );
   }
@@ -380,16 +383,17 @@ class _View extends StatelessWidget {
     String roleMr = existing?['roleMr'] ?? '';
     String category = existing?['category'] ?? 'UTILITY';
 
-    showModalBottomSheet(
+    showDialog(
       context: ctx,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (c) => StatefulBuilder(builder: (c, setState) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.borderLight, borderRadius: BorderRadius.circular(4)))),
-          const SizedBox(height: 20),
+      barrierDismissible: true,
+      builder: (c) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(builder: (c, setState) => SingleChildScrollView(
+        child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Expanded(child: Text(
               isEdit ? l.t('importantCalls.edit') : l.t('importantCalls.add'),
@@ -495,7 +499,9 @@ class _View extends StatelessWidget {
               } catch (_) {}
             })),
           ]),
-        ])),
+        ]),
+        ),
+      ),
       )),
     );
   }
