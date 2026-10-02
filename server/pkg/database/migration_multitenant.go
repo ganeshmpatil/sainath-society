@@ -129,6 +129,15 @@ func MigrateMultiTenancy(db *gorm.DB) error {
 }
 
 func ensureDefaultSociety(db *gorm.DB) error {
+	// On a fresh DB, don't auto-create a default society.
+	// Societies are provisioned via the onboarding flow.
+	var memberCount int64
+	db.Model(&models.Member{}).Count(&memberCount)
+	if memberCount == 0 {
+		log.Println("Fresh database — skipping default society creation")
+		return nil
+	}
+
 	var count int64
 	db.Model(&models.PlatformSociety{}).Where("id = ?", DefaultSocietyID).Count(&count)
 	if count > 0 {
