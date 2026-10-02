@@ -39,10 +39,6 @@
   </nav>
   {{end}}
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    {{template "content" .}}
-  </main>
-
   <script>
     const API = '/api/v1/platform';
 
@@ -119,5 +115,9 @@
       return `<span class="text-xs px-2 py-0.5 rounded-full font-medium ${cls}">${status}</span>`;
     }
   </script>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    {{template "content" .}}
+  </main>
 </body>
 </html>
