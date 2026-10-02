@@ -1,0 +1,69 @@
+{{define "content"}}
+<div class="fade-in">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Onboarding Requests</h1>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex gap-1 mb-4 bg-white rounded-lg border border-gray-200 p-1 w-fit">
+    <button onclick="filterRequests('')" class="filter-btn px-3 py-1.5 text-sm rounded-md" data-filter="">All</button>
+    <button onclick="filterRequests('PENDING')" class="filter-btn px-3 py-1.5 text-sm rounded-md" data-filter="PENDING">Pending</button>
+    <button onclick="filterRequests('APPROVED')" class="filter-btn px-3 py-1.5 text-sm rounded-md" data-filter="APPROVED">Approved</button>
+    <button onclick="filterRequests('REJECTED')" class="filter-btn px-3 py-1.5 text-sm rounded-md" data-filter="REJECTED">Rejected</button>
+    <button onclick="filterRequests('INFO_REQUESTED')" class="filter-btn px-3 py-1.5 text-sm rounded-md" data-filter="INFO_REQUESTED">Info Req.</button>
+  </div>
+
+  <!-- Requests list -->
+  <div class="bg-white rounded-xl border border-gray-200">
+    <div id="requests-list" class="divide-y divide-gray-100">
+      <div class="p-8 text-center text-gray-400">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentFilter = '';
+
+async function filterRequests(status) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('bg-gray-100', btn.dataset.filter === status);
+    btn.classList.toggle('text-gray-900', btn.dataset.filter === status);
+    btn.classList.toggle('font-medium', btn.dataset.filter === status);
+    btn.classList.toggle('text-gray-600', btn.dataset.filter !== status);
+  });
+
+  const url = status ? `/requests?status=${status}` : '/requests';
+  const resp = await apiFetch(url);
+  if (!resp) return;
+  const data = await resp.json();
+
+  const container = document.getElementById('requests-list');
+  const requests = data.requests || [];
+  if (requests.length === 0) {
+    container.innerHTML = '<div class="p-8 text-center text-gray-400">No requests found</div>';
+    return;
+  }
+  container.innerHTML = requests.map(r => `
+    <a href="/platform/requests/${r.id}" class="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+      <div class="min-w-0 flex-1">
+        <div class="font-medium text-gray-900">${r.societyName}</div>
+        <div class="text-sm text-gray-500 mt-0.5">
+          ${r.registrationNumber} &middot; ${r.city || 'N/A'} &middot; ${r.totalWings} wings, ${r.totalFlats} flats
+        </div>
+        <div class="text-xs text-gray-400 mt-1">By ${r.requesterName} (${r.requesterDesignation || 'N/A'})</div>
+      </div>
+      <div class="flex items-center gap-3 ml-4">
+        <span class="text-xs text-gray-400 whitespace-nowrap">${timeAgo(r.createdAt)}</span>
+        ${statusBadge(r.status)}
+      </div>
+    </a>
+  `).join('');
+}
+
+(function() {
+  if (!requireAuth()) return;
+  filterRequests('');
+})();
+</script>
+{{end}}

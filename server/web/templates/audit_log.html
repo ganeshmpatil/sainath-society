@@ -1,0 +1,50 @@
+{{define "content"}}
+<div class="fade-in">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Audit Log</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200">
+    <div id="audit-list" class="divide-y divide-gray-100">
+      <div class="p-8 text-center text-gray-400">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function() {
+  if (!requireAuth()) return;
+
+  const resp = await apiFetch('/audit-log');
+  if (!resp) return;
+  const data = await resp.json();
+
+  const container = document.getElementById('audit-list');
+  const logs = data.logs || [];
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="p-8 text-center text-gray-400">No audit entries yet</div>';
+    return;
+  }
+
+  const actionColors = {
+    'APPROVE_REQUEST': 'text-green-600',
+    'REJECT_REQUEST': 'text-red-600',
+    'REQUEST_INFO': 'text-blue-600',
+    'SUSPEND_SOCIETY': 'text-red-600',
+    'ACTIVATE_SOCIETY': 'text-green-600',
+  };
+
+  container.innerHTML = logs.map(l => `
+    <div class="px-5 py-3 text-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="font-medium ${actionColors[l.action] || 'text-gray-700'}">${l.action.replace(/_/g, ' ')}</span>
+          <span class="text-gray-500 ml-2">${l.entityType}</span>
+        </div>
+        <span class="text-xs text-gray-400">${new Date(l.createdAt).toLocaleString()}</span>
+      </div>
+      ${l.details ? `<div class="text-xs text-gray-500 mt-1">${l.details}</div>` : ''}
+      ${l.admin ? `<div class="text-xs text-gray-400 mt-0.5">by ${l.admin.name}</div>` : ''}
+    </div>
+  `).join('');
+})();
+</script>
+{{end}}

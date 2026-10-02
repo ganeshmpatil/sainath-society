@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} - Society Mitra Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .fade-in { animation: fadeIn 0.2s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  {{if .ShowNav}}
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-14">
+        <div class="flex items-center gap-6">
+          <a href="/platform/" class="text-lg font-bold text-gray-900">Society Mitra</a>
+          <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">Platform Admin</span>
+          <div class="hidden sm:flex gap-1">
+            <a href="/platform/" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "dashboard"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Dashboard</a>
+            <a href="/platform/requests" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "requests"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">
+              Requests
+              {{if gt .PendingCount 0}}<span class="ml-1 bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-full">{{.PendingCount}}</span>{{end}}
+            </a>
+            <a href="/platform/societies" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "societies"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Societies</a>
+            <a href="/platform/audit-log" class="px-3 py-2 text-sm rounded-md {{if eq .ActiveNav "audit"}}bg-gray-100 text-gray-900 font-medium{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-50{{end}}">Audit Log</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-500" id="admin-name"></span>
+          <button onclick="logout()" class="text-sm text-gray-500 hover:text-red-600">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  {{end}}
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    {{template "content" .}}
+  </main>
+
+  <script>
+    const API = '/api/v1/platform';
+
+    function getToken() {
+      return localStorage.getItem('platform_token');
+    }
+
+    function setToken(token) {
+      localStorage.setItem('platform_token', token);
+    }
+
+    function logout() {
+      localStorage.removeItem('platform_token');
+      localStorage.removeItem('platform_admin');
+      window.location.href = '/platform/login';
+    }
+
+    function requireAuth() {
+      if (!getToken()) {
+        window.location.href = '/platform/login';
+        return false;
+      }
+      const admin = JSON.parse(localStorage.getItem('platform_admin') || '{}');
+      const el = document.getElementById('admin-name');
+      if (el && admin.name) el.textContent = admin.name;
+      return true;
+    }
+
+    async function apiFetch(path, options = {}) {
+      const resp = await fetch(API + path, {
+        ...options,
+        headers: {
+          'Authorization': 'Bearer ' + getToken(),
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+        },
+      });
+      if (resp.status === 401) {
+        logout();
+        return null;
+      }
+      return resp;
+    }
+
+    function timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60) return mins + 'm ago';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h ago';
+      const days = Math.floor(hrs / 24);
+      return days + 'd ago';
+    }
+
+    function statusBadge(status) {
+      const colors = {
+        'PENDING': 'bg-amber-100 text-amber-700',
+        'APPROVED': 'bg-green-100 text-green-700',
+        'REJECTED': 'bg-red-100 text-red-700',
+        'INFO_REQUESTED': 'bg-blue-100 text-blue-700',
+        'ACTIVE': 'bg-green-100 text-green-700',
+        'SUSPENDED': 'bg-red-100 text-red-700',
+        'ONBOARDING': 'bg-amber-100 text-amber-700',
+      };
+      const cls = colors[status] || 'bg-gray-100 text-gray-700';
+      return `<span class="text-xs px-2 py-0.5 rounded-full font-medium ${cls}">${status}</span>`;
+    }
+  </script>
+</body>
+</html>

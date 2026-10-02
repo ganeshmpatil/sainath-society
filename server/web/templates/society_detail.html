@@ -1,0 +1,132 @@
+{{define "content"}}
+<div class="fade-in">
+  <a href="/platform/societies" class="text-sm text-gray-500 hover:text-gray-700 mb-4 inline-block">&larr; Back to Societies</a>
+  <div id="detail-container">
+    <div class="p-8 text-center text-gray-400">Loading...</div>
+  </div>
+</div>
+
+<script>
+let societyId = window.location.pathname.split('/').pop();
+
+async function loadSociety() {
+  const resp = await apiFetch(`/societies/${societyId}`);
+  if (!resp) return;
+  const data = await resp.json();
+  const s = data.society;
+  const u = data.usage || {};
+
+  document.getElementById('detail-container').innerHTML = `
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">${s.name}</h1>
+        <p class="text-sm text-gray-500">${s.nameMr || ''}</p>
+      </div>
+      ${statusBadge(s.status)}
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Overview -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Overview</h2>
+          <div class="grid sm:grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-500">Reg No:</span> <span class="font-mono">${s.registrationNumber}</span></div>
+            <div><span class="text-gray-500">Slug:</span> <span class="font-mono">${s.slug}</span></div>
+            <div><span class="text-gray-500">Address:</span> ${s.address || '-'}</div>
+            <div><span class="text-gray-500">City:</span> ${s.city || '-'} ${s.pinCode || ''}</div>
+            <div><span class="text-gray-500">Wings:</span> ${s.totalWings}</div>
+            <div><span class="text-gray-500">Flats:</span> ${s.totalFlats}</div>
+            <div><span class="text-gray-500">Admin:</span> ${s.adminName || '-'}</div>
+            <div><span class="text-gray-500">Admin Email:</span> <a href="mailto:${s.adminEmail}" class="text-indigo-600">${s.adminEmail || '-'}</a></div>
+            <div><span class="text-gray-500">Live since:</span> ${s.approvedAt ? new Date(s.approvedAt).toLocaleDateString() : '-'}</div>
+          </div>
+        </div>
+
+        ${s.suspendReason ? `
+        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-red-700 mb-2">Suspension Reason</h2>
+          <p class="text-sm text-red-600">${s.suspendReason}</p>
+          <p class="text-xs text-red-400 mt-1">Suspended: ${s.suspendedAt ? new Date(s.suspendedAt).toLocaleDateString() : ''}</p>
+        </div>` : ''}
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="space-y-4">
+        <!-- Usage Stats -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Usage</h2>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Total Members</span>
+              <span class="font-semibold">${u.totalMembers || 0}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Registered Users</span>
+              <span class="font-semibold">${u.registeredUsers || 0}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Total Flats</span>
+              <span class="font-semibold">${u.totalFlats || 0}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Actions</h2>
+          ${s.status === 'ACTIVE' ? `
+            <button onclick="suspendSociety()" id="suspend-btn" class="w-full py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+              Suspend Society
+            </button>
+          ` : ''}
+          ${s.status === 'SUSPENDED' ? `
+            <button onclick="activateSociety()" id="activate-btn" class="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
+              Reactivate Society
+            </button>
+          ` : ''}
+          <a href="mailto:${s.adminEmail}" class="block w-full py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 text-center">
+            Email Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function suspendSociety() {
+  const reason = prompt('Suspension reason:');
+  if (!reason) return;
+  const btn = document.getElementById('suspend-btn');
+  btn.disabled = true;
+  const resp = await apiFetch(`/societies/${societyId}/suspend`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+  if (resp && resp.ok) {
+    window.location.reload();
+  } else {
+    alert('Failed to suspend');
+    btn.disabled = false;
+  }
+}
+
+async function activateSociety() {
+  if (!confirm('Reactivate this society?')) return;
+  const btn = document.getElementById('activate-btn');
+  btn.disabled = true;
+  const resp = await apiFetch(`/societies/${societyId}/activate`, { method: 'POST' });
+  if (resp && resp.ok) {
+    window.location.reload();
+  } else {
+    alert('Failed to activate');
+    btn.disabled = false;
+  }
+}
+
+(function() {
+  if (!requireAuth()) return;
+  loadSociety();
+})();
+</script>
+{{end}}

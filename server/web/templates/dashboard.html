@@ -1,0 +1,70 @@
+{{define "content"}}
+<div class="fade-in">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="stats-grid">
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="text-sm text-gray-500">Total Societies</div>
+      <div class="text-3xl font-bold text-gray-900 mt-1" id="stat-total">-</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="text-sm text-gray-500">Pending Requests</div>
+      <div class="text-3xl font-bold text-amber-600 mt-1" id="stat-pending">-</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="text-sm text-gray-500">Active Societies</div>
+      <div class="text-3xl font-bold text-green-600 mt-1" id="stat-active">-</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="text-sm text-gray-500">Suspended</div>
+      <div class="text-3xl font-bold text-red-600 mt-1" id="stat-suspended">-</div>
+    </div>
+  </div>
+
+  <!-- Recent Pending Requests -->
+  <div class="bg-white rounded-xl border border-gray-200">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+      <h2 class="font-semibold text-gray-900">Recent Pending Requests</h2>
+      <a href="/platform/requests" class="text-sm text-indigo-600 hover:text-indigo-700">View All &rarr;</a>
+    </div>
+    <div id="recent-requests" class="divide-y divide-gray-100">
+      <div class="p-8 text-center text-gray-400">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function() {
+  if (!requireAuth()) return;
+
+  const resp = await apiFetch('/dashboard');
+  if (!resp) return;
+  const data = await resp.json();
+
+  document.getElementById('stat-total').textContent = data.stats.totalSocieties;
+  document.getElementById('stat-pending').textContent = data.stats.pendingRequests;
+  document.getElementById('stat-active').textContent = data.stats.activeSocieties;
+  document.getElementById('stat-suspended').textContent = data.stats.suspendedSocieties;
+
+  const container = document.getElementById('recent-requests');
+  const requests = data.recentRequests || [];
+  if (requests.length === 0) {
+    container.innerHTML = '<div class="p-8 text-center text-gray-400">No pending requests</div>';
+    return;
+  }
+  container.innerHTML = requests.slice(0, 5).map(r => `
+    <a href="/platform/requests/${r.id}" class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+      <div>
+        <div class="font-medium text-gray-900">${r.societyName}</div>
+        <div class="text-sm text-gray-500">${r.registrationNumber} &middot; ${r.city || 'N/A'}</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-400">${timeAgo(r.createdAt)}</span>
+        ${statusBadge(r.status)}
+      </div>
+    </a>
+  `).join('');
+})();
+</script>
+{{end}}

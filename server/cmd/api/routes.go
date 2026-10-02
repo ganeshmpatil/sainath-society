@@ -615,6 +615,18 @@ func SetupRoutes(
 		ac.DELETE("/items/:itemId", auditChecklistHandler.DeleteItem)
 	}
 
+	// ─── Platform Admin Web Dashboard (HTML pages) ──────────────
+	webHandler := handlers.NewWebHandler("web/templates")
+	r.GET("/platform/login", webHandler.LoginPage)
+	// Protected web pages (redirect to login client-side via JS requireAuth)
+	r.GET("/platform/", webHandler.DashboardPage)
+	r.GET("/platform/dashboard", webHandler.DashboardPage)
+	r.GET("/platform/requests", webHandler.RequestsPage)
+	r.GET("/platform/requests/:id", webHandler.RequestDetailPage)
+	r.GET("/platform/societies", webHandler.SocietiesPage)
+	r.GET("/platform/societies/:id", webHandler.SocietyDetailPage)
+	r.GET("/platform/audit-log", webHandler.AuditLogPage)
+
 	// ─── Guard Patrol & Incidents ─────────────────────────────
 	{
 		patrol := protected.Group("/patrol")

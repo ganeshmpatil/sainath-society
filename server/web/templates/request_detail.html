@@ -1,0 +1,286 @@
+{{define "content"}}
+<div class="fade-in">
+  <a href="/platform/requests" class="text-sm text-gray-500 hover:text-gray-700 mb-4 inline-block">&larr; Back to Requests</a>
+
+  <div class="grid lg:grid-cols-3 gap-6" id="detail-container">
+    <div class="lg:col-span-3 p-8 text-center text-gray-400">Loading...</div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div id="approve-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Approve Society?</h3>
+    <p class="text-sm text-gray-600 mb-4">This will create the society, wings, flats, and admin account. Credentials will be emailed.</p>
+    <textarea id="approve-notes" rows="2" placeholder="Review notes (optional)"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4"></textarea>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal('approve-modal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
+      <button onclick="confirmApprove()" id="approve-btn" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Confirm Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="reject-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Reject Request?</h3>
+    <textarea id="reject-reason" rows="3" placeholder="Reason for rejection (required, sent to requester)"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" required></textarea>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal('reject-modal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
+      <button onclick="confirmReject()" id="reject-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Confirm Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Info Request Modal -->
+<div id="info-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Ask for More Information</h3>
+    <textarea id="info-message" rows="3" placeholder="What additional info do you need?"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" required></textarea>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal('info-modal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
+      <button onclick="confirmInfo()" id="info-btn" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center flex">
+  <div class="bg-white rounded-xl shadow-lg max-w-lg w-full mx-4 p-6">
+    <div class="text-center mb-4">
+      <div class="text-4xl mb-2">&#10003;</div>
+      <h3 class="text-lg font-semibold text-green-700">Society Provisioned!</h3>
+    </div>
+    <div id="success-details" class="text-sm space-y-2"></div>
+    <div class="flex justify-center mt-6">
+      <button onclick="window.location.href='/platform/requests'" class="px-6 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Back to Requests</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let requestId = window.location.pathname.split('/').pop();
+let requestData = null;
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+async function loadDetail() {
+  const resp = await apiFetch(`/requests/${requestId}`);
+  if (!resp) return;
+  const data = await resp.json();
+  requestData = data.request;
+  const v = data.validation;
+
+  const container = document.getElementById('detail-container');
+  const isPending = requestData.status === 'PENDING' || requestData.status === 'INFO_REQUESTED';
+
+  container.innerHTML = `
+    <!-- Left: Details -->
+    <div class="lg:col-span-2 space-y-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-gray-900">${requestData.requestNo}</h1>
+        ${statusBadge(requestData.status)}
+      </div>
+
+      <!-- Society Info -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Society Info</h2>
+        <div class="grid sm:grid-cols-2 gap-3 text-sm">
+          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${requestData.societyName}</span></div>
+          <div><span class="text-gray-500">Name (MR):</span> <span class="font-medium">${requestData.societyNameMr || '-'}</span></div>
+          <div><span class="text-gray-500">Reg Number:</span> <span class="font-mono font-medium">${requestData.registrationNumber}</span></div>
+          <div><span class="text-gray-500">Address:</span> ${requestData.address || '-'}</div>
+          <div><span class="text-gray-500">City:</span> ${requestData.city || '-'}</div>
+          <div><span class="text-gray-500">PIN Code:</span> ${requestData.pinCode || '-'}</div>
+          <div><span class="text-gray-500">Wings:</span> ${requestData.totalWings}</div>
+          <div><span class="text-gray-500">Flats:</span> ${requestData.totalFlats}</div>
+        </div>
+      </div>
+
+      <!-- Requester Info -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Requester</h2>
+        <div class="grid sm:grid-cols-2 gap-3 text-sm">
+          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${requestData.requesterName}</span></div>
+          <div><span class="text-gray-500">Designation:</span> ${requestData.requesterDesignation || '-'}</div>
+          <div><span class="text-gray-500">Phone:</span> <a href="tel:${requestData.requesterPhone}" class="text-indigo-600">${requestData.requesterPhone}</a></div>
+          <div><span class="text-gray-500">Email:</span> <a href="mailto:${requestData.requesterEmail}" class="text-indigo-600">${requestData.requesterEmail}</a></div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Uploaded Documents</h2>
+        <div class="space-y-2 text-sm">
+          ${requestData.certificateUrl
+            ? `<a href="${requestData.certificateUrl}" target="_blank" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700">&#128196; Registration Certificate <span class="text-gray-400">[View]</span></a>`
+            : '<div class="text-gray-400">No certificate uploaded</div>'}
+          ${requestData.letterheadUrl
+            ? `<a href="${requestData.letterheadUrl}" target="_blank" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700">&#128196; Society Letterhead <span class="text-gray-400">[View]</span></a>`
+            : ''}
+        </div>
+      </div>
+
+      ${requestData.rejectReason ? `
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-red-700 mb-2">Rejection Reason</h2>
+        <p class="text-sm text-red-600">${requestData.rejectReason}</p>
+      </div>` : ''}
+
+      ${requestData.infoRequest ? `
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-blue-700 mb-2">Information Requested</h2>
+        <p class="text-sm text-blue-600">${requestData.infoRequest}</p>
+      </div>` : ''}
+
+      ${requestData.reviewerNotes ? `
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-500 mb-2">Reviewer Notes</h2>
+        <p class="text-sm text-gray-700">${requestData.reviewerNotes}</p>
+      </div>` : ''}
+    </div>
+
+    <!-- Right: Validation + Actions -->
+    <div class="space-y-4">
+      <!-- Auto Validation -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Auto Validation</h2>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="${v.regNumberFormatValid ? 'text-green-600' : 'text-red-600'}">${v.regNumberFormatValid ? '&#10003;' : '&#10007;'}</span>
+            Reg number format ${v.regNumberFormatValid ? 'valid' : 'invalid'}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="${!v.duplicateFound ? 'text-green-600' : 'text-red-600'}">${!v.duplicateFound ? '&#10003;' : '&#10007;'}</span>
+            ${v.duplicateFound ? 'Duplicate found!' : 'No duplicate found'}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="${v.pinCodeCityMatch ? 'text-green-600' : 'text-amber-500'}">${v.pinCodeCityMatch ? '&#10003;' : '&#9888;'}</span>
+            PIN / City ${v.pinCodeCityMatch ? 'match' : 'mismatch'}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="${requestData.certificateUrl ? 'text-green-600' : 'text-amber-500'}">${requestData.certificateUrl ? '&#10003;' : '&#9888;'}</span>
+            Certificate ${requestData.certificateUrl ? 'uploaded' : 'not uploaded'}
+          </div>
+          ${v.notes ? `<div class="mt-2 p-2 bg-red-50 rounded text-xs text-red-600">${v.notes}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      ${isPending ? `
+      <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Actions</h2>
+        <button onclick="openModal('approve-modal')" class="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+          &#10003; Approve & Provision
+        </button>
+        <button onclick="openModal('reject-modal')" class="w-full py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+          &#10007; Reject
+        </button>
+        <button onclick="openModal('info-modal')" class="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+          &#63; Ask More Info
+        </button>
+      </div>
+      ` : `
+      <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-center text-sm text-gray-500">
+        This request has been ${requestData.status.toLowerCase()}.
+        ${requestData.reviewedBy ? `<br>By ${requestData.reviewedBy.name}` : ''}
+        ${requestData.reviewedAt ? `<br>${new Date(requestData.reviewedAt).toLocaleDateString()}` : ''}
+      </div>
+      `}
+
+      <!-- Timeline -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Timeline</h2>
+        <div class="space-y-3 text-xs text-gray-500">
+          <div>&#128197; Submitted ${new Date(requestData.createdAt).toLocaleString()}</div>
+          ${requestData.reviewedAt ? `<div>&#128196; Reviewed ${new Date(requestData.reviewedAt).toLocaleString()}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function confirmApprove() {
+  const btn = document.getElementById('approve-btn');
+  btn.disabled = true;
+  btn.textContent = 'Provisioning...';
+  try {
+    const resp = await apiFetch(`/requests/${requestId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ notes: document.getElementById('approve-notes').value }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error);
+    closeModal('approve-modal');
+    document.getElementById('success-details').innerHTML = `
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 space-y-1">
+        <div><strong>Society:</strong> ${data.society.name} (${data.society.slug})</div>
+        <div><strong>Wings:</strong> ${data.wingsCreated} created</div>
+        <div><strong>Flats:</strong> ${data.flatsCreated} created</div>
+        <div><strong>Admin:</strong> ${data.admin.name} (${data.admin.email})</div>
+        <div class="pt-2 border-t border-green-200 mt-2">
+          <strong>Temp Password:</strong>
+          <code class="bg-white px-2 py-1 rounded border text-base">${data.tempPassword}</code>
+        </div>
+        <div class="text-amber-600 text-xs mt-1">Save this password - it won't be shown again!</div>
+      </div>
+    `;
+    openModal('success-modal');
+  } catch (err) {
+    alert('Approval failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirm Approve';
+  }
+}
+
+async function confirmReject() {
+  const reason = document.getElementById('reject-reason').value;
+  if (!reason.trim()) { alert('Reason is required'); return; }
+  const btn = document.getElementById('reject-btn');
+  btn.disabled = true;
+  try {
+    const resp = await apiFetch(`/requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+    if (!resp.ok) { const d = await resp.json(); throw new Error(d.error); }
+    closeModal('reject-modal');
+    window.location.reload();
+  } catch (err) {
+    alert('Rejection failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function confirmInfo() {
+  const message = document.getElementById('info-message').value;
+  if (!message.trim()) { alert('Message is required'); return; }
+  const btn = document.getElementById('info-btn');
+  btn.disabled = true;
+  try {
+    const resp = await apiFetch(`/requests/${requestId}/info`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+    if (!resp.ok) { const d = await resp.json(); throw new Error(d.error); }
+    closeModal('info-modal');
+    window.location.reload();
+  } catch (err) {
+    alert('Failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+(function() {
+  if (!requireAuth()) return;
+  loadDetail();
+})();
+</script>
+{{end}}
