@@ -90,6 +90,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		true,            // httpOnly
 	)
 
+	// Also include refresh token in response body for mobile clients
+	loginResp.RefreshToken = refreshToken
 	c.JSON(http.StatusOK, loginResp)
 }
 
@@ -139,6 +141,8 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		true,
 	)
 
+	// Also include refresh token in response body for mobile clients
+	refreshResp.RefreshToken = newRefreshToken
 	c.JSON(http.StatusOK, refreshResp)
 }
 

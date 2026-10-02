@@ -57,6 +57,8 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	}
 	if actor.IsAdmin() && req.OwnerMemberID != nil {
 		t.OwnerMemberID = *req.OwnerMemberID
+	} else {
+		t.OwnerMemberID = actor.MemberID
 	}
 
 	if err := h.repo.Create(actor, t); err != nil {

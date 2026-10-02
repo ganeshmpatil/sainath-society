@@ -3,6 +3,6 @@
 class ApiConfig {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://aangan.onrender.com/api/v1',
+    defaultValue: 'https://sainath-society.onrender.com/api/v1',
   );
 }

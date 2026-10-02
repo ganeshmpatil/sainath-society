@@ -104,6 +104,7 @@ func SetupRoutes(
 
 	// API v1 group
 	api := r.Group("/api/v1")
+	api.Use(middleware.SanitizeInput())
 
 	// Health check
 	api.GET("/health", func(c *gin.Context) {

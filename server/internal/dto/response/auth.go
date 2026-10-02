@@ -21,17 +21,19 @@ type UserResponse struct {
 
 // LoginResponse represents successful login response
 type LoginResponse struct {
-	AccessToken string       `json:"accessToken"`
-	ExpiresIn   int          `json:"expiresIn"`
-	ExpiresAt   time.Time    `json:"expiresAt"`
-	User        UserResponse `json:"user"`
+	AccessToken  string       `json:"accessToken"`
+	RefreshToken string       `json:"refreshToken,omitempty"`
+	ExpiresIn    int          `json:"expiresIn"`
+	ExpiresAt    time.Time    `json:"expiresAt"`
+	User         UserResponse `json:"user"`
 }
 
 // RefreshResponse represents token refresh response
 type RefreshResponse struct {
-	AccessToken string    `json:"accessToken"`
-	ExpiresIn   int       `json:"expiresIn"`
-	ExpiresAt   time.Time `json:"expiresAt"`
+	AccessToken  string    `json:"accessToken"`
+	RefreshToken string    `json:"refreshToken,omitempty"`
+	ExpiresIn    int       `json:"expiresIn"`
+	ExpiresAt    time.Time `json:"expiresAt"`
 }
 
 // ErrorResponse represents error response
