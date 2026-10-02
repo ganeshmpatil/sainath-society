@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app_colors.dart';
 
 class ThemeCubit extends Cubit<AppThemeType> {
-  ThemeCubit() : super(AppThemeType.royalGold) {
+  ThemeCubit() : super(AppThemeType.freshEmerald) {
     _loadSaved();
   }
 

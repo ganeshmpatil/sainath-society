@@ -64,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Logo
                   Container(
-                    width: 120,
-                    height: 120,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [

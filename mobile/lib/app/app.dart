@@ -42,6 +42,7 @@ class _AanganAppState extends State<AanganApp> {
     AppColors.applyTheme(themeType);
 
     return MaterialApp.router(
+      key: ValueKey(themeType),
       title: 'Aangan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.forType(themeType),

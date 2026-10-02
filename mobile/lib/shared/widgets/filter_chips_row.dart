@@ -36,7 +36,7 @@ class FilterChipsRow extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primary.withAlpha(30)
-                    : AppColors.border,
+                    : AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected

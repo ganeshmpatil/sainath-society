@@ -64,6 +64,7 @@ const Map<String, String> stringsMr = {
   'auth.password': 'पासवर्ड',
   'auth.mobile': 'मोबाईल क्रमांक',
   'auth.signIn': 'साइन इन करा',
+  'auth.logoutConfirm': 'तुम्हाला खात्री आहे की तुम्ही लॉगआउट करू इच्छिता?',
   'auth.createAccount': 'खाते तयार करा',
   'auth.noAccount': 'खाते नाही?',
   'auth.haveAccount': 'आधीच नोंदणी केली आहे?',

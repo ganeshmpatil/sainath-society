@@ -256,7 +256,7 @@ class _QuickActionsGrid extends StatelessWidget {
                       color: a.color,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(a.icon, size: 20, color: AppColors.textPrimary),
+                    child: Icon(a.icon, size: 20, color: a.iconColor),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -282,6 +282,7 @@ class _QA {
   final String route;
   final Color color;
   const _QA(this.icon, this.labelKey, this.route, this.color);
+  Color get iconColor => color.withAlpha(255);
 }
 
 class _NoticeItem extends StatelessWidget {

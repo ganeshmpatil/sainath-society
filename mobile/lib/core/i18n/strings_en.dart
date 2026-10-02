@@ -64,6 +64,7 @@ const Map<String, String> stringsEn = {
   'auth.password': 'Password',
   'auth.mobile': 'Mobile number',
   'auth.signIn': 'Sign In',
+  'auth.logoutConfirm': 'Are you sure you want to logout?',
   'auth.createAccount': 'Create account',
   'auth.noAccount': "Don't have an account?",
   'auth.haveAccount': 'Already registered?',

@@ -44,8 +44,15 @@ const _modules = [
   _Module(Icons.insights_rounded, 'nav.analytics', '/analytics', Color(0x303B82F6)),
 ];
 
-class MoreScreen extends StatelessWidget {
+class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
+
+  @override
+  State<MoreScreen> createState() => _MoreScreenState();
+}
+
+class _MoreScreenState extends State<MoreScreen> {
+  String _search = '';
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +61,9 @@ class MoreScreen extends StatelessWidget {
     final authState = context.watch<AuthBloc>().state;
     final user = authState is Authenticated ? authState.user : null;
     final currentTheme = context.watch<ThemeCubit>().state;
+    final filtered = _search.isEmpty
+        ? _modules
+        : _modules.where((m) => l.t(m.labelKey).toLowerCase().contains(_search.toLowerCase())).toList();
 
     return Scaffold(
       body: SafeArea(
@@ -97,6 +107,7 @@ class MoreScreen extends StatelessWidget {
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                   ),
+                  onChanged: (v) => setState(() => _search = v),
                 ),
               ),
             ),
@@ -113,7 +124,7 @@ class MoreScreen extends StatelessWidget {
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (ctx, i) {
-                    final m = _modules[i];
+                    final m = filtered[i];
                     return GestureDetector(
                       onTap: () => context.push(m.route),
                       child: Container(
@@ -132,7 +143,7 @@ class MoreScreen extends StatelessWidget {
                                 color: m.color,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(m.icon, size: 22, color: AppColors.textPrimary),
+                              child: Icon(m.icon, size: 22, color: m.color.withAlpha(255)),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -147,7 +158,7 @@ class MoreScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  childCount: _modules.length,
+                  childCount: filtered.length,
                 ),
               ),
             ),
@@ -247,7 +258,27 @@ class MoreScreen extends StatelessWidget {
               child: GlassCard(
                 borderColor: AppColors.urgent.withAlpha(50),
                 onTap: () {
-                  context.read<AuthBloc>().add(const AuthLogoutRequested());
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(l.t('common.logout')),
+                      content: Text(l.t('auth.logoutConfirm')),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: Text(l.t('common.cancel')),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            context.read<AuthBloc>().add(const AuthLogoutRequested());
+                          },
+                          child: Text(l.t('common.logout'),
+                              style: const TextStyle(color: AppColors.urgent)),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 child: Row(
                   children: [
