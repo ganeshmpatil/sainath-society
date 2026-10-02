@@ -82,7 +82,7 @@ async function loadDetail() {
     <!-- Left: Details -->
     <div class="lg:col-span-2 space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">${requestData.requestNo}</h1>
+        <h1 class="text-xl font-bold text-gray-900">${esc(requestData.requestNo)}</h1>
         ${statusBadge(requestData.status)}
       </div>
 
@@ -90,12 +90,12 @@ async function loadDetail() {
       <div class="bg-white rounded-xl border border-gray-200 p-5">
         <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Society Info</h2>
         <div class="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${requestData.societyName}</span></div>
-          <div><span class="text-gray-500">Name (MR):</span> <span class="font-medium">${requestData.societyNameMr || '-'}</span></div>
-          <div><span class="text-gray-500">Reg Number:</span> <span class="font-mono font-medium">${requestData.registrationNumber}</span></div>
-          <div><span class="text-gray-500">Address:</span> ${requestData.address || '-'}</div>
-          <div><span class="text-gray-500">City:</span> ${requestData.city || '-'}</div>
-          <div><span class="text-gray-500">PIN Code:</span> ${requestData.pinCode || '-'}</div>
+          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${esc(requestData.societyName)}</span></div>
+          <div><span class="text-gray-500">Name (MR):</span> <span class="font-medium">${esc(requestData.societyNameMr) || '-'}</span></div>
+          <div><span class="text-gray-500">Reg Number:</span> <span class="font-mono font-medium">${esc(requestData.registrationNumber)}</span></div>
+          <div><span class="text-gray-500">Address:</span> ${esc(requestData.address) || '-'}</div>
+          <div><span class="text-gray-500">City:</span> ${esc(requestData.city) || '-'}</div>
+          <div><span class="text-gray-500">PIN Code:</span> ${esc(requestData.pinCode) || '-'}</div>
           <div><span class="text-gray-500">Wings:</span> ${requestData.totalWings}</div>
           <div><span class="text-gray-500">Flats:</span> ${requestData.totalFlats}</div>
         </div>
@@ -105,10 +105,10 @@ async function loadDetail() {
       <div class="bg-white rounded-xl border border-gray-200 p-5">
         <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Requester</h2>
         <div class="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${requestData.requesterName}</span></div>
-          <div><span class="text-gray-500">Designation:</span> ${requestData.requesterDesignation || '-'}</div>
-          <div><span class="text-gray-500">Phone:</span> <a href="tel:${requestData.requesterPhone}" class="text-indigo-600">${requestData.requesterPhone}</a></div>
-          <div><span class="text-gray-500">Email:</span> <a href="mailto:${requestData.requesterEmail}" class="text-indigo-600">${requestData.requesterEmail}</a></div>
+          <div><span class="text-gray-500">Name:</span> <span class="font-medium">${esc(requestData.requesterName)}</span></div>
+          <div><span class="text-gray-500">Designation:</span> ${esc(requestData.requesterDesignation) || '-'}</div>
+          <div><span class="text-gray-500">Phone:</span> <a href="tel:${esc(requestData.requesterPhone)}" class="text-indigo-600">${esc(requestData.requesterPhone)}</a></div>
+          <div><span class="text-gray-500">Email:</span> <a href="mailto:${esc(requestData.requesterEmail)}" class="text-indigo-600">${esc(requestData.requesterEmail)}</a></div>
         </div>
       </div>
 
@@ -128,19 +128,19 @@ async function loadDetail() {
       ${requestData.rejectReason ? `
       <div class="bg-red-50 border border-red-200 rounded-xl p-5">
         <h2 class="text-sm font-semibold text-red-700 mb-2">Rejection Reason</h2>
-        <p class="text-sm text-red-600">${requestData.rejectReason}</p>
+        <p class="text-sm text-red-600">${esc(requestData.rejectReason)}</p>
       </div>` : ''}
 
       ${requestData.infoRequest ? `
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
         <h2 class="text-sm font-semibold text-blue-700 mb-2">Information Requested</h2>
-        <p class="text-sm text-blue-600">${requestData.infoRequest}</p>
+        <p class="text-sm text-blue-600">${esc(requestData.infoRequest)}</p>
       </div>` : ''}
 
       ${requestData.reviewerNotes ? `
       <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
         <h2 class="text-sm font-semibold text-gray-500 mb-2">Reviewer Notes</h2>
-        <p class="text-sm text-gray-700">${requestData.reviewerNotes}</p>
+        <p class="text-sm text-gray-700">${esc(requestData.reviewerNotes)}</p>
       </div>` : ''}
     </div>
 

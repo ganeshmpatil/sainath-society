@@ -41,8 +41,8 @@
         </div>
         <span class="text-xs text-gray-400">${new Date(l.createdAt).toLocaleString()}</span>
       </div>
-      ${l.details ? `<div class="text-xs text-gray-500 mt-1">${l.details}</div>` : ''}
-      ${l.admin ? `<div class="text-xs text-gray-400 mt-0.5">by ${l.admin.name}</div>` : ''}
+      ${l.details ? `<div class="text-xs text-gray-500 mt-1">${esc(l.details)}</div>` : ''}
+      ${l.admin ? `<div class="text-xs text-gray-400 mt-0.5">by ${esc(l.admin.name)}</div>` : ''}
     </div>
   `).join('');
 })();

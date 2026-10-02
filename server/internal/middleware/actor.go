@@ -67,9 +67,15 @@ func ActorContextMiddleware(db *gorm.DB) gin.HandlerFunc {
 			actor.FlatID = &flatID
 		}
 
-		// Set PostgreSQL session variable for RLS defense-in-depth
+		// RLS defense-in-depth: set session variable so PostgreSQL row-level
+		// security policies can filter by society. We use SET (session-level)
+		// because SET LOCAL only works within a transaction.
+		// Note: GORM's connection pool may reuse connections, so we ALWAYS
+		// set this at the start of every request (never rely on leftover state).
 		if societyID != uuid.Nil {
-			db.Exec("SET LOCAL app.current_society_id = ?", societyID.String())
+			db.Exec("SET app.current_society_id = ?", societyID.String())
+		} else {
+			db.Exec("RESET app.current_society_id")
 		}
 
 		c.Set(actorContextKey, actor)

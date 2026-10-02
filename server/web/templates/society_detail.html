@@ -19,8 +19,8 @@ async function loadSociety() {
   document.getElementById('detail-container').innerHTML = `
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-xl font-bold text-gray-900">${s.name}</h1>
-        <p class="text-sm text-gray-500">${s.nameMr || ''}</p>
+        <h1 class="text-xl font-bold text-gray-900">${esc(s.name)}</h1>
+        <p class="text-sm text-gray-500">${esc(s.nameMr) || ''}</p>
       </div>
       ${statusBadge(s.status)}
     </div>
@@ -31,14 +31,14 @@ async function loadSociety() {
         <div class="bg-white rounded-xl border border-gray-200 p-5">
           <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Overview</h2>
           <div class="grid sm:grid-cols-2 gap-3 text-sm">
-            <div><span class="text-gray-500">Reg No:</span> <span class="font-mono">${s.registrationNumber}</span></div>
-            <div><span class="text-gray-500">Slug:</span> <span class="font-mono">${s.slug}</span></div>
-            <div><span class="text-gray-500">Address:</span> ${s.address || '-'}</div>
-            <div><span class="text-gray-500">City:</span> ${s.city || '-'} ${s.pinCode || ''}</div>
+            <div><span class="text-gray-500">Reg No:</span> <span class="font-mono">${esc(s.registrationNumber)}</span></div>
+            <div><span class="text-gray-500">Slug:</span> <span class="font-mono">${esc(s.slug)}</span></div>
+            <div><span class="text-gray-500">Address:</span> ${esc(s.address) || '-'}</div>
+            <div><span class="text-gray-500">City:</span> ${esc(s.city) || '-'} ${esc(s.pinCode) || ''}</div>
             <div><span class="text-gray-500">Wings:</span> ${s.totalWings}</div>
             <div><span class="text-gray-500">Flats:</span> ${s.totalFlats}</div>
-            <div><span class="text-gray-500">Admin:</span> ${s.adminName || '-'}</div>
-            <div><span class="text-gray-500">Admin Email:</span> <a href="mailto:${s.adminEmail}" class="text-indigo-600">${s.adminEmail || '-'}</a></div>
+            <div><span class="text-gray-500">Admin:</span> ${esc(s.adminName) || '-'}</div>
+            <div><span class="text-gray-500">Admin Email:</span> <a href="mailto:${esc(s.adminEmail)}" class="text-indigo-600">${esc(s.adminEmail) || '-'}</a></div>
             <div><span class="text-gray-500">Live since:</span> ${s.approvedAt ? new Date(s.approvedAt).toLocaleDateString() : '-'}</div>
           </div>
         </div>
@@ -46,7 +46,7 @@ async function loadSociety() {
         ${s.suspendReason ? `
         <div class="bg-red-50 border border-red-200 rounded-xl p-5">
           <h2 class="text-sm font-semibold text-red-700 mb-2">Suspension Reason</h2>
-          <p class="text-sm text-red-600">${s.suspendReason}</p>
+          <p class="text-sm text-red-600">${esc(s.suspendReason)}</p>
           <p class="text-xs text-red-400 mt-1">Suspended: ${s.suspendedAt ? new Date(s.suspendedAt).toLocaleDateString() : ''}</p>
         </div>` : ''}
       </div>

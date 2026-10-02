@@ -21,12 +21,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _registerTap = TapGestureRecognizer();
   bool _obscure = true;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _registerTap.dispose();
     super.dispose();
   }
 
@@ -193,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
-                          recognizer: TapGestureRecognizer()
+                          recognizer: _registerTap
                             ..onTap = () => context.push('/register-society'),
                         ),
                       ],

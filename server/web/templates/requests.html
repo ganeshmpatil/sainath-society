@@ -47,11 +47,11 @@ async function filterRequests(status) {
   container.innerHTML = requests.map(r => `
     <a href="/platform/requests/${r.id}" class="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
       <div class="min-w-0 flex-1">
-        <div class="font-medium text-gray-900">${r.societyName}</div>
+        <div class="font-medium text-gray-900">${esc(r.societyName)}</div>
         <div class="text-sm text-gray-500 mt-0.5">
-          ${r.registrationNumber} &middot; ${r.city || 'N/A'} &middot; ${r.totalWings} wings, ${r.totalFlats} flats
+          ${esc(r.registrationNumber)} &middot; ${esc(r.city) || 'N/A'} &middot; ${r.totalWings} wings, ${r.totalFlats} flats
         </div>
-        <div class="text-xs text-gray-400 mt-1">By ${r.requesterName} (${r.requesterDesignation || 'N/A'})</div>
+        <div class="text-xs text-gray-400 mt-1">By ${esc(r.requesterName)} (${esc(r.requesterDesignation) || 'N/A'})</div>
       </div>
       <div class="flex items-center gap-3 ml-4">
         <span class="text-xs text-gray-400 whitespace-nowrap">${timeAgo(r.createdAt)}</span>

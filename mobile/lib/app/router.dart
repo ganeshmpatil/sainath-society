@@ -74,7 +74,7 @@ GoRouter buildRouter(AuthBloc authBloc) {
       final goingToChangePassword = state.matchedLocation == '/change-password';
 
       if (!isLoggedIn && !goingToAuth && !goingToRegister) return '/login';
-      if (isLoggedIn && goingToAuth) return '/';
+      if (isLoggedIn && (goingToAuth || goingToRegister)) return '/';
 
       // Force password change redirect
       if (isLoggedIn && authState.user.mustChangePassword && !goingToChangePassword) {

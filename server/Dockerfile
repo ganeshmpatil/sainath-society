@@ -27,6 +27,9 @@ RUN apk --no-cache add ca-certificates
 # Copy binary from builder
 COPY --from=builder /api .
 
+# Copy web templates for platform admin dashboard
+COPY --from=builder /app/web ./web
+
 # Expose port
 EXPOSE 8080
 

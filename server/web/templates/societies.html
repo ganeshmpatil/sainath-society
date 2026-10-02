@@ -39,11 +39,11 @@ async function filterSocieties(status) {
   container.innerHTML = societies.map(s => `
     <a href="/platform/societies/${s.id}" class="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
       <div class="min-w-0 flex-1">
-        <div class="font-medium text-gray-900">${s.name}</div>
+        <div class="font-medium text-gray-900">${esc(s.name)}</div>
         <div class="text-sm text-gray-500 mt-0.5">
-          ${s.registrationNumber} &middot; ${s.city || 'N/A'} &middot; ${s.totalWings} wings, ${s.totalFlats} flats
+          ${esc(s.registrationNumber)} &middot; ${esc(s.city) || 'N/A'} &middot; ${s.totalWings} wings, ${s.totalFlats} flats
         </div>
-        <div class="text-xs text-gray-400 mt-1">${s.slug}</div>
+        <div class="text-xs text-gray-400 mt-1">${esc(s.slug)}</div>
       </div>
       <div class="flex items-center gap-3 ml-4">
         ${statusBadge(s.status)}
