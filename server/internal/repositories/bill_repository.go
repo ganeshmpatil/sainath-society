@@ -451,3 +451,135 @@ func (r *BillRepository) GetBillsDueSoon(days int) ([]models.MaintenanceBill, er
 func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }
+
+// ─── Member Self-Report Payment ──────────────────────────────────
+
+// ReportPayment allows a member to self-report a payment (status=PENDING).
+// The bill is NOT updated until an admin confirms the payment.
+func (r *BillRepository) ReportPayment(actor *ActorContext, payment *models.BillPayment) error {
+	// Verify the member owns this bill
+	var bill models.MaintenanceBill
+	if err := r.db.First(&bill, "id = ?", payment.BillID).Error; err != nil {
+		return err
+	}
+	if err := AssertOwnerOrAdmin(actor, bill.MemberID); err != nil {
+		return err
+	}
+	if bill.Status == models.BillPaid {
+		return errors.New("bill is already fully paid")
+	}
+
+	payment.Status = models.BillPaymentPending
+	payment.RecordedByID = actor.UserID
+	SetTenantFields(actor, &payment.SocietyID)
+	return r.db.Create(payment).Error
+}
+
+// ListPendingPayments returns all PENDING self-reported payments (admin only).
+func (r *BillRepository) ListPendingPayments(actor *ActorContext) ([]models.BillPayment, error) {
+	if !actor.IsAdmin() {
+		return nil, ErrForbidden
+	}
+	var rows []models.BillPayment
+	err := ScopeBySociety(r.db.Model(&models.BillPayment{}), actor).
+		Where("status = ?", models.BillPaymentPending).
+		Preload("Bill").Preload("Bill.Member").Preload("Bill.Flat").
+		Order("created_at ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
+// ConfirmPayment approves a member-reported payment and updates the bill.
+func (r *BillRepository) ConfirmPayment(actor *ActorContext, paymentID uuid.UUID) (*models.BillPayment, error) {
+	if !actor.IsAdmin() {
+		return nil, ErrForbidden
+	}
+
+	var payment models.BillPayment
+	if err := r.db.First(&payment, "id = ?", paymentID).Error; err != nil {
+		return nil, err
+	}
+	if payment.Status != models.BillPaymentPending {
+		return nil, errors.New("payment is not in PENDING status")
+	}
+
+	now := time.Now()
+	return &payment, r.db.Transaction(func(tx *gorm.DB) error {
+		// Update payment status
+		payment.Status = models.BillPaymentConfirmed
+		payment.ConfirmedByID = &actor.UserID
+		payment.ConfirmedAt = &now
+
+		// Generate receipt number
+		var count int64
+		tx.Model(&models.BillPayment{}).Count(&count)
+		payment.ReceiptNo = fmt.Sprintf("RCT-%d-%04d", now.Year(), count+1)
+
+		if err := tx.Save(&payment).Error; err != nil {
+			return err
+		}
+
+		// Update the bill's amount_paid
+		var bill models.MaintenanceBill
+		if err := tx.First(&bill, "id = ?", payment.BillID).Error; err != nil {
+			return err
+		}
+		newPaid := bill.AmountPaid + payment.Amount
+		status := bill.Status
+		var paidAt *time.Time
+		if newPaid >= bill.TotalAmount {
+			status = models.BillPaid
+			paidAt = &now
+			newPaid = bill.TotalAmount
+		}
+		return tx.Model(&bill).Updates(map[string]interface{}{
+			"amount_paid": newPaid,
+			"status":      status,
+			"paid_at":     paidAt,
+		}).Error
+	})
+}
+
+// RejectPayment rejects a member-reported payment with a reason.
+func (r *BillRepository) RejectPayment(actor *ActorContext, paymentID uuid.UUID, reason string) (*models.BillPayment, error) {
+	if !actor.IsAdmin() {
+		return nil, ErrForbidden
+	}
+
+	var payment models.BillPayment
+	if err := r.db.First(&payment, "id = ?", paymentID).Error; err != nil {
+		return nil, err
+	}
+	if payment.Status != models.BillPaymentPending {
+		return nil, errors.New("payment is not in PENDING status")
+	}
+
+	payment.Status = models.BillPaymentRejected
+	payment.RejectedReason = reason
+	payment.ConfirmedByID = &actor.UserID
+	now := time.Now()
+	payment.ConfirmedAt = &now
+
+	return &payment, r.db.Save(&payment).Error
+}
+
+// GetPaymentProof returns the proof image data for a payment.
+func (r *BillRepository) GetPaymentProof(actor *ActorContext, paymentID uuid.UUID) ([]byte, string, error) {
+	var payment models.BillPayment
+	if err := r.db.Select("proof_image_data, proof_mime_type, bill_id").
+		First(&payment, "id = ?", paymentID).Error; err != nil {
+		return nil, "", err
+	}
+	// Verify access: admin or bill owner
+	var bill models.MaintenanceBill
+	if err := r.db.First(&bill, "id = ?", payment.BillID).Error; err != nil {
+		return nil, "", err
+	}
+	if err := AssertOwnerOrAdmin(actor, bill.MemberID); err != nil {
+		return nil, "", err
+	}
+	if len(payment.ProofImageData) == 0 {
+		return nil, "", ErrNotFound
+	}
+	return payment.ProofImageData, payment.ProofMimeType, nil
+}

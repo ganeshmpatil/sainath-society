@@ -529,13 +529,19 @@ func SetupRoutes(
 		settings.GET("", gstHandler.ListSettings)
 		settings.POST("", gstHandler.UpsertSetting)
 
-		// Payments: Razorpay gateway + bank details.
+		// Payments: Razorpay gateway + bank details + self-report.
 		pay := protected.Group("/payments")
 		pay.GET("/config", paymentHandler.GetConfig)
 		pay.GET("/bank-details", paymentHandler.GetBankDetails)
+		pay.PUT("/bank-details", paymentHandler.UpdateBankDetails)
 		pay.POST("/create-order", paymentHandler.CreateOrder)
 		pay.POST("/verify", paymentHandler.VerifyPayment)
 		pay.GET("", paymentHandler.ListPayments)
+		pay.POST("/report", paymentHandler.ReportPayment)
+		pay.GET("/pending", paymentHandler.ListPendingPayments)
+		pay.POST("/:id/confirm", paymentHandler.ConfirmPayment)
+		pay.POST("/:id/reject", paymentHandler.RejectPayment)
+		pay.GET("/:id/proof", paymentHandler.GetPaymentProof)
 
 		// Staff management.
 		staffHandler := handlers.NewStaffHandler(domain.Staff)

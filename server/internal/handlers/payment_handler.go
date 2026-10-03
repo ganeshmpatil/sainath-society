@@ -51,12 +51,224 @@ func (h *PaymentHandler) GetConfig(c *gin.Context) {
 // ─── Society bank details ────────────────────────────────────────
 
 func (h *PaymentHandler) GetBankDetails(c *gin.Context) {
-	cfg, err := h.paymentRepo.GetBankConfig()
+	actor := middleware.GetActor(c)
+	cfg, err := h.paymentRepo.GetBankConfig(actor)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"bankConfig": nil})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"bankConfig": cfg})
+}
+
+func (h *PaymentHandler) UpdateBankDetails(c *gin.Context) {
+	actor := middleware.GetActor(c)
+
+	var req struct {
+		AccountName   string `json:"accountName" binding:"required"`
+		AccountNumber string `json:"accountNumber" binding:"required"`
+		BankName      string `json:"bankName" binding:"required"`
+		BranchName    string `json:"branchName"`
+		IFSC          string `json:"ifsc" binding:"required"`
+		UpiID         string `json:"upiId"`
+		QRCodeData    string `json:"qrCodeData"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_REQUEST"})
+		return
+	}
+
+	// Try to find existing config
+	existing, err := h.paymentRepo.GetBankConfig(actor)
+	if err != nil {
+		// Create new
+		cfg := &models.SocietyBankConfig{
+			AccountName:   req.AccountName,
+			AccountNumber: req.AccountNumber,
+			BankName:      req.BankName,
+			BranchName:    req.BranchName,
+			IFSC:          req.IFSC,
+			UpiID:         req.UpiID,
+			QRCodeData:    req.QRCodeData,
+			IsActive:      true,
+		}
+		if err := h.paymentRepo.CreateBankConfig(actor, cfg); err != nil {
+			writeRepoError(c, err)
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{"bankConfig": cfg})
+		return
+	}
+
+	// Update existing
+	existing.AccountName = req.AccountName
+	existing.AccountNumber = req.AccountNumber
+	existing.BankName = req.BankName
+	existing.BranchName = req.BranchName
+	existing.IFSC = req.IFSC
+	existing.UpiID = req.UpiID
+	existing.QRCodeData = req.QRCodeData
+
+	if err := h.paymentRepo.UpdateBankConfig(actor, existing); err != nil {
+		writeRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"bankConfig": existing})
+}
+
+// ─── Member Self-Report Payment ─────────────────────────────────
+
+func (h *PaymentHandler) ReportPayment(c *gin.Context) {
+	actor := middleware.GetActor(c)
+
+	billID, err := uuid.Parse(c.PostForm("billId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid bill ID", Code: "INVALID_ID"})
+		return
+	}
+
+	amount := 0.0
+	if _, err := fmt.Sscanf(c.PostForm("amount"), "%f", &amount); err != nil || amount <= 0 {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid amount", Code: "INVALID_AMOUNT"})
+		return
+	}
+
+	paymentMode := c.PostForm("paymentMode")
+	if paymentMode == "" {
+		paymentMode = "UPI"
+	}
+
+	paymentDateStr := c.PostForm("paymentDate")
+	payDate := time.Now()
+	if paymentDateStr != "" {
+		if pd, err := time.Parse("2006-01-02", paymentDateStr); err == nil {
+			payDate = pd
+		}
+	}
+
+	payment := &models.BillPayment{
+		BillID:      billID,
+		Amount:      amount,
+		PaymentMode: models.PaymentMode(paymentMode),
+		PaymentDate: payDate,
+		Reference:   c.PostForm("reference"),
+	}
+
+	// Handle proof image upload (optional)
+	file, header, err := c.Request.FormFile("proof")
+	if err == nil && header != nil {
+		defer file.Close()
+		// Limit to 5MB
+		if header.Size > 5*1024*1024 {
+			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Proof image too large (max 5MB)", Code: "FILE_TOO_LARGE"})
+			return
+		}
+		data, err := io.ReadAll(file)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: "Failed to read file", Code: "READ_ERROR"})
+			return
+		}
+		payment.ProofImageData = data
+		payment.ProofMimeType = header.Header.Get("Content-Type")
+		if payment.ProofMimeType == "" {
+			payment.ProofMimeType = "image/jpeg"
+		}
+	}
+
+	if err := h.billRepo.ReportPayment(actor, payment); err != nil {
+		if err.Error() == "bill is already fully paid" {
+			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "ALREADY_PAID"})
+			return
+		}
+		writeRepoError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Payment reported, awaiting admin confirmation",
+		"payment": payment,
+	})
+}
+
+// ─── Admin: List Pending Payments ────────────────────────────────
+
+func (h *PaymentHandler) ListPendingPayments(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	rows, err := h.billRepo.ListPendingPayments(actor)
+	if err != nil {
+		writeRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"payments": rows, "count": len(rows)})
+}
+
+// ─── Admin: Confirm Payment ─────────────────────────────────────
+
+func (h *PaymentHandler) ConfirmPayment(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	paymentID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID", Code: "INVALID_ID"})
+		return
+	}
+
+	payment, err := h.billRepo.ConfirmPayment(actor, paymentID)
+	if err != nil {
+		if err.Error() == "payment is not in PENDING status" {
+			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_STATUS"})
+			return
+		}
+		writeRepoError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment confirmed", "payment": payment})
+}
+
+// ─── Admin: Reject Payment ──────────────────────────────────────
+
+func (h *PaymentHandler) RejectPayment(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	paymentID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID", Code: "INVALID_ID"})
+		return
+	}
+
+	var req struct {
+		Reason string `json:"reason"`
+	}
+	_ = c.ShouldBindJSON(&req)
+
+	payment, err := h.billRepo.RejectPayment(actor, paymentID, req.Reason)
+	if err != nil {
+		if err.Error() == "payment is not in PENDING status" {
+			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error(), Code: "INVALID_STATUS"})
+			return
+		}
+		writeRepoError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment rejected", "payment": payment})
+}
+
+// ─── Payment Proof Image ────────────────────────────────────────
+
+func (h *PaymentHandler) GetPaymentProof(c *gin.Context) {
+	actor := middleware.GetActor(c)
+	paymentID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Invalid ID", Code: "INVALID_ID"})
+		return
+	}
+
+	data, mimeType, err := h.billRepo.GetPaymentProof(actor, paymentID)
+	if err != nil {
+		writeRepoError(c, err)
+		return
+	}
+
+	c.Data(http.StatusOK, mimeType, data)
 }
 
 // ─── Create Razorpay Order ───────────────────────────────────────
@@ -214,7 +426,6 @@ func (h *PaymentHandler) createRazorpayOrder(amountPaise int64, receipt, notes s
 	req.SetBasicAuth(h.rzpKeyID, h.rzpSecret)
 	req.Header.Set("Content-Type", "application/json")
 	req.Body = io.NopCloser(
-		// Use a simple string reader
 		newStringReader(body),
 	)
 	req.ContentLength = int64(len(body))

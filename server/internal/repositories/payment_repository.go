@@ -41,13 +41,33 @@ func (r *PaymentRepository) ListForMember(actor *ActorContext) ([]models.Payment
 	return rows, err
 }
 
-func (r *PaymentRepository) GetBankConfig() (*models.SocietyBankConfig, error) {
+// ─── Society Bank Config ─────────────────────────────────────────
+
+func (r *PaymentRepository) GetBankConfig(actor *ActorContext) (*models.SocietyBankConfig, error) {
 	var cfg models.SocietyBankConfig
-	if err := r.db.Where("is_active = ?", true).First(&cfg).Error; err != nil {
+	q := ScopeBySociety(r.db.Model(&models.SocietyBankConfig{}), actor)
+	if err := q.Where("is_active = ?", true).First(&cfg).Error; err != nil {
 		return nil, err
 	}
 	return &cfg, nil
 }
+
+func (r *PaymentRepository) UpdateBankConfig(actor *ActorContext, cfg *models.SocietyBankConfig) error {
+	if !actor.IsAdmin() {
+		return ErrForbidden
+	}
+	return r.db.Save(cfg).Error
+}
+
+func (r *PaymentRepository) CreateBankConfig(actor *ActorContext, cfg *models.SocietyBankConfig) error {
+	if !actor.IsAdmin() {
+		return ErrForbidden
+	}
+	SetTenantFields(actor, &cfg.SocietyID)
+	return r.db.Create(cfg).Error
+}
+
+// ─── Bill Paid by Payment Gateway ────────────────────────────────
 
 // MarkBillPaidByPayment marks a bill as paid after a verified payment gateway
 // transaction. Unlike BillRepository.MarkPaid, this does not require admin role

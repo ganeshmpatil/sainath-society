@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 
 import '../../core/api/api_client.dart';
@@ -32,6 +34,7 @@ import 'fund_tracking_screen.dart';
 import 'tds_dashboard_screen.dart';
 import 'charge_overrides_screen.dart';
 import 'gst_invoice_screen.dart';
+import 'pending_payments_screen.dart';
 
 class _FD extends Equatable {
   final bool loading;
@@ -383,6 +386,7 @@ class _FVS extends State<_FV> {
       final cfg = res.data?['bankConfig'];
       if (cfg == null || !mounted) return;
       final l = AppLocalizations.of(context);
+      final qrData = cfg['qrCodeData']?.toString() ?? '';
       showDialog(
         context: context,
         barrierDismissible: true,
@@ -390,18 +394,41 @@ class _FVS extends State<_FV> {
           backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: Padding(padding: const EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.t('payment.bankDetails'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 16),
-            _bankRow(l.t('payment.accountName'), cfg['accountName']),
-            _bankRow(l.t('payment.accountNumber'), cfg['accountNumber']),
-            _bankRow(l.t('payment.bankName'), cfg['bankName']),
-            _bankRow(l.t('payment.branch'), cfg['branchName']),
-            _bankRow(l.t('payment.ifsc'), cfg['ifsc']),
-            if (cfg['upiId'] != null && cfg['upiId'].toString().isNotEmpty)
-              _bankRow(l.t('payment.upi'), cfg['upiId']),
-            const SizedBox(height: 16),
-          ])),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.t('payment.bankDetails'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              // QR Code
+              if (qrData.isNotEmpty) ...[
+                Center(child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(children: [
+                    Text(l.t('payment.scanQR'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    const SizedBox(height: 8),
+                    if (qrData.startsWith('data:image'))
+                      Image.memory(base64Decode(qrData.split(',').last), width: 180, height: 180, fit: BoxFit.contain)
+                    else
+                      Image.memory(base64Decode(qrData), width: 180, height: 180, fit: BoxFit.contain),
+                  ]),
+                )),
+                const SizedBox(height: 16),
+              ],
+              _bankRow(l.t('payment.accountName'), cfg['accountName']),
+              _bankRow(l.t('payment.accountNumber'), cfg['accountNumber']),
+              _bankRow(l.t('payment.bankName'), cfg['bankName']),
+              _bankRow(l.t('payment.branch'), cfg['branchName']),
+              _bankRow(l.t('payment.ifsc'), cfg['ifsc']),
+              if (cfg['upiId'] != null && cfg['upiId'].toString().isNotEmpty)
+                _bankRow(l.t('payment.upi'), cfg['upiId']),
+              const SizedBox(height: 16),
+            ]),
+          ),
         ),
       );
     } catch (_) {}
@@ -633,18 +660,35 @@ class _FVS extends State<_FV> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ))
-              else if (context.read<_FC>().state.rzpEnabled)
-                SizedBox(width: double.infinity, child: ElevatedButton.icon(
-                  onPressed: () { Navigator.pop(context); _showPayConfirmation(bill); },
-                  icon: const Icon(Icons.payment, size: 18),
-                  label: Text(l.t('payment.payNow')),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+              else ...[
+                if (context.read<_FC>().state.rzpEnabled)
+                  SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                    onPressed: () { Navigator.pop(context); _showPayConfirmation(bill); },
+                    icon: const Icon(Icons.payment, size: 18),
+                    label: Text(l.t('payment.payNow')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  )),
+                const SizedBox(height: 8),
+                SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showReportPaymentDialog(bill);
+                  },
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  label: Text(l.t('payment.reportPayment')),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.green,
+                    side: const BorderSide(color: Colors.green),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 )),
+              ],
             ],
 
             // Payment history
@@ -800,6 +844,147 @@ class _FVS extends State<_FV> {
           ),
         ),
         ),
+        ),
+      ),
+    );
+  }
+
+  void _showReportPaymentDialog(Map<String, dynamic> bill) {
+    final l = AppLocalizations.of(context);
+    final total = (bill['totalAmount'] ?? 0).toDouble();
+    final paid = (bill['amountPaid'] ?? 0).toDouble();
+    final due = total - paid;
+    final billId = bill['id'];
+    final amountCtl = TextEditingController(text: due.toStringAsFixed(0));
+    final refCtl = TextEditingController();
+    final dateCtl = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+    String mode = 'UPI';
+    XFile? proofFile;
+    bool submitting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dlgCtx) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: StatefulBuilder(
+          builder: (ctx2, setDlgState) => SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.t('payment.reportPayment'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text('${l.t('finance.balanceDue')}: \u20B9${due.toStringAsFixed(0)}',
+                    style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: amountCtl,
+                  decoration: InputDecoration(
+                    labelText: l.t('payment.amount'),
+                    border: const OutlineInputBorder(),
+                    prefixText: '\u20B9 ',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: mode,
+                  decoration: InputDecoration(
+                    labelText: l.t('payment.mode'),
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'UPI', child: Text('UPI')),
+                    DropdownMenuItem(value: 'NEFT', child: Text('NEFT/RTGS')),
+                    DropdownMenuItem(value: 'CHEQUE', child: Text('Cheque')),
+                    DropdownMenuItem(value: 'CASH', child: Text('Cash')),
+                  ],
+                  onChanged: (v) => setDlgState(() => mode = v!),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: refCtl,
+                  decoration: InputDecoration(
+                    labelText: l.t('payment.reference'),
+                    hintText: mode == 'UPI' ? 'UTR number' : mode == 'NEFT' ? 'Transaction ref' : '',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: dateCtl,
+                  decoration: InputDecoration(
+                    labelText: l.t('payment.date'),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                  ),
+                  readOnly: true,
+                  onTap: () async {
+                    final d = await showDatePicker(context: ctx2,
+                      initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime.now());
+                    if (d != null) dateCtl.text = d.toIso8601String().substring(0, 10);
+                  },
+                ),
+                const SizedBox(height: 12),
+                // Proof image upload
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final picker = ImagePicker();
+                    final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, imageQuality: 80);
+                    if (picked != null) setDlgState(() => proofFile = picked);
+                  },
+                  icon: Icon(proofFile != null ? Icons.check_circle : Icons.camera_alt, size: 18),
+                  label: Text(proofFile != null ? l.t('payment.proofAttached') : l.t('payment.uploadProof')),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: proofFile != null ? Colors.green : AppColors.textSecondary,
+                    side: BorderSide(color: proofFile != null ? Colors.green : AppColors.border),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, child: FilledButton(
+                  onPressed: submitting ? null : () async {
+                    final amt = double.tryParse(amountCtl.text) ?? 0;
+                    if (amt <= 0) return;
+                    setDlgState(() => submitting = true);
+                    try {
+                      final formData = FormData.fromMap({
+                        'billId': billId,
+                        'amount': amt.toString(),
+                        'paymentMode': mode,
+                        'paymentDate': dateCtl.text,
+                        'reference': refCtl.text.trim(),
+                        if (proofFile != null)
+                          'proof': await MultipartFile.fromFile(proofFile!.path, filename: proofFile!.name),
+                      });
+                      await api.post('/payments/report', data: formData);
+                      if (dlgCtx.mounted) Navigator.pop(dlgCtx);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(l.t('payment.reportSubmitted')),
+                          backgroundColor: Colors.green,
+                        ));
+                        context.read<_FC>().load();
+                      }
+                    } catch (e) {
+                      setDlgState(() => submitting = false);
+                      if (dlgCtx.mounted) {
+                        ScaffoldMessenger.of(dlgCtx).showSnackBar(
+                          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                      }
+                    }
+                  },
+                  child: submitting
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(l.t('payment.reportPayment')),
+                )),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1040,7 +1225,14 @@ class _FVS extends State<_FV> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChargeOverridesScreen())),
                 )),
                 const SizedBox(width: 8),
-                const Expanded(child: SizedBox()),
+                Expanded(child: _AdminActionChip(
+                  icon: Icons.pending_actions,
+                  label: l.t('payment.pendingPayments'),
+                  onTap: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const PendingPaymentsScreen()));
+                    if (mounted) context.read<_FC>().load();
+                  },
+                )),
               ]),
             )),
 

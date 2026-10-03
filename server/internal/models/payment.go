@@ -64,6 +64,7 @@ type SocietyBankConfig struct {
 	BranchName    string    `gorm:"type:varchar(200)" json:"branchName"`
 	IFSC          string    `gorm:"type:varchar(11);not null" json:"ifsc"`
 	UpiID         string    `gorm:"type:varchar(100)" json:"upiId,omitempty"`
+	QRCodeData    string    `gorm:"type:text" json:"qrCodeData,omitempty"` // base64-encoded QR image or UPI deep-link
 	IsActive      bool      `gorm:"default:true" json:"isActive"`
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt     time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
