@@ -179,6 +179,16 @@ func SetupRoutes(
 		platformProtected.GET("/billing/summary", billingHandler.Summary)
 	}
 
+	// Marketing routes (public — no auth, used by aan-gan.com website)
+	marketingHandler := handlers.NewMarketingHandler(db)
+	mkt := api.Group("/marketing")
+	{
+		mkt.POST("/demos", marketingHandler.CreateDemo)
+		mkt.GET("/demos", marketingHandler.ListDemos)
+		mkt.POST("/inquiries", marketingHandler.CreateInquiry)
+		mkt.GET("/inquiries", marketingHandler.ListInquiries)
+	}
+
 	// Registration routes (public)
 	registration := api.Group("/registration")
 	{

@@ -90,7 +90,7 @@ func getOrigins() []string {
 	if v := os.Getenv("ALLOWED_ORIGINS"); v != "" {
 		return strings.Split(v, ",")
 	}
-	return []string{"http://localhost:5173", "http://localhost:3000"}
+	return []string{"http://localhost:5173", "http://localhost:3000", "https://aan-gan.com", "https://www.aan-gan.com", "https://aangan-8ba.pages.dev"}
 }
 
 // requireEnvInProd logs a fatal error if the env var is not set in production.
